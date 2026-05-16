@@ -1,31 +1,46 @@
 package com.example.smartcommunity.controller;
 
-import com.example.smartcommunity.dto.CreateUserRequest;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+
 import com.example.smartcommunity.model.User;
 import com.example.smartcommunity.service.UserService;
-import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
-@RestController
-@RequestMapping("/users")
+@Controller
 public class UserController {
+
     private final UserService userService;
-    public UserController(UserService userService) { this.userService = userService; }
 
-    @GetMapping
-    public List<User> getAllUsers() { return userService.findAll(); }
+    public UserController(UserService userService){
+        this.userService = userService;
+    }
 
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) { return userService.findById(id); }
+    @GetMapping("/users")
+    public String users(Model model){
 
-    @PostMapping
-    public User createUser(@Valid @RequestBody CreateUserRequest request) { return userService.create(request); }
+        model.addAttribute("user", new User());
+        model.addAttribute("users", userService.getAllUsers());
 
-    @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @Valid @RequestBody CreateUserRequest request) { return userService.update(id, request); }
+        return "users";
+    }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) { userService.delete(id); return ResponseEntity.noContent().build(); }
+    @PostMapping("/save")
+    public String saveUser(@ModelAttribute User user){
+
+        userService.saveUser(user);
+
+        return "redirect:/users";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteUser(@PathVariable Long id){
+
+        userService.deleteUser(id);
+
+        return "redirect:/users";
+    }
 }

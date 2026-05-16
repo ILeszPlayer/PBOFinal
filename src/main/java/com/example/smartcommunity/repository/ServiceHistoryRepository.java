@@ -1,9 +1,16 @@
 package com.example.smartcommunity.repository;
 
-import com.example.smartcommunity.model.ServiceHistory;
-import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
-public interface ServiceHistoryRepository extends JpaRepository<ServiceHistory, Long> {
-    List<ServiceHistory> findByServiceRequestIdRequest(Long idRequest);
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.example.smartcommunity.model.ServiceHistory;
+
+@Repository
+public interface ServiceHistoryRepository
+        extends JpaRepository<ServiceHistory, Long> {
+
+    List<ServiceHistory> findByServiceRequestId(Long id);
+
 }

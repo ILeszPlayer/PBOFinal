@@ -1,36 +1,42 @@
 package com.example.smartcommunity.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import java.time.LocalDate;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
-@Table(name = "user_profiles")
 public class UserProfile {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idProfile;
+    private Long id;
 
-    private String nik;
-    private String alamat;
-    private String nomorTelepon;
-    private LocalDate tanggalLahir;
+    private String address;
 
-    @OneToOne
-    @JoinColumn(name = "id_user")
-    @JsonIgnore
-    private User user;
+    private String phone;
 
-    public Long getIdProfile() { return idProfile; }
-    public void setIdProfile(Long idProfile) { this.idProfile = idProfile; }
-    public String getNik() { return nik; }
-    public void setNik(String nik) { this.nik = nik; }
-    public String getAlamat() { return alamat; }
-    public void setAlamat(String alamat) { this.alamat = alamat; }
-    public String getNomorTelepon() { return nomorTelepon; }
-    public void setNomorTelepon(String nomorTelepon) { this.nomorTelepon = nomorTelepon; }
-    public LocalDate getTanggalLahir() { return tanggalLahir; }
-    public void setTanggalLahir(LocalDate tanggalLahir) { this.tanggalLahir = tanggalLahir; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 }

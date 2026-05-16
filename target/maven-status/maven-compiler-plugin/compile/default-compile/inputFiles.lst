@@ -1,38 +1,43 @@
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\config\CorsConfig.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\controller\AdministrativeServiceController.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\controller\ComplaintController.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\controller\ServiceRequestController.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\controller\UserController.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\dto\CreateComplaintRequest.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\dto\CreateDocumentRequest.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\dto\CreateServiceRequestDto.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\dto\CreateUserRequest.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\dto\UpdateStatusRequest.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\exception\GlobalExceptionHandler.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\exception\ResourceNotFoundException.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\model\Admin.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\model\AdministrativeService.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\model\Citizen.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\model\Complaint.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\model\GeneralServiceRequest.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\model\ServiceDocument.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\model\ServiceHistory.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\model\ServiceRequest.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\model\User.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\model\UserProfile.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\repository\AdministrativeServiceRepository.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\repository\ComplaintRepository.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\repository\ServiceDocumentRepository.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\repository\ServiceHistoryRepository.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\repository\ServiceRequestRepository.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\repository\UserProfileRepository.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\repository\UserRepository.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\service\AdministrativeServiceService.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\service\ComplaintService.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\service\impl\AdministrativeServiceServiceImpl.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\service\impl\ComplaintServiceImpl.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\service\impl\ServiceRequestServiceImpl.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\service\impl\UserServiceImpl.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\service\ServiceRequestService.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\service\UserService.java
-C:\Users\Hasan\Downloads\smart-community-service\smart-community-service\src\main\java\com\example\smartcommunity\SmartCommunityApplication.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\config\CorsConfig.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\config\DataInitializer.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\config\SecurityConfig.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\controller\AdministrativeServiceController.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\controller\AuthController.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\controller\ComplaintController.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\controller\HomeController.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\controller\ServiceController.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\controller\UserController.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\dto\CreateComplaintRequest.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\dto\CreateDocumentRequest.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\dto\CreateServiceRequestDto.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\dto\CreateUserRequest.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\dto\LoginRequest.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\dto\RegisterRequest.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\dto\UpdateStatusRequest.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\exception\GlobalExceptionHandler.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\exception\ResourceNotFoundException.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\Admin.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\AdministrativeService.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\Citizen.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\Complaint.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\ServiceDocument.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\ServiceHistory.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\ServiceRequest.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\User.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\UserProfile.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\AdministrativeServiceRepository.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\ComplaintRepository.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\ServiceDocumentRepository.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\ServiceHistoryRepository.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\ServiceRequestRepository.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\UserProfileRepository.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\UserRepository.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\AdministrativeServiceService.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\ComplaintService.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\impl\AdministrativeServiceServiceImpl.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\impl\ComplaintServiceImpl.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\impl\ServiceRequestServiceImpl.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\impl\UserServiceImpl.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\ServiceRequestService.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\UserService.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\SmartCommunityApplication.java

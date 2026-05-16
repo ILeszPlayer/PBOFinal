@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Users</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-slate-100">
+
+<div th:replace="layouts/sidebar :: sidebar"></div>
+
+<div class="ml-72">
+
+    <div th:replace="layouts/navbar :: navbar"></div>
+
+    <div class="p-8">
+
+        <div class="bg-white rounded-2xl p-8 shadow">
+
+            <h1 class="text-3xl font-bold mb-6">
+                Manajemen User
+            </h1>
+
+            <form th:action="@{/save}" th:object="${user}" method="post" class="space-y-4">
+
+                <input type="hidden" th:field="*{id}">
+
+                <input type="text"
+                       th:field="*{nama}"
+                       placeholder="Nama User"
+                       class="w-full border p-3 rounded-xl">
+
+                <button class="bg-blue-600 text-white px-6 py-3 rounded-xl">
+                    Simpan
+                </button>
+
+            </form>
+
+            <div class="mt-10">
+
+                <table class="w-full">
+
+                    <thead>
+                    <tr class="border-b">
+                        <th class="text-left p-3">Nama</th>
+                        <th class="text-left p-3">Aksi</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="u : ${users}" class="border-b">
+
+                        <td class="p-3" th:text="${u.nama}"></td>
+
+                        <td class="p-3 flex gap-2">
+
+                            <a th:href="@{/edit/{id}(id=${u.id})}"
+                               class="bg-yellow-500 text-white px-4 py-2 rounded-lg">
+                                Edit
+                            </a>
+
+                            <a th:href="@{/delete/{id}(id=${u.id})}"
+                               class="bg-red-500 text-white px-4 py-2 rounded-lg">
+                                Delete
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

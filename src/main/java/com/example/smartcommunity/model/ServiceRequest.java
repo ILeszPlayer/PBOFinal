@@ -1,64 +1,98 @@
 package com.example.smartcommunity.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorColumn;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "service_requests")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "request_type")
-public abstract class ServiceRequest {
+
+public class ServiceRequest {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idRequest;
+    @Column(name = "id_request")
+    private Long id;
 
     private String nomorRequest;
-    private LocalDate tanggalPengajuan = LocalDate.now();
-    private String status = "DIAJUKAN";
 
-    @Column(columnDefinition = "TEXT")
-    private String catatanAdmin;
+    private String status;
+
+    private LocalDate tanggalPengajuan;
 
     @ManyToOne
     @JoinColumn(name = "id_user")
-    @JsonIgnoreProperties({"serviceRequests", "complaints", "profile", "password"})
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "id_service")
-    @JsonIgnoreProperties("serviceRequests")
     private AdministrativeService administrativeService;
 
-    @OneToMany(mappedBy = "serviceRequest", cascade = CascadeType.ALL)
-    private List<ServiceHistory> histories = new ArrayList<>();
+    public String processRequest() {
+        return "Request diproses";
+    }
 
-    @OneToMany(mappedBy = "serviceRequest", cascade = CascadeType.ALL)
-    private List<ServiceDocument> documents = new ArrayList<>();
+    // Getter Setter
 
-    public abstract String processRequest();
+    public Long getId() {
+        return id;
+    }
 
-    public String submit() { return "Pengajuan layanan berhasil dikirim"; }
-    public String cancel() { this.status = "DIBATALKAN"; return "Pengajuan layanan dibatalkan"; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Long getIdRequest() { return idRequest; }
-    public void setIdRequest(Long idRequest) { this.idRequest = idRequest; }
-    public String getNomorRequest() { return nomorRequest; }
-    public void setNomorRequest(String nomorRequest) { this.nomorRequest = nomorRequest; }
-    public LocalDate getTanggalPengajuan() { return tanggalPengajuan; }
-    public void setTanggalPengajuan(LocalDate tanggalPengajuan) { this.tanggalPengajuan = tanggalPengajuan; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public String getCatatanAdmin() { return catatanAdmin; }
-    public void setCatatanAdmin(String catatanAdmin) { this.catatanAdmin = catatanAdmin; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
-    public AdministrativeService getAdministrativeService() { return administrativeService; }
-    public void setAdministrativeService(AdministrativeService administrativeService) { this.administrativeService = administrativeService; }
-    public List<ServiceHistory> getHistories() { return histories; }
-    public void setHistories(List<ServiceHistory> histories) { this.histories = histories; }
-    public List<ServiceDocument> getDocuments() { return documents; }
-    public void setDocuments(List<ServiceDocument> documents) { this.documents = documents; }
+    public String getNomorRequest() {
+        return nomorRequest;
+    }
+
+    public void setNomorRequest(String nomorRequest) {
+        this.nomorRequest = nomorRequest;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDate getTanggalPengajuan() {
+        return tanggalPengajuan;
+    }
+
+    public void setTanggalPengajuan(LocalDate tanggalPengajuan) {
+        this.tanggalPengajuan = tanggalPengajuan;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public AdministrativeService getAdministrativeService() {
+        return administrativeService;
+    }
+
+    public void setAdministrativeService(
+            AdministrativeService administrativeService) {
+
+        this.administrativeService = administrativeService;
+    }
 }

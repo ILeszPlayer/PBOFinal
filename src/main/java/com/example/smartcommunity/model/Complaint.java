@@ -1,41 +1,54 @@
 package com.example.smartcommunity.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDate;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 
 @Entity
-@Table(name = "complaints")
 public class Complaint {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idComplaint;
+    private Long id;
 
-    @NotBlank
-    private String judul;
+    private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String isiPengaduan;
+    private String description;
 
-    private LocalDate tanggal = LocalDate.now();
-    private String status = "MENUNGGU";
+    private String status;
 
-    @ManyToOne
-    @JoinColumn(name = "id_user")
-    @JsonIgnoreProperties({"complaints", "serviceRequests", "profile", "password"})
-    private User user;
+    public Long getId() {
+        return id;
+    }
 
-    public Long getIdComplaint() { return idComplaint; }
-    public void setIdComplaint(Long idComplaint) { this.idComplaint = idComplaint; }
-    public String getJudul() { return judul; }
-    public void setJudul(String judul) { this.judul = judul; }
-    public String getIsiPengaduan() { return isiPengaduan; }
-    public void setIsiPengaduan(String isiPengaduan) { this.isiPengaduan = isiPengaduan; }
-    public LocalDate getTanggal() { return tanggal; }
-    public void setTanggal(LocalDate tanggal) { this.tanggal = tanggal; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }
