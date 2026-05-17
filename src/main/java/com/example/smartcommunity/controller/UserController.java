@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.example.smartcommunity.model.User;
 import com.example.smartcommunity.service.UserService;
 
+import jakarta.servlet.http.HttpSession;
+
 @Controller
 public class UserController {
 
@@ -20,24 +22,39 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public String users(Model model){
+    public String users(HttpSession session, Model model){
+
+        if (session.getAttribute("loggedUser") == null) {
+            return "redirect:/";
+        }
 
         model.addAttribute("user", new User());
         model.addAttribute("users", userService.getAllUsers());
 
+        model.addAttribute("loggedUserName", session.getAttribute("loggedUserName"));
+        model.addAttribute("loggedUserRole", session.getAttribute("loggedUserRole"));
+
         return "users";
     }
 
-    @PostMapping("/save")
-    public String saveUser(@ModelAttribute User user){
+    @PostMapping("/users/save")
+    public String saveUser(@ModelAttribute User user, HttpSession session){
+
+        if (session.getAttribute("loggedUser") == null) {
+            return "redirect:/";
+        }
 
         userService.saveUser(user);
 
         return "redirect:/users";
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteUser(@PathVariable Long id){
+    @GetMapping("/users/delete/{id}")
+    public String deleteUser(@PathVariable Long id, HttpSession session){
+
+        if (session.getAttribute("loggedUser") == null) {
+            return "redirect:/";
+        }
 
         userService.deleteUser(id);
 

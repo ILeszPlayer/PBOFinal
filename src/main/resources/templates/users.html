@@ -1,87 +1,227 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title>Users</title>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Manajemen User</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap"
+          rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
 </head>
 
-<body class="bg-slate-100">
+<body class="bg-slate-100 min-h-screen">
 
 <div th:replace="layouts/sidebar :: sidebar"></div>
 
-<div class="ml-72">
+<main class="ml-72 min-h-screen">
 
     <div th:replace="layouts/navbar :: navbar"></div>
 
-    <div class="p-8">
+    <section class="p-8">
 
-        <div class="bg-white rounded-2xl p-8 shadow">
-
-            <h1 class="text-3xl font-bold mb-6">
+        <div class="mb-8">
+            <h1 class="text-4xl font-extrabold text-slate-800">
                 Manajemen User
             </h1>
 
-            <form th:action="@{/save}" th:object="${user}" method="post" class="space-y-4">
+            <p class="text-slate-500 mt-2">
+                Kelola data pengguna aplikasi Smart Community.
+            </p>
+        </div>
 
-                <input type="hidden" th:field="*{id}">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-                <input type="text"
-                       th:field="*{nama}"
-                       placeholder="Nama User"
-                       class="w-full border p-3 rounded-xl">
+            <!-- FORM USER -->
+            <div class="bg-white rounded-3xl p-6 shadow-lg border border-slate-100">
 
-                <button class="bg-blue-600 text-white px-6 py-3 rounded-xl">
-                    Simpan
-                </button>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl">
+                        👤
+                    </div>
 
-            </form>
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-800">
+                            Tambah User
+                        </h2>
 
-            <div class="mt-10">
+                        <p class="text-sm text-slate-500">
+                            Buat akun pengguna baru.
+                        </p>
+                    </div>
+                </div>
 
-                <table class="w-full">
+                <form th:action="@{/users/save}"
+                      th:object="${user}"
+                      method="post"
+                      class="space-y-4">
 
-                    <thead>
-                    <tr class="border-b">
-                        <th class="text-left p-3">Nama</th>
-                        <th class="text-left p-3">Aksi</th>
-                    </tr>
-                    </thead>
+                    <input type="hidden" th:field="*{id}">
 
-                    <tbody>
+                    <div>
+                        <label class="text-sm font-bold text-slate-600">
+                            Nama
+                        </label>
 
-                    <tr th:each="u : ${users}" class="border-b">
+                        <input type="text"
+                               th:field="*{nama}"
+                               required
+                               placeholder="Contoh: Budi Santoso"
+                               class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
-                        <td class="p-3" th:text="${u.nama}"></td>
+                    <div>
+                        <label class="text-sm font-bold text-slate-600">
+                            Email
+                        </label>
 
-                        <td class="p-3 flex gap-2">
+                        <input type="email"
+                               th:field="*{email}"
+                               required
+                               placeholder="contoh@email.com"
+                               class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
-                            <a th:href="@{/edit/{id}(id=${u.id})}"
-                               class="bg-yellow-500 text-white px-4 py-2 rounded-lg">
-                                Edit
-                            </a>
+                    <div>
+                        <label class="text-sm font-bold text-slate-600">
+                            Password
+                        </label>
 
-                            <a th:href="@{/delete/{id}(id=${u.id})}"
-                               class="bg-red-500 text-white px-4 py-2 rounded-lg">
-                                Delete
-                            </a>
+                        <input type="password"
+                               th:field="*{password}"
+                               required
+                               placeholder="Masukkan password"
+                               class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none">
+                    </div>
 
-                        </td>
+                    <div>
+                        <label class="text-sm font-bold text-slate-600">
+                            Role
+                        </label>
 
-                    </tr>
+                        <select th:field="*{role}"
+                                required
+                                class="w-full mt-2 px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <option value="">Pilih Role</option>
+                            <option value="ADMIN">ADMIN</option>
+                            <option value="CITIZEN">CITIZEN</option>
+                        </select>
+                    </div>
 
-                    </tbody>
+                    <button type="submit"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition shadow-lg shadow-blue-600/30">
+                        Simpan User
+                    </button>
 
-                </table>
+                </form>
+
+            </div>
+
+            <!-- TABLE USER -->
+            <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-lg border border-slate-100">
+
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-slate-800">
+                            Daftar User
+                        </h2>
+
+                        <p class="text-sm text-slate-500">
+                            Data user yang sudah terdaftar.
+                        </p>
+                    </div>
+
+                    <div class="px-4 py-2 rounded-xl bg-blue-50 text-blue-700 font-bold text-sm">
+                        Total:
+                        <span th:text="${#lists.size(users)}">0</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+
+                    <table class="w-full">
+
+                        <thead>
+                        <tr class="border-b text-left text-slate-500 text-sm">
+                            <th class="py-3 px-3">Nama</th>
+                            <th class="py-3 px-3">Email</th>
+                            <th class="py-3 px-3">Role</th>
+                            <th class="py-3 px-3 text-right">Aksi</th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+
+                        <tr th:if="${#lists.isEmpty(users)}">
+                            <td colspan="4"
+                                class="py-10 text-center text-slate-400">
+                                Belum ada data user.
+                            </td>
+                        </tr>
+
+                        <tr th:each="u : ${users}"
+                            class="border-b hover:bg-slate-50 transition">
+
+                            <td class="py-4 px-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center font-bold text-slate-700"
+                                         th:text="${#strings.substring(u.nama, 0, 1).toUpperCase()}">
+                                        U
+                                    </div>
+
+                                    <span class="font-bold text-slate-800"
+                                          th:text="${u.nama}">
+                                        Nama User
+                                    </span>
+                                </div>
+                            </td>
+
+                            <td class="py-4 px-3 text-slate-500"
+                                th:text="${u.email}">
+                                email@example.com
+                            </td>
+
+                            <td class="py-4 px-3">
+                                <span class="px-3 py-1 rounded-full text-xs font-bold"
+                                      th:classappend="${u.role == 'ADMIN'} ? ' bg-purple-100 text-purple-700' : ' bg-green-100 text-green-700'"
+                                      th:text="${u.role}">
+                                    ADMIN
+                                </span>
+                            </td>
+
+                            <td class="py-4 px-3 text-right">
+                                <a th:href="@{/users/delete/{id}(id=${u.id})}"
+                                   onclick="return confirm('Yakin ingin menghapus user ini?')"
+                                   class="inline-flex items-center justify-center bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl font-bold transition">
+                                    Delete
+                                </a>
+                            </td>
+
+                        </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
 
             </div>
 
         </div>
 
-    </div>
+    </section>
 
-</div>
+</main>
 
 </body>
 </html>
