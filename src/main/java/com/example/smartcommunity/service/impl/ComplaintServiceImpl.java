@@ -49,7 +49,8 @@ public class ComplaintServiceImpl implements ComplaintService {
         complaint.setKategori(kategori);
         complaint.setUser(user);
         complaint.setTanggal(LocalDateTime.now());
-        complaint.setStatus(Complaint.Status.MENUNGGU);
+        complaint.setStatus(Complaint.Status.PENDING);
+        complaint.setIsAnonymous(request.isIsAnonymous());
 
         MultipartFile file = request.getBuktiFoto();
         if (file != null && !file.isEmpty()) {
@@ -79,6 +80,22 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
+    public Complaint upvote(Long complaintId) {
+        Complaint complaint = complaintRepository.findById(complaintId)
+                .orElseThrow(() -> new RuntimeException("Pengaduan tidak ditemukan"));
+        complaint.setUpvotesCount(complaint.getUpvotesCount() + 1);
+        return complaintRepository.save(complaint);
+    }
+
+    @Override
+    public void deleteComplaint(Long complaintId) {
+        if (!complaintRepository.existsById(complaintId)) {
+            throw new RuntimeException("Pengaduan tidak ditemukan");
+        }
+        complaintRepository.deleteById(complaintId);
+    }
+
+    @Override
     public List<Complaint> getAllComplaints() {
         return complaintRepository.findAllByOrderByTanggalDesc();
     }
@@ -96,6 +113,11 @@ public class ComplaintServiceImpl implements ComplaintService {
     @Override
     public List<Complaint> getComplaintsByStatus(Complaint.Status status) {
         return complaintRepository.findByStatus(status);
+    }
+
+    @Override
+    public List<Complaint> getComplaintsSortedByUpvotes() {
+        return complaintRepository.findAllByOrderByUpvotesCountDesc();
     }
 
     @Override

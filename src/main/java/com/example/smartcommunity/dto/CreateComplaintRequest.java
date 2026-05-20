@@ -20,6 +20,8 @@ public class CreateComplaintRequest {
 
     private MultipartFile buktiFoto;
 
+    private boolean isAnonymous;
+
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
     public String getJudul() { return judul; }
@@ -30,4 +32,6 @@ public class CreateComplaintRequest {
     public void setKategori(String kategori) { this.kategori = kategori; }
     public MultipartFile getBuktiFoto() { return buktiFoto; }
     public void setBuktiFoto(MultipartFile buktiFoto) { this.buktiFoto = buktiFoto; }
+    public boolean isIsAnonymous() { return isAnonymous; }
+    public void setIsAnonymous(boolean isAnonymous) { this.isAnonymous = isAnonymous; }
 }

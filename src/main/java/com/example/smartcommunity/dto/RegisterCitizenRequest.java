@@ -25,7 +25,7 @@ public class RegisterCitizenRequest {
     private String alamat;
 
     @NotBlank(message = "Nomor telepon wajib diisi")
-    private String noTelp;
+    private String nomorTelepon;
 
     private String tanggalLahir;
 
@@ -39,8 +39,8 @@ public class RegisterCitizenRequest {
     public void setNik(String nik) { this.nik = nik; }
     public String getAlamat() { return alamat; }
     public void setAlamat(String alamat) { this.alamat = alamat; }
-    public String getNoTelp() { return noTelp; }
-    public void setNoTelp(String noTelp) { this.noTelp = noTelp; }
+    public String getNomorTelepon() { return nomorTelepon; }
+    public void setNomorTelepon(String nomorTelepon) { this.nomorTelepon = nomorTelepon; }
     public String getTanggalLahir() { return tanggalLahir; }
     public void setTanggalLahir(String tanggalLahir) { this.tanggalLahir = tanggalLahir; }
 }

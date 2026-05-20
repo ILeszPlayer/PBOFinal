@@ -5,13 +5,13 @@ import jakarta.validation.constraints.NotNull;
 
 public class CreateCommentRequest {
 
-    @NotNull(message = "User ID wajib diisi")
+    @NotNull
     private Long userId;
 
-    @NotNull(message = "Complaint ID wajib diisi")
+    @NotNull
     private Long complaintId;
 
-    @NotBlank(message = "Isi komentar wajib diisi")
+    @NotBlank
     private String isiKomentar;
 
     public Long getUserId() { return userId; }

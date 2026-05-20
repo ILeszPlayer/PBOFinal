@@ -9,6 +9,7 @@ com\example\smartcommunity\exception\GlobalExceptionHandler.class
 com\example\smartcommunity\SmartCommunityApplication.class
 com\example\smartcommunity\service\impl\UserServiceImpl.class
 com\example\smartcommunity\dto\CreateBroadcastRequest.class
+com\example\smartcommunity\config\CustomUserDetailsService.class
 com\example\smartcommunity\service\impl\CommentServiceImpl.class
 com\example\smartcommunity\config\WebConfig.class
 com\example\smartcommunity\service\UserService.class

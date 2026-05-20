@@ -20,19 +20,19 @@ public class UserProfile {
 
     private String alamat;
 
-    @Column(name = "no_telp")
-    private String noTelp;
+    @Column(name = "nomor_telepon")
+    private String nomorTelepon;
 
     @Column(name = "tanggal_lahir")
     private LocalDate tanggalLahir;
 
     public UserProfile() {}
 
-    public UserProfile(User user, String nik, String alamat, String noTelp, LocalDate tanggalLahir) {
+    public UserProfile(User user, String nik, String alamat, String nomorTelepon, LocalDate tanggalLahir) {
         this.user = user;
         this.nik = nik;
         this.alamat = alamat;
-        this.noTelp = noTelp;
+        this.nomorTelepon = nomorTelepon;
         this.tanggalLahir = tanggalLahir;
     }
 
@@ -44,8 +44,8 @@ public class UserProfile {
     public void setNik(String nik) { this.nik = nik; }
     public String getAlamat() { return alamat; }
     public void setAlamat(String alamat) { this.alamat = alamat; }
-    public String getNoTelp() { return noTelp; }
-    public void setNoTelp(String noTelp) { this.noTelp = noTelp; }
+    public String getNomorTelepon() { return nomorTelepon; }
+    public void setNomorTelepon(String nomorTelepon) { this.nomorTelepon = nomorTelepon; }
     public LocalDate getTanggalLahir() { return tanggalLahir; }
     public void setTanggalLahir(LocalDate tanggalLahir) { this.tanggalLahir = tanggalLahir; }
 }

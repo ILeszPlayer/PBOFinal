@@ -10,11 +10,11 @@ import java.util.List;
 public class Complaint {
 
     public enum Kategori {
-        INFRASTRUKTUR, KEBERSIHAN, KEAMANAN, KESEHATAN, LAIN_LAIN
+        INFRASTRUCTURE, CLEANLINESS, SECURITY, HEALTH, OTHERS
     }
 
     public enum Status {
-        MENUNGGU, DIPROSES, SELESAI
+        PENDING, PROCESSED, RESOLVED
     }
 
     @Id
@@ -41,11 +41,17 @@ public class Complaint {
     @Column(name = "bukti_foto")
     private String buktiFoto;
 
+    @Column(name = "upvotes_count", nullable = false)
+    private int upvotesCount = 0;
+
+    @Column(name = "is_anonymous", nullable = false)
+    private boolean isAnonymous = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("tanggal ASC")
     private List<Comment> comments = new ArrayList<>();
 
@@ -57,13 +63,13 @@ public class Complaint {
         this.kategori = kategori;
         this.user = user;
         this.tanggal = LocalDateTime.now();
-        this.status = Status.MENUNGGU;
+        this.status = Status.PENDING;
     }
 
     @PrePersist
     protected void onCreate() {
         if (tanggal == null) tanggal = LocalDateTime.now();
-        if (status == null) status = Status.MENUNGGU;
+        if (status == null) status = Status.PENDING;
     }
 
     public Long getId() { return id; }
@@ -80,6 +86,10 @@ public class Complaint {
     public void setStatus(Status status) { this.status = status; }
     public String getBuktiFoto() { return buktiFoto; }
     public void setBuktiFoto(String buktiFoto) { this.buktiFoto = buktiFoto; }
+    public int getUpvotesCount() { return upvotesCount; }
+    public void setUpvotesCount(int upvotesCount) { this.upvotesCount = upvotesCount; }
+    public boolean isIsAnonymous() { return isAnonymous; }
+    public void setIsAnonymous(boolean isAnonymous) { this.isAnonymous = isAnonymous; }
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
     public List<Comment> getComments() { return comments; }

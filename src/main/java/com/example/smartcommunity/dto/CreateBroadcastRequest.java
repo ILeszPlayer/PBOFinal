@@ -1,17 +1,15 @@
 package com.example.smartcommunity.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public class CreateBroadcastRequest {
 
-    @NotNull(message = "Admin ID wajib diisi")
     private Long adminId;
 
-    @NotBlank(message = "Judul wajib diisi")
+    @NotBlank
     private String judul;
 
-    @NotBlank(message = "Isi broadcast wajib diisi")
+    @NotBlank
     private String isiBroadcast;
 
     public Long getAdminId() { return adminId; }

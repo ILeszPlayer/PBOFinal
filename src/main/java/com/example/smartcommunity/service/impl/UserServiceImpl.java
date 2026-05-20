@@ -46,7 +46,7 @@ public class UserServiceImpl implements UserService {
         }
 
         UserProfile profile = new UserProfile(citizen, request.getNik(),
-                request.getAlamat(), request.getNoTelp(), tglLahir);
+                request.getAlamat(), request.getNomorTelepon(), tglLahir);
         userProfileRepository.save(profile);
 
         return citizen;

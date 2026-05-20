@@ -32,35 +32,43 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String loginPage(HttpSession session, Model model) {
-        if (session.getAttribute("loggedUser") != null) {
-            return redirectDashboard(session);
+    public String loginPage(HttpSession session) {
+        if (session.getAttribute("loggedUserId") != null) {
+            return redirectByRole(session);
         }
         return "login";
     }
 
     @PostMapping("/login")
-    public String login(@RequestParam String login, @RequestParam String password,
+    public String login(@RequestParam String email,
+                        @RequestParam String password,
                         HttpSession session, Model model) {
-        Optional<User> userOptional = userRepository.findByEmail(login);
-        if (userOptional.isEmpty()) {
-            userOptional = userRepository.findByNama(login);
-        }
-        if (userOptional.isEmpty()) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
             model.addAttribute("error", "Akun tidak ditemukan");
             return "login";
         }
-        User user = userOptional.get();
+        User user = userOpt.get();
         if (!passwordEncoder.matches(password, user.getPassword())) {
             model.addAttribute("error", "Password salah");
             return "login";
         }
-        session.setAttribute("loggedUser", user);
         session.setAttribute("loggedUserId", user.getId());
         session.setAttribute("loggedUserName", user.getNama());
-        session.setMaxInactiveInterval(30 * 60);
+        session.setAttribute("loggedUserRole", user.getRole());
+        return redirectByRole(session);
+    }
 
-        return redirectDashboard(session);
+    @GetMapping("/logout")
+    public String logoutGet(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
+    }
+
+    @PostMapping("/logout")
+    public String logoutPost(HttpSession session) {
+        session.invalidate();
+        return "redirect:/login";
     }
 
     @GetMapping("/register")
@@ -83,8 +91,7 @@ public class AuthController {
         }
         try {
             userService.registerCitizen(request);
-            model.addAttribute("success", "Pendaftaran berhasil! Silakan login.");
-            return "login";
+            return "redirect:/login?registered=true";
         } catch (Exception e) {
             model.addAttribute("error", "Gagal mendaftar: " + e.getMessage());
             model.addAttribute("registerRequest", request);
@@ -92,15 +99,9 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/logout")
-    public String logout(HttpSession session) {
-        session.invalidate();
-        return "redirect:/login";
-    }
-
-    private String redirectDashboard(HttpSession session) {
-        User user = (User) session.getAttribute("loggedUser");
-        if (user instanceof com.example.smartcommunity.model.Admin) {
+    private String redirectByRole(HttpSession session) {
+        String role = (String) session.getAttribute("loggedUserRole");
+        if ("ADMIN".equals(role)) {
             return "redirect:/admin/dashboard";
         }
         return "redirect:/home";

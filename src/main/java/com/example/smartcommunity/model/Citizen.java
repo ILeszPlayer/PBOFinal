@@ -7,11 +7,14 @@ import jakarta.persistence.Entity;
 @DiscriminatorValue("CITIZEN")
 public class Citizen extends User {
 
-    public Citizen() {}
+    public Citizen() {
+        setRole("CITIZEN");
+    }
 
     public Citizen(String nama, String email, String password) {
         setNama(nama);
         setEmail(email);
         setPassword(password);
+        setRole("CITIZEN");
     }
 }

@@ -12,6 +12,7 @@
         .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(99, 102, 241, 0.1); }
         .input-field { transition: all 0.3s ease; }
         .input-field:focus { box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+        .input-field.error { border-color: rgba(239, 68, 68, 0.5); }
         .btn-primary { transition: all 0.3s ease; background: linear-gradient(135deg, #6366f1, #818cf8); }
         .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35); }
     </style>
@@ -23,7 +24,7 @@
     </div>
 
     <div class="w-full max-w-lg relative z-10">
-        <div class="glass rounded-3xl p-8 border border-slate-700/50">
+        <div class="glass rounded-3xl p-8">
             <div class="text-center mb-6">
                 <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-600/30">
                     <i class="fa-solid fa-user-plus text-2xl text-white"></i>
@@ -41,7 +42,9 @@
                         <input type="text" th:field="*{nama}" required
                                class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
                                placeholder="Nama Anda">
-                        <p th:if="${#fields.hasErrors('nama')}" th:errors="*{nama}" class="text-red-400 text-xs mt-1"></p>
+                        <p th:if="${#fields.hasErrors('nama')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{nama}"></span>
+                        </p>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-slate-300 block mb-1.5">
@@ -50,7 +53,9 @@
                         <input type="email" th:field="*{email}" required
                                class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
                                placeholder="email@example.com">
-                        <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-red-400 text-xs mt-1"></p>
+                        <p th:if="${#fields.hasErrors('email')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{email}"></span>
+                        </p>
                     </div>
                 </div>
 
@@ -62,7 +67,9 @@
                         <input type="password" th:field="*{password}" required
                                class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
                                placeholder="Min. 6 karakter">
-                        <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="text-red-400 text-xs mt-1"></p>
+                        <p th:if="${#fields.hasErrors('password')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{password}"></span>
+                        </p>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-slate-300 block mb-1.5">
@@ -71,7 +78,9 @@
                         <input type="text" th:field="*{nik}" required maxlength="16"
                                class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
                                placeholder="16 digit NIK">
-                        <p th:if="${#fields.hasErrors('nik')}" th:errors="*{nik}" class="text-red-400 text-xs mt-1"></p>
+                        <p th:if="${#fields.hasErrors('nik')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{nik}"></span>
+                        </p>
                     </div>
                 </div>
 
@@ -82,7 +91,9 @@
                     <textarea th:field="*{alamat}" required rows="2"
                               class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500 resize-none"
                               placeholder="Alamat lengkap"></textarea>
-                    <p th:if="${#fields.hasErrors('alamat')}" th:errors="*{alamat}" class="text-red-400 text-xs mt-1"></p>
+                    <p th:if="${#fields.hasErrors('alamat')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
+                        <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{alamat}"></span>
+                    </p>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -90,10 +101,12 @@
                         <label class="text-xs font-medium text-slate-300 block mb-1.5">
                             <i class="fa-solid fa-phone mr-1 text-indigo-400"></i>No. Telepon
                         </label>
-                        <input type="text" th:field="*{noTelp}" required
+                        <input type="text" th:field="*{nomorTelepon}" required
                                class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
                                placeholder="08xxxxxxx">
-                        <p th:if="${#fields.hasErrors('noTelp')}" th:errors="*{noTelp}" class="text-red-400 text-xs mt-1"></p>
+                        <p th:if="${#fields.hasErrors('nomorTelepon')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
+                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{nomorTelepon}"></span>
+                        </p>
                     </div>
                     <div>
                         <label class="text-xs font-medium text-slate-300 block mb-1.5">
@@ -124,5 +137,20 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll('input, textarea').forEach(el => {
+            el.addEventListener('blur', function() {
+                if (this.value.trim() === '' && this.hasAttribute('required')) {
+                    this.classList.add('error');
+                } else {
+                    this.classList.remove('error');
+                }
+            });
+            el.addEventListener('input', function() {
+                this.classList.remove('error');
+            });
+        });
+    </script>
 </body>
 </html>
