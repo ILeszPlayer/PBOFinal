@@ -6,6 +6,7 @@ C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\kom
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\controller\AdminController.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\controller\AuthController.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\controller\CitizenController.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\controller\RootController.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\dto\CreateBroadcastRequest.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\dto\CreateCommentRequest.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\dto\CreateComplaintRequest.java
@@ -17,11 +18,13 @@ C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\kom
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\Citizen.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\Comment.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\Complaint.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\Notification.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\User.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\model\UserProfile.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\BroadcastRepository.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\CommentRepository.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\ComplaintRepository.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\NotificationRepository.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\UserProfileRepository.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\repository\UserRepository.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\BroadcastService.java
@@ -30,6 +33,8 @@ C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\kom
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\impl\BroadcastServiceImpl.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\impl\CommentServiceImpl.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\impl\ComplaintServiceImpl.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\impl\NotificationServiceImpl.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\impl\UserServiceImpl.java
+C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\NotificationService.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\service\UserService.java
 C:\Itenas\Semester 4\IFB-202 Pemrograman Berorientasi Objek\Praktikum\Projek\komunservis\src\main\java\com\example\smartcommunity\SmartCommunityApplication.java

@@ -1,156 +1,70 @@
 <!DOCTYPE html>
-<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar - Smart Community</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * { font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(99, 102, 241, 0.1); }
-        .input-field { transition: all 0.3s ease; }
-        .input-field:focus { box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
-        .input-field.error { border-color: rgba(239, 68, 68, 0.5); }
-        .btn-primary { transition: all 0.3s ease; background: linear-gradient(135deg, #6366f1, #818cf8); }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35); }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar - KomunServis</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{font-family:'Inter',sans-serif;margin:0;padding:0;box-sizing:border-box;}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:#0f172a;padding:2rem;}
+.bg-pattern{background-image:radial-gradient(circle at 20% 50%,rgba(99,102,241,0.08) 0%,transparent 50%),radial-gradient(circle at 80% 50%,rgba(6,182,212,0.08) 0%,transparent 50%);position:fixed;inset:0;z-index:0;}
+.bg-grid{background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);background-size:40px 40px;}
+.glass-card{background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:24px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);width:100%;max-width:560px;padding:2.5rem;position:relative;z-index:1;}
+.input-group{position:relative;margin-bottom:1.4rem;}
+.input-group input,.input-group select{width:100%;padding:1rem 1rem 0.5rem 1rem;background:rgba(255,255,255,0.06);border:1.5px solid rgba(255,255,255,0.12);border-radius:12px;color:#fff;font-size:0.95rem;outline:none;transition:all 0.3s ease;}
+.input-group input:focus,.input-group select:focus{border-color:#6366f1;background:rgba(99,102,241,0.08);box-shadow:0 0 0 3px rgba(99,102,241,0.15);}
+.input-group input.error{border-color:#ef4444;}
+.input-group input:focus+label,.input-group input:not(:placeholder-shown)+label,.input-group select:focus+label,.input-group select:not([value=""])+label{transform:translateY(-1.2rem) scale(0.8);color:#818cf8;}
+.input-group label{position:absolute;left:1rem;top:0.75rem;color:rgba(255,255,255,0.4);font-size:0.95rem;pointer-events:none;transition:all 0.3s ease;}
+.input-group select{appearance:none;cursor:pointer;color:rgba(255,255,255,0.6);}
+.input-group select option{background:#1e293b;color:#fff;}
+.btn-primary{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;padding:0.9rem 2rem;border-radius:12px;font-weight:600;font-size:1rem;cursor:pointer;transition:all 0.3s ease;width:100%;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px -5px rgba(99,102,241,0.4);}
+.toast{position:fixed;top:1.5rem;right:1.5rem;padding:1rem 1.5rem;border-radius:12px;color:#fff;font-weight:500;font-size:0.9rem;z-index:9999;transform:translateX(120%);transition:transform 0.5s cubic-bezier(0.68,-0.55,0.265,1.55);max-width:380px;backdrop-filter:blur(12px);display:flex;align-items:center;gap:0.75rem;}
+.toast.show{transform:translateX(0);}
+.toast.error{background:rgba(239,68,68,0.9);border:1px solid rgba(239,68,68,0.3);}
+</style>
 </head>
-<body class="min-h-screen bg-slate-950 flex items-center justify-center p-4 overflow-hidden relative">
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div class="absolute -top-40 -right-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-        <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-    </div>
-
-    <div class="w-full max-w-lg relative z-10">
-        <div class="glass rounded-3xl p-8">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-600/30">
-                    <i class="fa-solid fa-user-plus text-2xl text-white"></i>
-                </div>
-                <h1 class="text-2xl font-bold text-white">Buat Akun Baru</h1>
-                <p class="text-slate-400 text-sm mt-1">Daftar sebagai warga untuk mengajukan pengaduan</p>
-            </div>
-
-            <form th:action="@{/register}" th:object="${registerRequest}" method="post" class="space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-medium text-slate-300 block mb-1.5">
-                            <i class="fa-solid fa-user mr-1 text-indigo-400"></i>Nama Lengkap
-                        </label>
-                        <input type="text" th:field="*{nama}" required
-                               class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
-                               placeholder="Nama Anda">
-                        <p th:if="${#fields.hasErrors('nama')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{nama}"></span>
-                        </p>
-                    </div>
-                    <div>
-                        <label class="text-xs font-medium text-slate-300 block mb-1.5">
-                            <i class="fa-solid fa-envelope mr-1 text-indigo-400"></i>Email
-                        </label>
-                        <input type="email" th:field="*{email}" required
-                               class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
-                               placeholder="email@example.com">
-                        <p th:if="${#fields.hasErrors('email')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{email}"></span>
-                        </p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-medium text-slate-300 block mb-1.5">
-                            <i class="fa-solid fa-key mr-1 text-indigo-400"></i>Password
-                        </label>
-                        <input type="password" th:field="*{password}" required
-                               class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
-                               placeholder="Min. 6 karakter">
-                        <p th:if="${#fields.hasErrors('password')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{password}"></span>
-                        </p>
-                    </div>
-                    <div>
-                        <label class="text-xs font-medium text-slate-300 block mb-1.5">
-                            <i class="fa-solid fa-id-card mr-1 text-indigo-400"></i>NIK
-                        </label>
-                        <input type="text" th:field="*{nik}" required maxlength="16"
-                               class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
-                               placeholder="16 digit NIK">
-                        <p th:if="${#fields.hasErrors('nik')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{nik}"></span>
-                        </p>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="text-xs font-medium text-slate-300 block mb-1.5">
-                        <i class="fa-solid fa-location-dot mr-1 text-indigo-400"></i>Alamat
-                    </label>
-                    <textarea th:field="*{alamat}" required rows="2"
-                              class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500 resize-none"
-                              placeholder="Alamat lengkap"></textarea>
-                    <p th:if="${#fields.hasErrors('alamat')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
-                        <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{alamat}"></span>
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-xs font-medium text-slate-300 block mb-1.5">
-                            <i class="fa-solid fa-phone mr-1 text-indigo-400"></i>No. Telepon
-                        </label>
-                        <input type="text" th:field="*{nomorTelepon}" required
-                               class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
-                               placeholder="08xxxxxxx">
-                        <p th:if="${#fields.hasErrors('nomorTelepon')}" class="text-red-400 text-xs mt-1 flex items-center gap-1">
-                            <i class="fa-solid fa-circle-exclamation text-[10px]"></i><span th:errors="*{nomorTelepon}"></span>
-                        </p>
-                    </div>
-                    <div>
-                        <label class="text-xs font-medium text-slate-300 block mb-1.5">
-                            <i class="fa-solid fa-calendar mr-1 text-indigo-400"></i>Tanggal Lahir
-                        </label>
-                        <input type="date" th:field="*{tanggalLahir}"
-                               class="input-field w-full px-4 py-3 rounded-xl bg-slate-800/50 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm">
-                    </div>
-                </div>
-
-                <div th:if="${error}" class="flex items-center gap-3 bg-red-500/10 border border-red-500/20 text-red-300 px-4 py-3 rounded-xl text-sm">
-                    <i class="fa-solid fa-circle-exclamation text-red-400"></i>
-                    <span th:text="${error}"></span>
-                </div>
-
-                <button type="submit" class="btn-primary w-full py-3.5 rounded-xl font-semibold text-white text-sm tracking-wide">
-                    <i class="fa-solid fa-user-check mr-2"></i>Daftar Sekarang
-                </button>
-            </form>
-
-            <div class="mt-5 text-center">
-                <p class="text-slate-500 text-xs">
-                    Sudah punya akun?
-                    <a href="/login" class="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
-                        Masuk <i class="fa-solid fa-arrow-right text-[10px] ml-0.5"></i>
-                    </a>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        document.querySelectorAll('input, textarea').forEach(el => {
-            el.addEventListener('blur', function() {
-                if (this.value.trim() === '' && this.hasAttribute('required')) {
-                    this.classList.add('error');
-                } else {
-                    this.classList.remove('error');
-                }
-            });
-            el.addEventListener('input', function() {
-                this.classList.remove('error');
-            });
-        });
-    </script>
+<body>
+<div class="bg-pattern bg-grid"></div>
+<div class="glass-card">
+<div style="text-align:center;margin-bottom:2rem;">
+<div style="font-size:2.5rem;margin-bottom:0.5rem;">🏘️</div>
+<h2 style="font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:0.3rem;">Bergabung dengan Komunitas</h2>
+<p style="color:rgba(255,255,255,0.4);font-size:0.9rem;">Daftar akun baru sebagai warga</p>
+</div>
+<form th:action="@{/register}" method="post" onsubmit="return validateForm()">
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 1rem;">
+<div class="input-group"><input type="text" id="nama" name="nama" placeholder=" " required><label for="nama"><i class="fas fa-user" style="margin-right:0.4rem;"></i>Nama Lengkap</label></div>
+<div class="input-group"><input type="email" id="email" name="email" placeholder=" " required><label for="email"><i class="far fa-envelope" style="margin-right:0.4rem;"></i>Email</label></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 1rem;">
+<div class="input-group"><input type="password" id="password" name="password" placeholder=" " required minlength="6"><label for="password"><i class="fas fa-lock" style="margin-right:0.4rem;"></i>Kata Sandi</label></div>
+<div class="input-group"><input type="text" id="nik" name="nik" placeholder=" " required pattern="\d{16}" title="NIK harus 16 digit angka"><label for="nik"><i class="fas fa-id-card" style="margin-right:0.4rem;"></i>NIK</label></div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 1rem;">
+<div class="input-group"><input type="text" id="nomorTelepon" name="nomorTelepon" placeholder=" " required><label for="nomorTelepon"><i class="fas fa-phone" style="margin-right:0.4rem;"></i>No. Telepon</label></div>
+<div class="input-group"><input type="date" id="tanggalLahir" name="tanggalLahir" placeholder=" "><label for="tanggalLahir"><i class="fas fa-cake-candles" style="margin-right:0.4rem;"></i>Tanggal Lahir</label></div>
+</div>
+<div class="input-group"><input type="text" id="alamat" name="alamat" placeholder=" " required><label for="alamat"><i class="fas fa-map-pin" style="margin-right:0.4rem;"></i>Alamat Lengkap</label></div>
+<div th:if="${param.error}" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem;">
+<p style="color:#fca5a5;font-size:0.85rem;"><i class="fas fa-circle-exclamation" style="margin-right:0.5rem;"></i><span th:text="${param.error[0]}">Email sudah terdaftar</span></p>
+</div>
+<button type="submit" class="btn-primary"><i class="fas fa-user-plus" style="margin-right:0.5rem;"></i>Daftar Akun</button>
+</form>
+<div style="margin-top:1.5rem;text-align:center;">
+<span style="color:rgba(255,255,255,0.4);font-size:0.9rem;">Sudah punya akun? </span>
+<a th:href="@{/login}" style="color:#818cf8;font-size:0.9rem;text-decoration:none;font-weight:500;">Masuk di sini</a>
+</div>
+</div>
+<div th:if="${param.error}" class="toast error show" id="errorToast"><i class="fas fa-circle-exclamation" style="font-size:1.2rem;"></i><span th:text="${param.error[0]}">Pendaftaran gagal</span></div>
+<script>
+function validateForm(){const p=document.getElementById('password');const n=document.getElementById('nik');let v=true;document.querySelectorAll('.input-group input').forEach(i=>i.classList.remove('error'));if(p.value.length<6){p.classList.add('error');v=false;}
+if(n.value.length!==16||!/^\d{16}$/.test(n.value)){n.classList.add('error');v=false;}
+if(!v)alert('Periksa kembali input Anda (password min 6 karakter, NIK 16 digit).');return v;}
+</script>
 </body>
 </html>

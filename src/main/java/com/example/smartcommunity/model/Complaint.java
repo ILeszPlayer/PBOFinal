@@ -10,11 +10,37 @@ import java.util.List;
 public class Complaint {
 
     public enum Kategori {
-        INFRASTRUCTURE, CLEANLINESS, SECURITY, HEALTH, OTHERS
+        INFRASTRUKTUR("Infrastruktur"),
+        LINGKUNGAN("Lingkungan"),
+        SOSIAL("Sosial"),
+        KEAMANAN("Keamanan"),
+        KESEHATAN("Kesehatan"),
+        PENDIDIKAN("Pendidikan"),
+        UMUM("Umum");
+
+        private final String displayName;
+        Kategori(String displayName) { this.displayName = displayName; }
+        public String getDisplayName() { return displayName; }
     }
 
     public enum Status {
-        PENDING, PROCESSED, RESOLVED
+        PENDING("Pending"),
+        PROSES("Diproses"),
+        SELESAI("Selesai");
+
+        private final String displayName;
+        Status(String displayName) { this.displayName = displayName; }
+        public String getDisplayName() { return displayName; }
+    }
+
+    public enum Urgency {
+        RENDAH("Rendah"),
+        SEDANG("Sedang"),
+        TINGGI("Tinggi");
+
+        private final String displayName;
+        Urgency(String displayName) { this.displayName = displayName; }
+        public String getDisplayName() { return displayName; }
     }
 
     @Id
@@ -31,8 +57,18 @@ public class Complaint {
     @Column(nullable = false)
     private Kategori kategori;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Urgency urgency = Urgency.SEDANG;
+
     @Column(nullable = false)
     private LocalDateTime tanggal;
+
+    @Column
+    private LocalDateTime processedAt;
+
+    @Column
+    private LocalDateTime resolvedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -47,6 +83,15 @@ public class Complaint {
     @Column(name = "is_anonymous", nullable = false)
     private boolean isAnonymous = false;
 
+    @Column
+    private Double latitude;
+
+    @Column
+    private Double longitude;
+
+    @Column(name = "lokasi_nama")
+    private String lokasiNama;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -57,19 +102,28 @@ public class Complaint {
 
     public Complaint() {}
 
-    public Complaint(String judul, String isiPengaduan, Kategori kategori, User user) {
-        this.judul = judul;
-        this.isiPengaduan = isiPengaduan;
-        this.kategori = kategori;
-        this.user = user;
-        this.tanggal = LocalDateTime.now();
-        this.status = Status.PENDING;
-    }
-
     @PrePersist
     protected void onCreate() {
         if (tanggal == null) tanggal = LocalDateTime.now();
         if (status == null) status = Status.PENDING;
+        if (urgency == null) urgency = Urgency.SEDANG;
+    }
+
+    public long getSlaHours() {
+        if (resolvedAt == null && processedAt == null) return 0;
+        LocalDateTime end = resolvedAt != null ? resolvedAt : LocalDateTime.now();
+        LocalDateTime start = processedAt != null ? processedAt : tanggal;
+        return java.time.Duration.between(start, end).toHours();
+    }
+
+    public boolean isSlaCompliant() {
+        if (status != Status.SELESAI) return false;
+        return getSlaHours() <= 24;
+    }
+
+    public String getDisplayUser() {
+        if (isAnonymous) return "Anonim";
+        return user != null ? user.getNama() : "Unknown";
     }
 
     public Long getId() { return id; }
@@ -80,8 +134,14 @@ public class Complaint {
     public void setIsiPengaduan(String isiPengaduan) { this.isiPengaduan = isiPengaduan; }
     public Kategori getKategori() { return kategori; }
     public void setKategori(Kategori kategori) { this.kategori = kategori; }
+    public Urgency getUrgency() { return urgency; }
+    public void setUrgency(Urgency urgency) { this.urgency = urgency; }
     public LocalDateTime getTanggal() { return tanggal; }
     public void setTanggal(LocalDateTime tanggal) { this.tanggal = tanggal; }
+    public LocalDateTime getProcessedAt() { return processedAt; }
+    public void setProcessedAt(LocalDateTime processedAt) { this.processedAt = processedAt; }
+    public LocalDateTime getResolvedAt() { return resolvedAt; }
+    public void setResolvedAt(LocalDateTime resolvedAt) { this.resolvedAt = resolvedAt; }
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
     public String getBuktiFoto() { return buktiFoto; }
@@ -90,6 +150,12 @@ public class Complaint {
     public void setUpvotesCount(int upvotesCount) { this.upvotesCount = upvotesCount; }
     public boolean isIsAnonymous() { return isAnonymous; }
     public void setIsAnonymous(boolean isAnonymous) { this.isAnonymous = isAnonymous; }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public String getLokasiNama() { return lokasiNama; }
+    public void setLokasiNama(String lokasiNama) { this.lokasiNama = lokasiNama; }
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
     public List<Comment> getComments() { return comments; }

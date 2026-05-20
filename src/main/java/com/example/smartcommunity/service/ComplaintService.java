@@ -11,11 +11,18 @@ public interface ComplaintService {
     Complaint upvote(Long complaintId);
     void deleteComplaint(Long complaintId);
     List<Complaint> getAllComplaints();
+    List<Complaint> searchComplaints(String keyword);
     List<Complaint> getComplaintsByUser(Long userId);
     List<Complaint> getComplaintsByCategory(Complaint.Kategori kategori);
     List<Complaint> getComplaintsByStatus(Complaint.Status status);
+    List<Complaint> getComplaintsByUrgency(Complaint.Urgency urgency);
     List<Complaint> getComplaintsSortedByUpvotes();
+    List<Complaint> getGeoTaggedComplaints();
     Complaint findById(Long id);
     long countByStatus(Complaint.Status status);
     long countAll();
+    List<Object[]> countByKategori();
+    List<Object[]> countByUrgency();
+    List<Object[]> countResolvedByMonth();
+    double getAverageSlaHours();
 }

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profil - KomunServis</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{font-family:'Inter',sans-serif;}
+.tier-badge{display:inline-flex;align-items:center;gap:0.4rem;padding:0.35rem 1rem;border-radius:100px;font-size:0.8rem;font-weight:600;}
+.tier-bronze{background:linear-gradient(135deg,#d97706,#b45309);color:#fff;}
+.tier-silver{background:linear-gradient(135deg,#64748b,#475569);color:#fff;}
+.tier-gold{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;}
+.tier-platinum{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;}
+.profile-header{background:linear-gradient(135deg,#1e293b 0%,#0f172a 50%,#1e1b4b 100%);border-radius:20px;padding:2rem;position:relative;overflow:hidden;}
+.profile-header::before{content:'';position:absolute;top:-50%;right:-20%;width:400px;height:400px;background:radial-gradient(circle,rgba(99,102,241,0.15) 0%,transparent 70%);border-radius:50%;}
+.stat-card{background:rgba(255,255,255,0.05);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:1.25rem;text-align:center;}
+.complaint-table th{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;font-weight:600;padding:0.75rem 1rem;text-align:left;border-bottom:2px solid #e2e8f0;}
+.complaint-table td{padding:0.75rem 1rem;border-bottom:1px solid #f1f5f9;font-size:0.88rem;color:#334155;}
+.complaint-table tr:hover td{background:#f8fafc;}
+.progress-bar{height:8px;border-radius:100px;background:rgba(255,255,255,0.1);overflow:hidden;}
+.progress-bar-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,#6366f1,#8b5cf6);transition:width 1.5s ease;}
+</style>
+</head>
+<body style="background:#f8fafc;min-height:100vh;">
+<div style="max-width:1024px;margin:0 auto;padding:2rem;">
+<a th:href="@{/citizen/home}" style="display:inline-flex;align-items:center;gap:0.4rem;color:#6366f1;text-decoration:none;font-size:0.9rem;font-weight:500;margin-bottom:1.5rem;"><i class="fas fa-arrow-left"></i> Kembali ke Beranda</a>
+<div class="profile-header" style="margin-bottom:2rem;">
+<div style="display:flex;align-items:center;gap:1.5rem;position:relative;z-index:1;flex-wrap:wrap;">
+<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;font-weight:700;border:3px solid rgba(255,255,255,0.2);flex-shrink:0;"><span th:text="${#strings.substring(user.nama, 0, 1).toUpperCase()}">U</span></div>
+<div style="flex:1;min-width:200px;">
+<div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-bottom:0.3rem;">
+<h1 style="font-size:1.5rem;font-weight:700;color:#fff;" th:text="${user.nama}">Nama</h1>
+<span class="tier-badge" th:classappend="${reputationTier == 'Pahlawan Komunitas' ? 'tier-platinum' : reputationTier == 'Warga Teladan' ? 'tier-gold' : reputationTier == 'Warga Peduli' ? 'tier-silver' : 'tier-bronze'}"><i class="fas fa-crown"></i> <span th:text="${reputationTier}">Warga Baru</span></span>
+</div>
+<p style="color:rgba(255,255,255,0.5);font-size:0.9rem;"><i class="far fa-envelope" style="margin-right:0.4rem;"></i><span th:text="${user.email}">email@example.com</span></p>
+</div>
+<a href="#" style="display:inline-flex;align-items:center;gap:0.4rem;background:rgba(255,255,255,0.1);color:#fff;padding:0.6rem 1.2rem;border-radius:10px;text-decoration:none;font-size:0.85rem;font-weight:500;"><i class="fas fa-pen"></i> Edit Profil</a>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;">
+<div class="stat-card">
+<div style="font-size:1.8rem;font-weight:700;color:#fff;" th:text="${user.reputationPoints}">0</div>
+<div style="color:rgba(255,255,255,0.5);font-size:0.8rem;font-weight:500;">Total Poin Reputasi</div>
+<div class="progress-bar" style="margin-top:0.75rem;"><div class="progress-bar-fill" th:style="'width:' + ${tierProgressPercent} + '%'"></div></div>
+<div style="color:rgba(255,255,255,0.35);font-size:0.7rem;margin-top:0.3rem;"><span th:text="${user.reputationPoints} + ' / ' + ${nextTierPoints} + ' poin menuju ' + ${nextTierName}"></span></div>
+</div>
+<div class="stat-card"><div style="font-size:1.8rem;font-weight:700;color:#818cf8;" th:text="${#lists.size(myComplaints)}">0</div><div style="color:rgba(255,255,255,0.5);font-size:0.8rem;font-weight:500;">Total Pengaduan</div></div>
+<div class="stat-card"><div style="font-size:1.8rem;font-weight:700;color:#34d399;" th:text="${totalUpvotes}">0</div><div style="color:rgba(255,255,255,0.5);font-size:0.8rem;font-weight:500;">Total Upvotes</div></div>
+</div>
+<div style="background:#fff;border-radius:20px;border:1px solid rgba(0,0,0,0.06);overflow:hidden;">
+<div style="padding:1.25rem 1.5rem;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
+<h2 style="font-size:1.1rem;font-weight:700;color:#0f172a;"><i class="fas fa-list" style="margin-right:0.5rem;color:#6366f1;"></i>Riwayat Pengaduan</h2>
+<span style="font-size:0.85rem;color:#64748b;font-weight:500;" th:text="${#lists.size(myComplaints)} + ' pengaduan'">0</span>
+</div>
+<div style="overflow-x:auto;">
+<table class="complaint-table" style="width:100%;border-collapse:collapse;">
+<thead><tr><th>Judul</th><th>Kategori</th><th>Status</th><th>Upvotes</th><th>Tanggal</th><th>Aksi</th></tr></thead>
+<tbody>
+<tr th:each="c : ${myComplaints}">
+<td style="font-weight:500;color:#0f172a;" th:text="${c.judul}">Judul</td>
+<td><span style="display:inline-block;padding:0.2rem 0.6rem;border-radius:100px;font-size:0.7rem;font-weight:600;" th:text="${c.kategori.displayName}" th:classappend="'pill-' + ${c.kategori.name().toLowerCase()}"></span></td>
+<td><span th:classappend="'px-2 py-0.5 rounded-full text-xs font-medium ' + (${c.status.name() == 'PENDING'} ? 'bg-amber-100 text-amber-700' : ${c.status.name() == 'PROSES'} ? 'bg-violet-100 text-violet-700' : 'bg-emerald-100 text-emerald-700')" th:text="${c.status.displayName}"></span></td>
+<td><i class="fas fa-arrow-up" style="color:#6366f1;margin-right:0.2rem;"></i><span th:text="${c.upvotesCount}">0</span></td>
+<td style="font-size:0.85rem;color:#64748b;" th:text="${#temporals.format(c.tanggal, 'dd MMM yyyy')}">01 Jan 2025</td>
+<td><a th:href="@{/citizen/detail/{id}(id=${c.id})}" style="color:#6366f1;text-decoration:none;font-size:0.85rem;">Detail <i class="fas fa-arrow-right" style="font-size:0.7rem;"></i></a></td>
+</tr>
+<tr th:if="${#lists.isEmpty(myComplaints)}"><td colspan="6" style="text-align:center;padding:2rem;color:#94a3b8;"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>Belum ada pengaduan.</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</body>
+</html>

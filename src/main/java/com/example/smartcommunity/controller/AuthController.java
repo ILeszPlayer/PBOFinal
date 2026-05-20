@@ -3,6 +3,7 @@ package com.example.smartcommunity.controller;
 import com.example.smartcommunity.dto.RegisterCitizenRequest;
 import com.example.smartcommunity.model.User;
 import com.example.smartcommunity.repository.UserRepository;
+import com.example.smartcommunity.service.NotificationService;
 import com.example.smartcommunity.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -22,13 +23,16 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
+    private final NotificationService notificationService;
 
     public AuthController(UserRepository userRepository,
                           PasswordEncoder passwordEncoder,
-                          UserService userService) {
+                          UserService userService,
+                          NotificationService notificationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.userService = userService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/login")
@@ -104,6 +108,6 @@ public class AuthController {
         if ("ADMIN".equals(role)) {
             return "redirect:/admin/dashboard";
         }
-        return "redirect:/home";
+        return "redirect:/citizen/home";
     }
 }

@@ -7,11 +7,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(
-    name = "user_type",
-    discriminatorType = DiscriminatorType.STRING,
-    length = 20
-)
+@DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING, length = 20)
 public abstract class User {
 
     @Id
@@ -30,6 +26,9 @@ public abstract class User {
     @Column(nullable = false)
     private String role;
 
+    @Column(name = "reputation_points", nullable = false)
+    private int reputationPoints = 0;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserProfile profile;
 
@@ -38,6 +37,9 @@ public abstract class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Comment> comments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Notification> notifications = new ArrayList<>();
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -49,10 +51,22 @@ public abstract class User {
     public void setPassword(String password) { this.password = password; }
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
+    public int getReputationPoints() { return reputationPoints; }
+    public void setReputationPoints(int reputationPoints) { this.reputationPoints = reputationPoints; }
     public UserProfile getProfile() { return profile; }
     public void setProfile(UserProfile profile) { this.profile = profile; }
     public List<Complaint> getComplaints() { return complaints; }
     public void setComplaints(List<Complaint> complaints) { this.complaints = complaints; }
     public List<Comment> getComments() { return comments; }
     public void setComments(List<Comment> comments) { this.comments = comments; }
+    public List<Notification> getNotifications() { return notifications; }
+    public void setNotifications(List<Notification> notifications) { this.notifications = notifications; }
+
+    public String getReputationTier() {
+        if (reputationPoints >= 200) return "Pahlawan Komunitas";
+        if (reputationPoints >= 100) return "Warga Teladan";
+        if (reputationPoints >= 50)  return "Warga Peduli";
+        if (reputationPoints >= 20)  return "Warga Aktif";
+        return "Warga Baru";
+    }
 }

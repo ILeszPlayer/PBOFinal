@@ -15,12 +15,17 @@ public class CreateComplaintRequest {
     @NotBlank(message = "Isi pengaduan wajib diisi")
     private String isiPengaduan;
 
-    @NotNull(message = "Kategori wajib dipilih")
     private String kategori;
 
     private MultipartFile buktiFoto;
 
     private boolean isAnonymous;
+
+    private Double latitude;
+
+    private Double longitude;
+
+    private String lokasiNama;
 
     public Long getUserId() { return userId; }
     public void setUserId(Long userId) { this.userId = userId; }
@@ -34,4 +39,10 @@ public class CreateComplaintRequest {
     public void setBuktiFoto(MultipartFile buktiFoto) { this.buktiFoto = buktiFoto; }
     public boolean isIsAnonymous() { return isAnonymous; }
     public void setIsAnonymous(boolean isAnonymous) { this.isAnonymous = isAnonymous; }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public String getLokasiNama() { return lokasiNama; }
+    public void setLokasiNama(String lokasiNama) { this.lokasiNama = lokasiNama; }
 }

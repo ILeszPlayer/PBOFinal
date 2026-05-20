@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Export Data Pengaduan</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+*{font-family:'Inter',sans-serif;}
+body{padding:2rem;background:#fff;}
+h1{font-size:1.5rem;margin-bottom:0.3rem;color:#0f172a;}
+.sub{padding:0.5rem 0;color:#94a3b8;border-bottom:2px solid #e2e8f0;margin-bottom:1.5rem;display:flex;justify-content:space-between;}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;padding:0.5rem 0.75rem;border-bottom:2px solid #e2e8f0;font-size:0.75rem;text-transform:uppercase;color:#64748b;font-weight:600;background:#f8fafc;}
+td{padding:0.5rem 0.75rem;border-bottom:1px solid #f1f5f9;font-size:0.85rem;color:#334155;}
+tr:nth-child(even) td{background:#fafafa;}
+.no-print{margin-bottom:1.5rem;}
+@media print{.no-print{display:none;}}
+</style>
+</head>
+<body>
+<div class="no-print">
+<h1>Export Data Pengaduan</h1>
+<p style="color:#64748b;margin-bottom:1rem;">Gunakan print (Ctrl+P) untuk menyimpan sebagai PDF</p>
+<button onclick="window.print()" style="padding:0.5rem 1.2rem;background:#6366f1;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:500;font-size:0.9rem;">Cetak / Simpan PDF</button>
+<a th:href="@{/admin/dashboard}" style="margin-left:0.5rem;padding:0.5rem 1.2rem;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;border-radius:8px;text-decoration:none;font-weight:500;">Kembali</a>
+</div>
+<h1>Laporan Pengaduan Komunitas</h1>
+<div class="sub"><span>KomunServis - Smart Community</span><span th:text="${#dates.createNow()}">Tanggal</span></div>
+<table>
+<thead><tr><th>No</th><th>Pengadu</th><th>Judul</th><th>Kategori</th><th>Urgensi</th><th>Status</th><th>Upvotes</th><th>SLA (jam)</th><th>Tanggal</th></tr></thead>
+<tbody>
+<tr th:each="c, stat : ${complaints}">
+<td th:text="${stat.count}">1</td>
+<td th:text="${c.displayUser}">User</td>
+<td th:text="${c.judul}">Judul</td>
+<td th:text="${c.kategori.displayName}">Kat</td>
+<td th:text="${c.urgency.displayName}">Urg</td>
+<td th:text="${c.status.displayName}">Status</td>
+<td th:text="${c.upvotesCount}">0</td>
+<td th:text="${c.status == 'SELESAI' or c.status == 'PROSES'} ? ${c.slaHours} + ' jam' : '-'">-</td>
+<td th:text="${#temporals.format(c.tanggal, 'dd MMM yyyy')}">Date</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>

@@ -2,6 +2,7 @@ package com.example.smartcommunity.service.impl;
 
 import com.example.smartcommunity.dto.RegisterCitizenRequest;
 import com.example.smartcommunity.model.Citizen;
+import com.example.smartcommunity.model.Complaint;
 import com.example.smartcommunity.model.User;
 import com.example.smartcommunity.model.UserProfile;
 import com.example.smartcommunity.repository.UserProfileRepository;
@@ -62,6 +63,31 @@ public class UserServiceImpl implements UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+    }
+
+    @Override
+    public User awardPoints(Long userId, int points) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+        user.setReputationPoints(user.getReputationPoints() + points);
+        return userRepository.save(user);
+    }
+
+    @Override
+    public User recalculateReputation(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        long approvedCount = user.getComplaints().stream()
+                .filter(c -> c.getStatus() == Complaint.Status.SELESAI)
+                .count();
+        int totalUpvotes = user.getComplaints().stream()
+                .mapToInt(Complaint::getUpvotesCount)
+                .sum();
+
+        int newPoints = ((int) approvedCount * 20) + (totalUpvotes * 5);
+        user.setReputationPoints(newPoints);
+        return userRepository.save(user);
     }
 
     @Override
