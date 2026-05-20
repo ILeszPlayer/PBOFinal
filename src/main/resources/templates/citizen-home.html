@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beranda - Smart Community</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .glass-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(99, 102, 241, 0.08); }
+        .glass-nav { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(99, 102, 241, 0.08); }
+        .complaint-card { transition: all 0.3s ease; }
+        .complaint-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+        .badge-cat { font-size: 10px; padding: 2px 10px; border-radius: 999px; font-weight: 600; letter-spacing: 0.02em; }
+        .badge-status { font-size: 10px; padding: 3px 10px; border-radius: 999px; font-weight: 700; letter-spacing: 0.02em; }
+        .btn-primary { background: linear-gradient(135deg, #6366f1, #818cf8); transition: all 0.3s ease; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35); }
+        .marquee-track { animation: marquee 25s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .marquee-container:hover .marquee-track { animation-play-state: paused; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        .modal-overlay { background: rgba(2, 6, 23, 0.7); backdrop-filter: blur(8px); }
+        .input-field:focus { box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); }
+        .comment-section { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, opacity 0.3s ease; opacity: 0; }
+        .comment-section.open { max-height: 1000px; opacity: 1; }
+        .avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-900">
+    <nav class="glass-nav fixed top-0 left-0 right-0 z-30">
+        <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                    <i class="fa-solid fa-building-columns text-white text-sm"></i>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-sm">Smart Community</h1>
+                    <p class="text-slate-500 text-[10px] -mt-0.5">Portal Warga</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="/home" class="text-indigo-400 text-sm font-medium flex items-center gap-1.5">
+                    <i class="fa-solid fa-house"></i>Beranda
+                </a>
+                <div class="flex items-center gap-3 pl-4 border-l border-slate-700/50">
+                    <div class="avatar bg-indigo-500/20 text-indigo-300" th:text="${#strings.substring(loggedUserName, 0, 1)}"></div>
+                    <div class="hidden sm:block">
+                        <p class="text-white text-xs font-medium" th:text="${loggedUserName}"></p>
+                        <p class="text-slate-500 text-[10px]">Warga</p>
+                    </div>
+                    <a href="/logout" class="text-slate-500 hover:text-red-400 transition-colors ml-2" title="Logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="pt-20 pb-10">
+        <div class="max-w-6xl mx-auto px-4 space-y-6">
+            <div class="glass-card rounded-2xl overflow-hidden marquee-container">
+                <div class="flex items-center bg-indigo-500/10 px-5 py-3 border-b border-indigo-500/10">
+                    <div class="flex items-center gap-2 shrink-0 mr-4">
+                        <div class="w-7 h-7 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                            <i class="fa-solid fa-bullhorn text-indigo-400 text-xs"></i>
+                        </div>
+                        <span class="text-indigo-300 text-xs font-bold uppercase tracking-wider">Pengumuman</span>
+                    </div>
+                    <div class="overflow-hidden flex-1 relative">
+                        <div class="marquee-track flex gap-12 whitespace-nowrap" th:if="${!#lists.isEmpty(broadcasts)}">
+                            <span th:each="b : ${broadcasts}" class="text-slate-300 text-sm inline-flex items-center gap-3 shrink-0">
+                                <span class="text-indigo-400 font-semibold" th:text="${b.judul}"></span>
+                                <span class="text-slate-500">-</span>
+                                <span th:text="${b.isiBroadcast}"></span>
+                                <span class="text-slate-600 text-[11px]" th:text="${#temporals.format(b.tanggal, 'dd MMM')}"></span>
+                            </span>
+                            <span th:each="b : ${broadcasts}" class="text-slate-300 text-sm inline-flex items-center gap-3 shrink-0">
+                                <span class="text-indigo-400 font-semibold" th:text="${b.judul}"></span>
+                                <span class="text-slate-500">-</span>
+                                <span th:text="${b.isiBroadcast}"></span>
+                                <span class="text-slate-600 text-[11px]" th:text="${#temporals.format(b.tanggal, 'dd MMM')}"></span>
+                            </span>
+                        </div>
+                        <p th:if="${#lists.isEmpty(broadcasts)}" class="text-slate-500 text-sm">Belum ada pengumuman</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/15 flex items-center justify-center">
+                        <i class="fa-solid fa-pen-to-square text-indigo-400"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-white font-bold text-sm">Buat Pengaduan Baru</h2>
+                        <p class="text-slate-500 text-[11px]">Sampaikan keluhan atau laporan Anda</p>
+                    </div>
+                </div>
+                <form action="/complaint/create" method="post" enctype="multipart/form-data" class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="sm:col-span-2">
+                            <input type="text" name="judul" required
+                                   class="w-full px-4 py-3 rounded-xl bg-slate-800 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
+                                   placeholder="Judul pengaduan...">
+                        </div>
+                        <div>
+                            <select name="kategori" required
+                                    class="w-full px-4 py-3 rounded-xl bg-slate-800 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm">
+                                <option value="" disabled selected>Pilih kategori</option>
+                                <option value="INFRASTRUKTUR">Infrastruktur</option>
+                                <option value="KEBERSIHAN">Kebersihan</option>
+                                <option value="KEAMANAN">Keamanan</option>
+                                <option value="KESEHATAN">Kesehatan</option>
+                                <option value="LAIN_LAIN">Lain-lain</option>
+                            </select>
+                        </div>
+                    </div>
+                    <textarea name="isiPengaduan" required rows="3"
+                              class="w-full px-4 py-3 rounded-xl bg-slate-800 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500 resize-none"
+                              placeholder="Jelaskan pengaduan Anda secara detail..."></textarea>
+                    <div class="flex items-center gap-4 flex-wrap">
+                        <label class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800/50 border border-slate-700/50 cursor-pointer hover:border-indigo-500/30 transition-colors text-sm text-slate-400">
+                            <i class="fa-solid fa-camera text-indigo-400"></i>
+                            <span>Lampirkan Foto</span>
+                            <input type="file" name="buktiFoto" accept="image/*" class="hidden">
+                        </label>
+                        <button type="submit" class="btn-primary px-6 py-2.5 rounded-xl text-white text-sm font-semibold">
+                            <i class="fa-solid fa-paper-plane mr-1.5"></i>Kirim Pengaduan
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="space-y-4" id="complaints-feed">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-newspaper text-indigo-400"></i>Feed Pengaduan
+                    </h2>
+                    <span class="text-xs text-slate-500">
+                        <span class="text-indigo-400 font-semibold" th:text="${#lists.size(complaints)}"></span> pengaduan
+                    </span>
+                </div>
+
+                <div th:each="c : ${complaints}" class="complaint-card glass-card rounded-2xl overflow-hidden">
+                    <div class="p-5">
+                        <div class="flex items-start justify-between gap-4 mb-3">
+                            <div class="flex items-center gap-3">
+                                <div class="avatar bg-indigo-500/15 text-indigo-300 shrink-0" th:text="${#strings.substring(c.user.nama, 0, 1)}"></div>
+                                <div>
+                                    <p class="text-white text-sm font-semibold" th:text="${c.user.nama}"></p>
+                                    <p class="text-slate-500 text-[11px]">
+                                        <i class="fa-regular fa-clock mr-1"></i>
+                                        <span th:text="${#temporals.format(c.tanggal, 'dd MMM yyyy, HH:mm')}"></span>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <span class="badge-cat bg-indigo-500/10 text-indigo-300" th:text="${c.kategori}"></span>
+                                <span th:if="${c.status.name() == 'MENUNGGU'}" class="badge-status bg-yellow-500/15 text-yellow-300">
+                                    <i class="fa-regular fa-clock mr-0.5"></i>Menunggu
+                                </span>
+                                <span th:if="${c.status.name() == 'DIPROSES'}" class="badge-status bg-blue-500/15 text-blue-300">
+                                    <i class="fa-solid fa-rotate mr-0.5"></i>Diproses
+                                </span>
+                                <span th:if="${c.status.name() == 'SELESAI'}" class="badge-status bg-emerald-500/15 text-emerald-300">
+                                    <i class="fa-solid fa-check mr-0.5"></i>Selesai
+                                </span>
+                            </div>
+                        </div>
+
+                        <h3 class="text-white font-bold text-base mb-2" th:text="${c.judul}"></h3>
+                        <p class="text-slate-300 text-sm leading-relaxed whitespace-pre-line" th:text="${c.isiPengaduan}"></p>
+
+                        <div th:if="${c.buktiFoto != null}" class="mt-3">
+                            <img th:src="@{${c.buktiFoto}}" alt="Bukti Foto"
+                                 class="rounded-xl max-h-64 w-full object-cover border border-slate-700/50 cursor-pointer hover:opacity-90 transition-opacity"
+                                 onclick="window.open(this.src, '_blank')">
+                        </div>
+
+                        <div class="mt-4 pt-4 border-t border-slate-700/30">
+                            <button onclick="toggleComments('comments-${c.id}')"
+                                    class="flex items-center gap-2 text-slate-400 hover:text-indigo-400 transition-colors text-sm font-medium">
+                                <i class="fa-regular fa-comment"></i>
+                                <span>Komentar</span>
+                                <span class="text-xs text-slate-500" th:text="'(' + ${#lists.size(c.comments)} + ')'"></span>
+                                <i class="fa-solid fa-chevron-down text-xs ml-1 transition-transform" id="chevron-comments-${c.id}"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="comments-${c.id}" class="comment-section">
+                        <div class="px-5 pb-5 space-y-3 border-t border-slate-700/20 pt-4">
+                            <div th:each="cm : ${c.comments}" class="flex gap-3">
+                                <div class="avatar bg-slate-700/50 text-slate-400 shrink-0 !w-8 !h-8 !text-xs"
+                                     th:text="${#strings.substring(cm.user.nama, 0, 1)}"></div>
+                                <div class="flex-1 bg-slate-800/40 rounded-xl px-4 py-2.5">
+                                    <div class="flex items-center justify-between gap-2 mb-1">
+                                        <span class="text-white text-xs font-semibold" th:text="${cm.user.nama}"></span>
+                                        <span class="text-slate-600 text-[10px]">
+                                            <i class="fa-regular fa-clock mr-0.5"></i>
+                                            <span th:text="${#temporals.format(cm.tanggal, 'dd MMM HH:mm')}"></span>
+                                        </span>
+                                    </div>
+                                    <p class="text-slate-300 text-sm" th:text="${cm.isiKomentar}"></p>
+                                </div>
+                            </div>
+
+                            <form action="/comment/add" method="post" class="flex gap-3 pt-2">
+                                <input type="hidden" name="complaintId" th:value="${c.id}">
+                                <div class="avatar bg-indigo-500/15 text-indigo-300 shrink-0 !w-8 !h-8 !text-xs"
+                                     th:text="${#strings.substring(loggedUserName, 0, 1)}"></div>
+                                <div class="flex-1 flex gap-2">
+                                    <input type="text" name="isiKomentar" required
+                                           class="flex-1 px-4 py-2.5 rounded-xl bg-slate-800 text-white outline-none border border-slate-700/50 focus:border-indigo-500/50 text-sm placeholder:text-slate-500"
+                                           placeholder="Tulis komentar...">
+                                    <button type="submit"
+                                            class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm transition-all">
+                                        <i class="fa-solid fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${#lists.isEmpty(complaints)}" class="glass-card rounded-2xl p-10 text-center">
+                    <div class="w-16 h-16 rounded-2xl bg-slate-800/50 flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-regular fa-rectangle-list text-3xl text-slate-500"></i>
+                    </div>
+                    <h3 class="text-white font-semibold mb-1">Belum Ada Pengaduan</h3>
+                    <p class="text-slate-500 text-sm">Jadilah warga pertama yang mengajukan pengaduan</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleComments(id) {
+            const el = document.getElementById(id);
+            const chevron = document.getElementById('chevron-' + id);
+            if (el.classList.contains('open')) {
+                el.classList.remove('open');
+                if (chevron) chevron.style.transform = 'rotate(0deg)';
+            } else {
+                el.classList.add('open');
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                const label = this.closest('label');
+                if (label && this.files.length > 0) {
+                    const span = label.querySelector('span');
+                    if (span) span.textContent = this.files[0].name;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Smart Community</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; scroll-behavior: smooth; }
+        .glass-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(99, 102, 241, 0.08); }
+        .glass-sidebar { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); border-right: 1px solid rgba(99, 102, 241, 0.08); }
+        .stat-card { transition: all 0.3s ease; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+        .badge { font-size: 11px; padding: 2px 10px; border-radius: 999px; font-weight: 600; letter-spacing: 0.02em; }
+        .btn-primary { background: linear-gradient(135deg, #6366f1, #818cf8); transition: all 0.3s ease; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(99, 102, 241, 0.35); }
+        .modal-overlay { background: rgba(2, 6, 23, 0.7); backdrop-filter: blur(8px); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+        .nav-link { transition: all 0.2s ease; }
+        .nav-link:hover { background: rgba(99, 102, 241, 0.1); }
+        .nav-link.active { background: rgba(99, 102, 241, 0.15); border-right: 2px solid #6366f1; }
+        .status-menunggu { background: rgba(234, 179, 8, 0.15); color: #fbbf24; }
+        .status-diproses { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+        .status-selesai { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-900 flex">
+    <aside class="glass-sidebar w-64 fixed h-full z-20 hidden lg:block">
+        <div class="p-5 border-b border-slate-700/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/20">
+                    <i class="fa-solid fa-building-columns text-white text-lg"></i>
+                </div>
+                <div>
+                    <h2 class="text-white font-bold text-sm">Smart Community</h2>
+                    <p class="text-slate-500 text-[10px]">Panel Admin</p>
+                </div>
+            </div>
+        </div>
+        <nav class="p-4 space-y-1">
+            <a href="/admin/dashboard" class="nav-link active flex items-center gap-3 text-indigo-400 px-4 py-2.5 rounded-xl text-sm font-medium">
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i>Dashboard
+            </a>
+            <a href="#complaints" onclick="document.getElementById('complaints').scrollIntoView({behavior:'smooth'})" class="nav-link flex items-center gap-3 text-slate-400 hover:text-white px-4 py-2.5 rounded-xl text-sm font-medium">
+                <i class="fa-solid fa-list w-5 text-center"></i>Pengaduan
+            </a>
+            <a href="#broadcasts" onclick="document.getElementById('broadcasts').scrollIntoView({behavior:'smooth'})" class="nav-link flex items-center gap-3 text-slate-400 hover:text-white px-4 py-2.5 rounded-xl text-sm font-medium">
+                <i class="fa-solid fa-bullhorn w-5 text-center"></i>Broadcast
+            </a>
+        </nav>
+        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50">
+            <div class="flex items-center gap-3 px-4 py-2">
+                <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                    <span class="text-indigo-300 text-xs font-bold" th:text="${#strings.substring(loggedUserName, 0, 1)}"></span>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-white text-xs font-medium truncate" th:text="${loggedUserName}"></p>
+                    <p class="text-slate-500 text-[10px]">Administrator</p>
+                </div>
+                <a href="/logout" class="text-slate-500 hover:text-red-400 transition-colors" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 lg:ml-64 min-h-screen">
+        <div class="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto">
+            <div class="glass-card rounded-2xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Dashboard</h1>
+                        <p class="text-slate-400 text-sm mt-1">Selamat datang kembali, <span class="text-indigo-400 font-medium" th:text="${loggedUserName}"></span></p>
+                    </div>
+                    <div class="flex items-center gap-3 lg:hidden">
+                        <a href="/logout" class="text-slate-400 hover:text-red-400 transition-colors text-xl">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="stat-card glass-card rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-500/15 flex items-center justify-center">
+                            <i class="fa-solid fa-file-lines text-indigo-400 text-xl"></i>
+                        </div>
+                        <span class="text-3xl font-extrabold text-white" th:text="${totalComplaints}"></span>
+                    </div>
+                    <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Total Pengaduan</p>
+                </div>
+                <div class="stat-card glass-card rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-12 h-12 rounded-xl bg-yellow-500/15 flex items-center justify-center">
+                            <i class="fa-solid fa-clock text-yellow-400 text-xl"></i>
+                        </div>
+                        <span class="text-3xl font-extrabold text-white" th:text="${pendingComplaints}"></span>
+                    </div>
+                    <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Menunggu</p>
+                </div>
+                <div class="stat-card glass-card rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/15 flex items-center justify-center">
+                            <i class="fa-solid fa-gear text-blue-400 text-xl"></i>
+                        </div>
+                        <span class="text-3xl font-extrabold text-white" th:text="${processingComplaints}"></span>
+                    </div>
+                    <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Diproses</p>
+                </div>
+                <div class="stat-card glass-card rounded-2xl p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                            <i class="fa-solid fa-circle-check text-emerald-400 text-xl"></i>
+                        </div>
+                        <span class="text-3xl font-extrabold text-white" th:text="${solvedComplaints}"></span>
+                    </div>
+                    <p class="text-slate-400 text-xs font-medium uppercase tracking-wider">Selesai</p>
+                </div>
+            </div>
+
+            <div id="complaints" class="glass-card rounded-2xl overflow-hidden scroll-mt-6">
+                <div class="p-5 border-b border-slate-700/30 flex items-center justify-between flex-wrap gap-3">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-list text-indigo-400"></i>Daftar Pengaduan
+                    </h2>
+                    <div class="text-xs text-slate-400">
+                        <span class="text-indigo-400 font-semibold" th:text="${totalComplaints}"></span> total
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-700/30">
+                                <th class="text-left py-4 px-5 text-slate-400 font-semibold text-xs uppercase tracking-wider">Pengadu</th>
+                                <th class="text-left py-4 px-5 text-slate-400 font-semibold text-xs uppercase tracking-wider">Judul</th>
+                                <th class="text-left py-4 px-5 text-slate-400 font-semibold text-xs uppercase tracking-wider">Kategori</th>
+                                <th class="text-left py-4 px-5 text-slate-400 font-semibold text-xs uppercase tracking-wider">Status</th>
+                                <th class="text-left py-4 px-5 text-slate-400 font-semibold text-xs uppercase tracking-wider">Tanggal</th>
+                                <th class="text-center py-4 px-5 text-slate-400 font-semibold text-xs uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${complaints}" class="border-b border-slate-700/20 hover:bg-slate-800/30 transition-colors">
+                                <td class="py-4 px-5">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center">
+                                            <span class="text-slate-300 text-xs font-bold" th:text="${#strings.substring(c.user.nama, 0, 1)}"></span>
+                                        </div>
+                                        <span class="text-slate-300 text-sm truncate max-w-[120px]" th:text="${c.user.nama}"></span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-5">
+                                    <span class="text-white text-sm font-medium" th:text="${c.judul}"></span>
+                                </td>
+                                <td class="py-4 px-5">
+                                    <span class="badge text-indigo-300 bg-indigo-500/10" th:text="${c.kategori}"></span>
+                                </td>
+                                <td class="py-4 px-5">
+                                    <span th:if="${c.status.name() == 'MENUNGGU'}" class="badge status-menunggu">
+                                        <i class="fa-regular fa-clock mr-1"></i>Menunggu
+                                    </span>
+                                    <span th:if="${c.status.name() == 'DIPROSES'}" class="badge status-diproses">
+                                        <i class="fa-solid fa-rotate mr-1"></i>Diproses
+                                    </span>
+                                    <span th:if="${c.status.name() == 'SELESAI'}" class="badge status-selesai">
+                                        <i class="fa-solid fa-check mr-1"></i>Selesai
+                                    </span>
+                                </td>
+                                <td class="py-4 px-5 text-slate-400 text-xs">
+                                    <span th:text="${#temporals.format(c.tanggal, 'dd MMM yyyy')}"></span>
+                                </td>
+                                <td class="py-4 px-5 text-center">
+                                    <button onclick="openStatusModal(${c.id}, '${c.status}', '${#strings.escapeXml(c.judul)}')"
+                                            class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-indigo-500/15 text-indigo-300 hover:bg-indigo-500/25 transition-all">
+                                        <i class="fa-solid fa-pen mr-1"></i>Ubah Status
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(complaints)}">
+                                <td colspan="6" class="py-10 text-center">
+                                    <div class="text-slate-500">
+                                        <i class="fa-regular fa-rectangle-list text-3xl mb-2 block"></i>
+                                        <p class="text-sm">Belum ada pengaduan</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="broadcasts" class="glass-card rounded-2xl p-6 scroll-mt-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-white font-bold text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-bullhorn text-indigo-400"></i>Kelola Broadcast
+                    </h2>
+                    <button onclick="openBroadcastModal()"
+                            class="btn-primary px-4 py-2 rounded-xl text-white text-xs font-semibold">
+                        <i class="fa-solid fa-plus mr-1.5"></i>Buat Baru
+                    </button>
+                </div>
+                <div class="space-y-3">
+                    <div th:each="b : ${broadcasts}" class="bg-slate-800/30 rounded-xl p-4 border border-slate-700/30">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-white font-semibold text-sm" th:text="${b.judul}"></h4>
+                                <p class="text-slate-400 text-xs mt-1 line-clamp-2" th:text="${b.isiBroadcast}"></p>
+                            </div>
+                            <span class="text-slate-500 text-[11px] whitespace-nowrap" th:text="${#temporals.format(b.tanggal, 'dd MMM yyyy')}"></span>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(broadcasts)}" class="text-center py-8 text-slate-500">
+                        <i class="fa-regular fa-megaphone text-2xl mb-2 block"></i>
+                        <p class="text-sm">Belum ada broadcast</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="statusModal" class="fixed inset-0 z-50 modal-overlay hidden items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-md border border-slate-700/50">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-white font-bold text-lg">Ubah Status Pengaduan</h3>
+                <button onclick="closeStatusModal()" class="text-slate-500 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <p class="text-slate-400 text-sm mb-4">
+                <span class="text-slate-300 font-medium" id="modalComplaintTitle"></span>
+            </p>
+            <form action="/admin/complaint/status" method="post" class="space-y-4">
+                <input type="hidden" name="complaintId" id="modalComplaintId">
+                <div>
+                    <label class="text-xs font-medium text-slate-300 block mb-2">Status Baru</label>
+                    <select name="status" id="modalStatusSelect"
+                            class="w-full px-4 py-3 rounded-xl bg-slate-800 text-white outline-none border border-slate-700 focus:border-indigo-500/50 text-sm">
+                        <option value="MENUNGGU">Menunggu</option>
+                        <option value="DIPROSES">Diproses</option>
+                        <option value="SELESAI">Selesai</option>
+                    </select>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeStatusModal()"
+                            class="flex-1 py-2.5 rounded-xl bg-slate-700/50 text-slate-300 text-sm font-semibold hover:bg-slate-700/70 transition-all">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-all">
+                        <i class="fa-solid fa-floppy-disk mr-1.5"></i>Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="broadcastModal" class="fixed inset-0 z-50 modal-overlay hidden items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-6 w-full max-w-lg border border-slate-700/50">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-white font-bold text-lg">Buat Broadcast Baru</h3>
+                <button onclick="closeBroadcastModal()" class="text-slate-500 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <form action="/admin/broadcast/create" method="post" class="space-y-4">
+                <div>
+                    <label class="text-xs font-medium text-slate-300 block mb-2">Judul Broadcast</label>
+                    <input type="text" name="judul" required
+                           class="w-full px-4 py-3 rounded-xl bg-slate-800 text-white outline-none border border-slate-700 focus:border-indigo-500/50 text-sm"
+                           placeholder="Judul pengumuman">
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-slate-300 block mb-2">Isi Broadcast</label>
+                    <textarea name="isiBroadcast" required rows="4"
+                              class="w-full px-4 py-3 rounded-xl bg-slate-800 text-white outline-none border border-slate-700 focus:border-indigo-500/50 text-sm resize-none"
+                              placeholder="Isi pengumuman..."></textarea>
+                </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeBroadcastModal()"
+                            class="flex-1 py-2.5 rounded-xl bg-slate-700/50 text-slate-300 text-sm font-semibold hover:bg-slate-700/70 transition-all">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-all">
+                        <i class="fa-solid fa-paper-plane mr-1.5"></i>Publikasikan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openStatusModal(id, currentStatus, title) {
+            document.getElementById('modalComplaintId').value = id;
+            document.getElementById('modalStatusSelect').value = currentStatus;
+            document.getElementById('modalComplaintTitle').textContent = '"' + title + '"';
+            document.getElementById('statusModal').classList.remove('hidden');
+            document.getElementById('statusModal').classList.add('flex');
+        }
+        function closeStatusModal() {
+            document.getElementById('statusModal').classList.add('hidden');
+            document.getElementById('statusModal').classList.remove('flex');
+        }
+        function openBroadcastModal() {
+            document.getElementById('broadcastModal').classList.remove('hidden');
+            document.getElementById('broadcastModal').classList.add('flex');
+        }
+        function closeBroadcastModal() {
+            document.getElementById('broadcastModal').classList.add('hidden');
+            document.getElementById('broadcastModal').classList.remove('flex');
+        }
+        document.getElementById('statusModal').addEventListener('click', function(e) {
+            if (e.target === this) closeStatusModal();
+        });
+        document.getElementById('broadcastModal').addEventListener('click', function(e) {
+            if (e.target === this) closeBroadcastModal();
+        });
+    </script>
+</body>
+</html>

@@ -6,7 +6,12 @@ import jakarta.persistence.Entity;
 @Entity
 @DiscriminatorValue("CITIZEN")
 public class Citizen extends User {
-    public String buatPengaduan() { return "Masyarakat membuat pengaduan"; }
-    public String ajukanLayanan() { return "Masyarakat mengajukan layanan"; }
-    public String lihatRiwayat() { return "Masyarakat melihat riwayat"; }
+
+    public Citizen() {}
+
+    public Citizen(String nama, String email, String password) {
+        setNama(nama);
+        setEmail(email);
+        setPassword(password);
+    }
 }

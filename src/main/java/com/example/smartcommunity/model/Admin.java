@@ -1,13 +1,24 @@
 package com.example.smartcommunity.model;
 
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @DiscriminatorValue("ADMIN")
 public class Admin extends User {
-    public String verifikasiLayanan() { return "Admin memverifikasi layanan"; }
-    public String updateStatus() { return "Admin memperbarui status"; }
-    public String kelolaPengaduan() { return "Admin mengelola pengaduan"; }
-    public String lihatDashboard() { return "Admin melihat dashboard"; }
+
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Broadcast> broadcasts = new ArrayList<>();
+
+    public Admin() {}
+
+    public Admin(String nama, String email, String password) {
+        setNama(nama);
+        setEmail(email);
+        setPassword(password);
+    }
+
+    public List<Broadcast> getBroadcasts() { return broadcasts; }
+    public void setBroadcasts(List<Broadcast> broadcasts) { this.broadcasts = broadcasts; }
 }

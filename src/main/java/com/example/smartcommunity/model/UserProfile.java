@@ -1,42 +1,51 @@
 package com.example.smartcommunity.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+import java.time.LocalDate;
 
 @Entity
+@Table(name = "user_profiles")
 public class UserProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String address;
+    @OneToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    private String phone;
+    @Column(unique = true, length = 16)
+    private String nik;
 
-    public Long getId() {
-        return id;
+    private String alamat;
+
+    @Column(name = "no_telp")
+    private String noTelp;
+
+    @Column(name = "tanggal_lahir")
+    private LocalDate tanggalLahir;
+
+    public UserProfile() {}
+
+    public UserProfile(User user, String nik, String alamat, String noTelp, LocalDate tanggalLahir) {
+        this.user = user;
+        this.nik = nik;
+        this.alamat = alamat;
+        this.noTelp = noTelp;
+        this.tanggalLahir = tanggalLahir;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+    public String getNik() { return nik; }
+    public void setNik(String nik) { this.nik = nik; }
+    public String getAlamat() { return alamat; }
+    public void setAlamat(String alamat) { this.alamat = alamat; }
+    public String getNoTelp() { return noTelp; }
+    public void setNoTelp(String noTelp) { this.noTelp = noTelp; }
+    public LocalDate getTanggalLahir() { return tanggalLahir; }
+    public void setTanggalLahir(LocalDate tanggalLahir) { this.tanggalLahir = tanggalLahir; }
 }

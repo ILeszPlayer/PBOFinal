@@ -1,14 +1,14 @@
 package com.example.smartcommunity.service;
 
-import java.util.List;
-
+import com.example.smartcommunity.dto.RegisterCitizenRequest;
 import com.example.smartcommunity.model.User;
 
+import java.util.List;
+
 public interface UserService {
-
+    User registerCitizen(RegisterCitizenRequest request);
+    User findById(Long id);
+    User findByEmail(String email);
     List<User> getAllUsers();
-
-    User saveUser(User user);
-
-    void deleteUser(Long id);
+    long countUsers();
 }

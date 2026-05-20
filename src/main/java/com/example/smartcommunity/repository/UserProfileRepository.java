@@ -2,5 +2,11 @@ package com.example.smartcommunity.repository;
 
 import com.example.smartcommunity.model.UserProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {}
+import java.util.Optional;
+
+@Repository
+public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
+    Optional<UserProfile> findByUserId(Long userId);
+}

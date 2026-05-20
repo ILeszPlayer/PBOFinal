@@ -1,11 +1,10 @@
 package com.example.smartcommunity.config;
 
+import com.example.smartcommunity.model.Admin;
+import com.example.smartcommunity.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import com.example.smartcommunity.model.User;
-import com.example.smartcommunity.repository.UserRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -21,13 +20,10 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         if (!userRepository.existsByEmail("admin@gmail.com")) {
-            User admin = new User();
-            admin.setNama("Admin");
-            admin.setEmail("admin@gmail.com");
-            admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setRole("ADMIN");
-
+            Admin admin = new Admin("Admin", "admin@gmail.com",
+                    passwordEncoder.encode("admin123"));
             userRepository.save(admin);
+            System.out.println("✅ Admin default berhasil dibuat (admin@gmail.com / admin123)");
         }
     }
 }

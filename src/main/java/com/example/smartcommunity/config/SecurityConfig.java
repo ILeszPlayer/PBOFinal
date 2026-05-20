@@ -18,7 +18,6 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())
                 .logout(logout -> logout.disable())
                 .httpBasic(basic -> basic.disable());
-
         return http.build();
     }
 
