@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Pengaduan - KomunServis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 flex min-h-screen font-sans">
+    <aside class="w-64 bg-slate-800 border-r border-slate-700 p-6 flex flex-col justify-between flex-shrink-0">
+        <div class="space-y-6">
+            <div class="flex items-center gap-2 px-2 text-indigo-400 font-black tracking-wider"><i class="fas fa-shield-halved text-xl"></i> CORE COMMAND</div>
+            <nav class="space-y-2 text-xs font-bold">
+                <a th:href="@{/admin/dashboard}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-chart-line"></i> Monitoring Dashboard</a>
+                <a th:href="@{/admin/complaints/manage}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-600 text-white shadow-md"><i class="fas fa-list"></i> Kelola Pengaduan</a>
+                <a th:href="@{/admin/warga}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-users"></i> Manajemen Warga</a>
+                <a th:href="@{/admin/broadcasts}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-bullhorn"></i> Broadcast</a>
+            </nav>
+        </div>
+        <a th:href="@{/logout}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all font-bold text-xs"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+    </aside>
+    <main class="flex-1 p-8 overflow-y-auto max-w-5xl">
+        <a th:href="@{/admin/complaints/manage}" class="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-bold mb-6 transition-all"><i class="fas fa-arrow-left"></i> Kembali ke Kelola Pengaduan</a>
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden shadow-xl">
+            <div class="px-6 py-5 border-b border-slate-700 flex items-start justify-between gap-4">
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-xl font-black text-slate-100" th:text="${c.judul}">Judul</h1>
+                    <p class="text-xs text-slate-400 mt-1">
+                        <span th:text="${c.isAnonymous} ? 'Anonim' : (${c.user != null} ? ${c.user.nama} : 'Warga')">Pelapor</span>
+                        <span class="mx-1">•</span>
+                        <span th:text="${c.tanggal != null} ? ${#temporals.format(c.tanggal, 'dd MMM yyyy HH:mm')} : '-'">Tanggal</span>
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                    <span th:class="${c.status != null and c.status.name() == 'SELESAI'} ? 'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : (${c.status != null and c.status.name() == 'PROSES'} ? 'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20' : 'inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20')">
+                        <i th:class="${c.status != null and c.status.name() == 'SELESAI'} ? 'fas fa-check-circle' : (${c.status != null and c.status.name() == 'PROSES'} ? 'fas fa-spinner' : 'fas fa-clock')"></i>
+                        <span th:text="${c.status != null ? c.status.displayName : 'Pending'}">Status</span>
+                    </span>
+                </div>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-slate-700/30 rounded-xl p-3"><span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Kategori</span><span class="text-xs font-bold text-slate-200" th:text="${c.kategori != null ? c.kategori.displayName : '-'}">Kategori</span></div>
+                    <div class="bg-slate-700/30 rounded-xl p-3"><span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Urgensi</span><span class="text-xs font-bold" th:class="${c.urgency != null and c.urgency.name() == 'TINGGI'} ? 'text-red-400' : (${c.urgency != null and c.urgency.name() == 'SEDANG'} ? 'text-amber-400' : 'text-emerald-400')" th:text="${c.urgency != null ? c.urgency.displayName : '-'}">Urgensi</span></div>
+                    <div class="bg-slate-700/30 rounded-xl p-3"><span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Dukungan</span><span class="text-xs font-bold text-slate-200"><i class="fas fa-arrow-up text-indigo-400 mr-1"></i><span th:text="${c.upvotesCount}">0</span></span></div>
+                    <div class="bg-slate-700/30 rounded-xl p-3"><span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 block mb-1">SLA</span><span class="text-xs font-bold" th:class="${c.slaCompliant} ? 'text-emerald-400' : 'text-red-400'" th:text="${c.slaHours} + ' jam'">0</span></div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Isi Pengaduan</h3>
+                    <p class="text-sm text-slate-300 leading-relaxed bg-slate-700/20 rounded-xl p-4" th:text="${c.isiPengaduan}">Isi...</p>
+                </div>
+                <div th:if="${c.buktiFoto != null and !c.buktiFoto.isEmpty()}" class="rounded-xl overflow-hidden border border-slate-700 max-w-md cursor-pointer">
+                    <img th:src="${c.buktiFoto}" alt="Bukti Foto" class="w-full h-auto object-cover hover:opacity-90 transition-opacity" onclick="openLightbox(this.src)">
+                </div>
+                <div th:if="${c.latitude != null or c.lokasiNama != null}" class="bg-slate-700/20 rounded-xl p-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2"><i class="fas fa-map-marker-alt text-indigo-400 mr-1"></i> Lokasi</h3>
+                    <p th:if="${c.lokasiNama != null}" class="text-xs text-slate-300" th:text="${c.lokasiNama}">Lokasi</p>
+                    <p th:if="${c.latitude != null}" class="text-[10px] text-slate-500 mt-1" th:text="'Lat: ' + ${c.latitude} + ', Lon: ' + ${c.longitude}">Koordinat</p>
+                </div>
+                <div th:if="${c.status.name() == 'PROSES' or c.status.name() == 'SELESAI'}" class="bg-slate-700/20 rounded-xl p-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3"><i class="fas fa-clock-rotate-left text-indigo-400 mr-1"></i> Timeline</h3>
+                    <div class="space-y-2">
+                        <div th:if="${c.tanggal != null}" class="flex items-center gap-2 text-xs"><span class="w-2 h-2 rounded-full bg-slate-500 flex-shrink-0"></span><span class="text-slate-400">Dibuat:</span><span class="text-slate-300" th:text="${#temporals.format(c.tanggal, 'dd MMM yyyy HH:mm')}"></span></div>
+                        <div th:if="${c.processedAt != null}" class="flex items-center gap-2 text-xs"><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span><span class="text-slate-400">Diproses:</span><span class="text-slate-300" th:text="${#temporals.format(c.processedAt, 'dd MMM yyyy HH:mm')}"></span></div>
+                        <div th:if="${c.resolvedAt != null}" class="flex items-center gap-2 text-xs"><span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span><span class="text-slate-400">Selesai:</span><span class="text-slate-300" th:text="${#temporals.format(c.resolvedAt, 'dd MMM yyyy HH:mm')}"></span></div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3"><i class="fas fa-comments text-indigo-400 mr-1"></i> Komentar (<span th:text="${#lists.size(comments)}"></span>)</h3>
+                    <div th:if="${#lists.isEmpty(comments)}" class="text-center py-6 text-slate-500 text-xs"><i class="fas fa-comment-slash mr-1"></i> Belum ada komentar</div>
+                    <div th:unless="${#lists.isEmpty(comments)}" class="space-y-2">
+                        <div th:each="cm : ${comments}" class="bg-slate-700/20 rounded-xl p-3">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-bold text-xs text-slate-200" th:text="${cm.user.nama}">Nama</span>
+                                <span class="text-[9px] text-slate-500 ml-auto" th:text="${cm.tanggalStr}">Tgl</span>
+                            </div>
+                            <p class="text-xs text-slate-300" th:text="${cm.isiKomentar}">Komentar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4" onclick="closeLightbox(event)">
+        <button onclick="closeLightbox(event)" class="absolute top-4 right-4 text-white/70 hover:text-white text-2xl transition-all z-10"><i class="fas fa-times"></i></button>
+        <img id="lightboxImg" class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl">
+    </div>
+
+    <script>
+        let lightboxImages = [];
+        let lightboxIndex = 0;
+        function openLightbox(src) {
+            lightboxImages = [];
+            document.querySelectorAll('[onclick*="openLightbox"]').forEach(el => {
+                const m = el.getAttribute('onclick').match(/'([^']+)'/);
+                if (m) lightboxImages.push(m[1]);
+            });
+            lightboxIndex = lightboxImages.indexOf(src);
+            if (lightboxIndex === -1) { lightboxImages = [src]; lightboxIndex = 0; }
+            document.getElementById('lightboxImg').src = src;
+            document.getElementById('lightbox').classList.remove('hidden');
+            document.getElementById('lightbox').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('lightbox').classList.remove('flex'); document.getElementById('lightbox').classList.add('hidden'); document.body.style.overflow = ''; }
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { const lb = document.getElementById('lightbox'); if (!lb.classList.contains('hidden')) { lb.classList.remove('flex'); lb.classList.add('hidden'); document.body.style.overflow = ''; } } });
+    </script>
+</body>
+</html>

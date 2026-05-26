@@ -1,5 +1,6 @@
 package com.example.smartcommunity.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -33,10 +34,12 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnoreProperties({"complaints", "comments", "notifications", "profile", "password", "hibernateLazyInitializer", "handler"})
     private Pengguna user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "complaint_id")
+    @JsonIgnoreProperties({"comments", "user", "hibernateLazyInitializer", "handler"})
     private Complaint complaint;
 
     public Notification() {}

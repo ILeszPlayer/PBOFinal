@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "complaints")
@@ -82,6 +84,12 @@ public class Complaint {
     @Column(name = "upvotes_count", nullable = false)
     private int upvotesCount = 0;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "complaint_upvotes", joinColumns = @JoinColumn(name = "complaint_id"))
+    @Column(name = "user_id")
+    @JsonIgnore
+    private Set<Long> upvotedUserIds = new HashSet<>();
+
     @Column(name = "is_anonymous", nullable = false)
     private boolean isAnonymous = false;
 
@@ -99,9 +107,9 @@ public class Complaint {
     @JsonIgnoreProperties({"complaints", "comments", "notifications", "profile", "password", "hibernateLazyInitializer", "handler"})
     private Pengguna user;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("tanggal ASC")
+    @JsonIgnoreProperties({"complaint", "hibernateLazyInitializer", "handler"})
     private List<Comment> comments = new ArrayList<>();
 
     public Complaint() {}
@@ -152,6 +160,8 @@ public class Complaint {
     public void setBuktiFoto(String buktiFoto) { this.buktiFoto = buktiFoto; }
     public int getUpvotesCount() { return upvotesCount; }
     public void setUpvotesCount(int upvotesCount) { this.upvotesCount = upvotesCount; }
+    public Set<Long> getUpvotedUserIds() { return upvotedUserIds; }
+    public void setUpvotedUserIds(Set<Long> upvotedUserIds) { this.upvotedUserIds = upvotedUserIds; }
     public boolean isIsAnonymous() { return isAnonymous; }
     public void setIsAnonymous(boolean isAnonymous) { this.isAnonymous = isAnonymous; }
     public Double getLatitude() { return latitude; }

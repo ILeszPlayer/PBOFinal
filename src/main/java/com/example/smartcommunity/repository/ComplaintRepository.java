@@ -1,6 +1,8 @@
 package com.example.smartcommunity.repository;
 
 import com.example.smartcommunity.model.Complaint;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -14,6 +16,7 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     List<Complaint> findByUrgency(Complaint.Urgency urgency);
     List<Complaint> findByUserIdOrderByTanggalDesc(Long userId);
     List<Complaint> findAllByOrderByTanggalDesc();
+    Page<Complaint> findAllByOrderByUpvotesCountDesc(Pageable pageable);
     List<Complaint> findAllByOrderByUpvotesCountDesc();
     List<Complaint> findByJudulContainingIgnoreCaseOrIsiPengaduanContainingIgnoreCase(String judul, String isi);
     List<Complaint> findByLatitudeIsNotNullAndLongitudeIsNotNull();
@@ -32,6 +35,6 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     @Query(value = "SELECT MONTH(tanggal), COUNT(id) FROM complaints WHERE status = ?1 GROUP BY MONTH(tanggal) ORDER BY MONTH(tanggal)", nativeQuery = true)
     List<Object[]> getMonthlyResolutionStats(String status);
 
-    @Query(value = "SELECT MONTH(tanggal), COUNT(id) FROM complaints WHERE status = 'SELESAI' GROUP BY MONTH(tanggal) ORDER BY MONTH(tanggal)", nativeQuery = true)
-    List<Object[]> getMonthlyResolutionStats();
+    @Query(value = "SELECT MONTH(tanggal), COUNT(id) FROM complaints GROUP BY MONTH(tanggal) ORDER BY MONTH(tanggal)", nativeQuery = true)
+    List<Object[]> getMonthlyStats();
 }

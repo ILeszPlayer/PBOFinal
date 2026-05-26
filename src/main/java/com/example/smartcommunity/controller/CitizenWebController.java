@@ -22,7 +22,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/citizen")
@@ -52,6 +56,7 @@ public class CitizenWebController {
     public String submitComplaint(
             @RequestParam("judul") String judul,
             @RequestParam("isiPengaduan") String isiPengaduan,
+            @RequestParam(value = "kategori", required = false) String kategori,
             @RequestParam(value = "buktiFoto", required = false) MultipartFile buktiFoto,
             @RequestParam(value = "isAnonymous", defaultValue = "false") boolean isAnonymous,
             Authentication authentication) {
@@ -62,6 +67,7 @@ public class CitizenWebController {
         request.setUserId(user.getId());
         request.setJudul(judul);
         request.setIsiPengaduan(isiPengaduan);
+        request.setKategori(kategori);
         request.setBuktiFoto(buktiFoto);
         request.setIsAnonymous(isAnonymous);
 
@@ -112,11 +118,32 @@ public class CitizenWebController {
     }
 
     @GetMapping("/detail/{id}")
-    @Transactional(readOnly = true)
     public String viewDetail(@PathVariable Long id, Model model) {
         Complaint complaint = complaintService.findById(id);
         model.addAttribute("complaint", complaint);
-        model.addAttribute("comments", complaint.getComments());
+
+        // Load comments via native query to avoid lazy-loading issues
+        List<Object[]> rows = commentRepository.findCommentRawDataByComplaintId(id);
+        List<Map<String, Object>> commentsList = new ArrayList<>();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
+        for (Object[] row : rows) {
+            Map<String, Object> cm = new java.util.LinkedHashMap<>();
+            cm.put("id", row[0]);
+            cm.put("isiKomentar", row[1]);
+            // Convert SQL timestamp to formatted string
+            if (row[2] instanceof java.sql.Timestamp ts) {
+                cm.put("tanggalStr", ts.toLocalDateTime().format(dtf));
+            } else if (row[2] instanceof LocalDateTime ldt) {
+                cm.put("tanggalStr", ldt.format(dtf));
+            } else {
+                cm.put("tanggalStr", String.valueOf(row[2]));
+            }
+            Map<String, Object> u = new java.util.LinkedHashMap<>();
+            u.put("nama", row[3] != null ? row[3] : "Warga");
+            cm.put("user", u);
+            commentsList.add(cm);
+        }
+        model.addAttribute("comments", commentsList);
         return "citizen-detail";
     }
 

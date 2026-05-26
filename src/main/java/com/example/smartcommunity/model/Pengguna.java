@@ -1,5 +1,7 @@
 package com.example.smartcommunity.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,8 +45,10 @@ public abstract class Pengguna {
     private List<Comment> comments = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnoreProperties({"user", "complaint"})
     private List<Notification> notifications = new ArrayList<>();
 
+    @JsonIgnore
     public abstract String getDashboardRoute();
 
     public Long getId() { return id; }

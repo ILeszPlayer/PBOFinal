@@ -10,4 +10,7 @@ public interface BroadcastService {
     List<Broadcast> getAllBroadcasts();
     List<Broadcast> findAllActive();
     Broadcast save(Broadcast broadcast);
+    Broadcast updateBroadcast(Long id, String judul, String isiBroadcast);
+    void deleteBroadcast(Long id);
+    Broadcast findById(Long id);
 }

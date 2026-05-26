@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Warga - KomunServis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 flex min-h-screen font-sans">
+    <aside class="w-64 bg-slate-800 border-r border-slate-700 p-6 flex flex-col justify-between flex-shrink-0">
+        <div class="space-y-6">
+            <div class="flex items-center gap-2 px-2 text-indigo-400 font-black tracking-wider"><i class="fas fa-shield-halved text-xl"></i> CORE COMMAND</div>
+            <nav class="space-y-2 text-xs font-bold">
+                <a th:href="@{/admin/dashboard}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-chart-line"></i> Monitoring Dashboard</a>
+                <a th:href="@{/admin/complaints/manage}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-list"></i> Kelola Pengaduan</a>
+                <a th:href="@{/admin/warga}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-600 text-white shadow-md"><i class="fas fa-users"></i> Manajemen Warga</a>
+                <a th:href="@{/admin/broadcasts}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-bullhorn"></i> Broadcast</a>
+            </nav>
+        </div>
+        <a th:href="@{/logout}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all font-bold text-xs"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+    </aside>
+    <main class="flex-1 p-8 overflow-y-auto max-w-5xl">
+        <a th:href="@{/admin/warga}" class="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 font-bold mb-6 transition-all"><i class="fas fa-arrow-left"></i> Kembali</a>
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden shadow-xl">
+            <div class="px-6 py-6 border-b border-slate-700 flex items-center gap-5">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-xl font-bold flex-shrink-0 shadow-lg">
+                    <span th:text="${u.nama != null and u.nama.length() > 0 ? #strings.substring(u.nama, 0, 1) : '?'}">U</span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black text-slate-100" th:text="${u.nama}">Nama</h1>
+                    <p class="text-xs text-slate-400" th:text="${u.email}">Email</p>
+                    <div class="flex items-center gap-2 mt-1.5">
+                        <span th:class="${u.role == 'ADMIN'} ? 'inline-flex items-center gap-1 bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-full text-[9px] font-bold' : 'inline-flex items-center gap-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full text-[9px] font-bold'">
+                            <i class="fas text-[8px]" th:class="${u.role == 'ADMIN'} ? 'fa-crown' : 'fa-user'"></i>
+                            <span th:text="${u.role == 'ADMIN'} ? 'Admin' : 'Warga'">Role</span>
+                        </span>
+                        <span th:class="${u.reputationPoints >= 100} ? 'text-emerald-400' : (${u.reputationPoints >= 50} ? 'text-amber-400' : 'text-slate-300')" class="text-xs font-bold"><i class="fas fa-star text-amber-400 mr-0.5"></i><span th:text="${u.reputationPoints}">0</span> pts</span>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3"><i class="fas fa-clipboard-list text-indigo-400 mr-1"></i> Riwayat Pengaduan (<span th:text="${#lists.size(complaints)}"></span>)</h3>
+                <div th:if="${#lists.isEmpty(complaints)}" class="text-center py-8 text-slate-500 text-xs"><i class="fas fa-inbox text-2xl mb-2 block text-slate-600"></i> Belum ada pengaduan</div>
+                <div th:unless="${#lists.isEmpty(complaints)}" class="space-y-2">
+                    <div th:each="c : ${complaints}" class="bg-slate-700/20 rounded-xl p-3 flex items-center justify-between gap-3 hover:bg-slate-700/30 transition-all">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-slate-200 truncate" th:text="${c.judul}">Judul</p>
+                            <p class="text-[10px] text-slate-500 mt-0.5" th:text="${#temporals.format(c.tanggal, 'dd MMM yyyy')}">Tgl</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span th:class="${c.status.name() == 'SELESAI'} ? 'inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full text-[9px] font-bold' : (${c.status.name() == 'PROSES'} ? 'inline-flex items-center gap-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full text-[9px] font-bold' : 'inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full text-[9px] font-bold')">
+                                <i th:class="${c.status.name() == 'SELESAI'} ? 'fas fa-check-circle' : (${c.status.name() == 'PROSES'} ? 'fas fa-spinner' : 'fas fa-clock')" class="text-[8px]"></i>
+                                <span th:text="${c.status.displayName}">Status</span>
+                            </span>
+                            <a th:href="@{/admin/complaints/{id}(id=${c.id})}" class="text-indigo-400 hover:text-indigo-300 text-[9px]"><i class="fas fa-external-link-alt"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="mt-4 text-right">
+            <form th:action="@{/admin/warga/{id}/delete(id=${u.id})}" method="POST" onsubmit="return confirm('Hapus warga ini? Semua data terkait akan ikut terhapus.')">
+                <button type="submit" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold px-4 py-2 rounded-xl transition-all"><i class="fas fa-trash mr-1"></i> Hapus Warga</button>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

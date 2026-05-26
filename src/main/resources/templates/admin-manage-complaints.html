@@ -16,21 +16,51 @@
             </div>
             <nav class="space-y-2 text-xs font-bold">
                 <a th:href="@{/admin/dashboard}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-chart-line"></i> Monitoring Dashboard</a>
-                <a th:href="@{/admin/complaints/manage}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-600 text-white shadow-md"><i class="fas fa-folder-gear"></i> Kelola Pengaduan</a>
-                <a th:href="@{/admin/warga}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-users-gear"></i> Manajemen Warga</a>
+                <a th:href="@{/admin/complaints/manage}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-600 text-white shadow-md"><i class="fas fa-list"></i> Kelola Pengaduan</a>
+                <a th:href="@{/admin/warga}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-users"></i> Manajemen Warga</a>
+                <a th:href="@{/admin/broadcasts}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-bullhorn"></i> Broadcast</a>
             </nav>
         </div>
         <a th:href="@{/logout}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all font-bold text-xs"><i class="fas fa-sign-out-alt"></i> Keluar</a>
     </aside>
 
     <main class="flex-1 p-8 overflow-y-auto">
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex justify-between items-center mb-6">
             <div>
                 <h1 class="text-2xl font-black tracking-tight">Pusat Data & Mutasi Pengaduan</h1>
                 <p class="text-slate-400 text-xs mt-0.5">Lakukan pembaruan status keluhan warga dan publikasikan maklumat broadcast di sini.</p>
             </div>
-            <button onclick="document.getElementById('broadcastModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all"><i class="fas fa-bullhorn mr-1"></i> Buat Broadcast</button>
+            <div class="flex items-center gap-2">
+                <a href="/admin/complaints/export/csv" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all"><i class="fas fa-download mr-1"></i> Export CSV</a>
+                <button onclick="document.getElementById('broadcastModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all"><i class="fas fa-bullhorn mr-1"></i> Buat Broadcast</button>
+            </div>
         </div>
+
+        <!-- Search & Filter Bar -->
+        <form method="GET" action="/admin/complaints/manage" class="mb-6 flex flex-wrap items-center gap-3">
+            <div class="relative flex-1 min-w-[200px] max-w-md">
+                <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                <input type="text" name="search" placeholder="Cari judul atau deskripsi..." th:value="${param.search}" class="w-full bg-slate-800/60 border border-slate-700/60 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all">
+            </div>
+            <select name="kategori" class="bg-slate-800/60 border border-slate-700/60 rounded-xl px-3 py-2.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 transition-all">
+                <option value="">Semua Kategori</option>
+                <option value="INFRASTRUKTUR" th:selected="${param.kategori == 'INFRASTRUKTUR'}">Infrastruktur</option>
+                <option value="LINGKUNGAN" th:selected="${param.kategori == 'LINGKUNGAN'}">Lingkungan</option>
+                <option value="SOSIAL" th:selected="${param.kategori == 'SOSIAL'}">Sosial</option>
+                <option value="KEAMANAN" th:selected="${param.kategori == 'KEAMANAN'}">Keamanan</option>
+                <option value="KESEHATAN" th:selected="${param.kategori == 'KESEHATAN'}">Kesehatan</option>
+                <option value="PENDIDIKAN" th:selected="${param.kategori == 'PENDIDIKAN'}">Pendidikan</option>
+                <option value="UMUM" th:selected="${param.kategori == 'UMUM'}">Umum</option>
+            </select>
+            <select name="status" class="bg-slate-800/60 border border-slate-700/60 rounded-xl px-3 py-2.5 text-xs text-slate-300 focus:outline-none focus:border-indigo-500 transition-all">
+                <option value="">Semua Status</option>
+                <option value="PENDING" th:selected="${param.status == 'PENDING'}">Pending</option>
+                <option value="PROSES" th:selected="${param.status == 'PROSES'}">Diproses</option>
+                <option value="SELESAI" th:selected="${param.status == 'SELESAI'}">Selesai</option>
+            </select>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all"><i class="fas fa-filter mr-1"></i> Filter</button>
+            <a th:href="@{/admin/complaints/manage}" class="text-slate-400 hover:text-slate-300 text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-700 hover:border-slate-600 transition-all"><i class="fas fa-undo mr-1"></i> Reset</a>
+        </form>
 
         <div th:if="${param.mutationSuccess}" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
             <i class="fas fa-check-circle"></i> Status pengaduan warga berhasil diperbarui!
@@ -65,7 +95,7 @@
                                 </div>
                             </td>
                             <td class="p-4 max-w-[200px]">
-                                <span class="text-slate-200 font-medium" th:text="${c.judul}">Judul</span>
+                                <a th:href="@{/admin/complaints/{id}(id=${c.id})}" class="text-slate-200 font-medium hover:text-indigo-400 transition-all" th:text="${c.judul}">Judul</a>
                             </td>
                             <td class="p-4">
                                 <span class="inline-flex items-center gap-1 bg-indigo-500/10 text-indigo-400 px-2.5 py-1 rounded-full text-[10px] font-bold border border-indigo-500/20">
@@ -88,13 +118,13 @@
                             </td>
                             <td class="p-4">
                                 <div class="flex items-center justify-center gap-1.5" th:id="'status-actions-' + ${c.id}">
-                                    <button onclick="updateStatus(${c.id}, 'PENDING')" th:class="${c.status != null and c.status.name() == 'PENDING'} ? 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 cursor-default' : 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30 border border-transparent transition-all'">
+                                    <button th:onclick="'updateStatus(' + ${c.id} + ', \'PENDING\')'" data-status="PENDING" th:class="${c.status != null and c.status.name() == 'PENDING'} ? 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 cursor-default' : 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30 border border-transparent transition-all cursor-pointer'">
                                         <i class="fas fa-clock mr-0.5"></i> Pending
                                     </button>
-                                    <button onclick="updateStatus(${c.id}, 'PROSES')" th:class="${c.status != null and c.status.name() == 'PROSES'} ? 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 cursor-default' : 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 hover:bg-blue-500/20 hover:text-blue-400 hover:border-blue-500/30 border border-transparent transition-all'">
+                                    <button th:onclick="'updateStatus(' + ${c.id} + ', \'PROSES\')'" data-status="PROSES" th:class="${c.status != null and c.status.name() == 'PROSES'} ? 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 cursor-default' : 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 hover:bg-blue-500/20 hover:text-blue-400 hover:border-blue-500/30 border border-transparent transition-all cursor-pointer'">
                                         <i class="fas fa-spinner mr-0.5"></i> Proses
                                     </button>
-                                    <button onclick="updateStatus(${c.id}, 'SELESAI')" th:class="${c.status != null and c.status.name() == 'SELESAI'} ? 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default' : 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30 border border-transparent transition-all'">
+                                    <button th:onclick="'updateStatus(' + ${c.id} + ', \'SELESAI\')'" data-status="SELESAI" th:class="${c.status != null and c.status.name() == 'SELESAI'} ? 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default' : 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30 border border-transparent transition-all cursor-pointer'">
                                         <i class="fas fa-check mr-0.5"></i> Selesai
                                     </button>
                                 </div>
@@ -134,46 +164,31 @@
 
     <script>
         function updateStatus(id, status) {
-            fetch('/admin/complaints/' + id + '/update-status', {
+            fetch('/admin/api/complaints/' + id + '/update-status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: 'status=' + status
-            }).then(res => {
-                if (res.ok) {
+            }).then(res => res.json()).then(data => {
+                if (data.success) {
                     const badge = document.getElementById('status-badge-' + id);
                     const allBtns = document.querySelectorAll('#status-actions-' + id + ' button');
                     allBtns.forEach(b => {
-                        b.className = 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 hover:border border border-transparent transition-all';
-                        if (b.textContent.trim().toLowerCase() === status.toLowerCase() || 
-                            (status === 'PROSES' && b.textContent.trim().toLowerCase() === 'proses') ||
-                            (status === 'SELESAI' && b.textContent.trim().toLowerCase() === 'selesai')) {
-                            const colors = {
-                                PENDING: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-                                PROSES: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-                                SELESAI: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-                            };
-                            b.className = 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold ' + (colors[status] || '') + ' cursor-default';
+                        b.className = 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 border border-transparent transition-all';
+                        const btnStatus = b.getAttribute('data-status');
+                        if (btnStatus === data.status) {
+                            const colors = { PENDING: 'bg-amber-500/20 text-amber-400 border-amber-500/30', PROSES: 'bg-blue-500/20 text-blue-400 border-blue-500/30', SELESAI: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' };
+                            b.className = 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold ' + (colors[data.status] || '') + ' cursor-default';
                         } else {
-                            const hovers = {
-                                PENDING: 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30',
-                                PROSES: 'hover:bg-blue-500/20 hover:text-blue-400 hover:border-blue-500/30',
-                                SELESAI: 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30'
-                            };
-                            const txt = b.textContent.trim().toLowerCase();
-                            let s = txt === 'pending' ? 'PENDING' : txt === 'proses' ? 'PROSES' : 'SELESAI';
-                            b.className = 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 border border-transparent ' + (hovers[s] || '') + ' transition-all';
+                            const hovers = { PENDING: 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30', PROSES: 'hover:bg-blue-500/20 hover:text-blue-400 hover:border-blue-500/30', SELESAI: 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30' };
+                            b.className = 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 border border-transparent ' + (hovers[btnStatus] || '') + ' transition-all';
                         }
                     });
                     if (badge) {
                         const icons = { PENDING: 'fa-clock', PROSES: 'fa-spinner', SELESAI: 'fa-check-circle' };
                         const labels = { PENDING: 'Pending', PROSES: 'Diproses', SELESAI: 'Selesai' };
-                        const colors = {
-                            PENDING: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-                            PROSES: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-                            SELESAI: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                        };
-                        badge.className = 'inline-flex items-center gap-1 ' + (colors[status] || colors.PENDING) + ' px-2.5 py-1 rounded-full text-[10px] font-bold';
-                        badge.innerHTML = '<i class="fas ' + (icons[status] || icons.PENDING) + '"></i> <span>' + (labels[status] || labels.PENDING) + '</span>';
+                        const colors = { PENDING: 'bg-amber-500/10 text-amber-400 border-amber-500/20', PROSES: 'bg-blue-500/10 text-blue-400 border-blue-500/20', SELESAI: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' };
+                        badge.className = 'inline-flex items-center gap-1 ' + (colors[data.status] || colors.PENDING) + ' px-2.5 py-1 rounded-full text-[10px] font-bold';
+                        badge.innerHTML = '<i class="fas ' + (icons[data.status] || icons.PENDING) + '"></i> <span>' + (data.displayName || labels[data.status]) + '</span>';
                     }
                 }
             });

@@ -49,10 +49,16 @@
                 <p class="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap" th:text="${complaint.isiPengaduan}">Isi pengaduan</p>
             </div>
 
-            <!-- Photo -->
+            <!-- Photo Lightbox -->
             <div th:if="${complaint.buktiFoto != null and !complaint.buktiFoto.isEmpty()}" class="mb-5">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 block"><i class="fas fa-image text-indigo-400 mr-1"></i> Bukti Foto</span>
-                <img th:src="@{${complaint.buktiFoto}}" alt="Bukti Foto" class="w-full max-h-96 object-cover rounded-xl border border-slate-700/50 cursor-pointer hover:opacity-90 transition-opacity" onclick="window.open('${complaint.buktiFoto}', '_blank')" onerror="this.style.display='none'">
+                <img th:src="@{${complaint.buktiFoto}}" alt="Bukti Foto" class="w-full max-h-96 object-cover rounded-xl border border-slate-700/50 cursor-pointer hover:opacity-90 transition-opacity" onclick="openLightbox(this.src)" onerror="this.style.display='none'">
+            </div>
+            <div id="lightbox" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4" onclick="closeLightbox(event)">
+                <button onclick="closeLightbox(event)" class="absolute top-4 right-4 text-white/70 hover:text-white text-2xl transition-all z-10"><i class="fas fa-times"></i></button>
+                <button onclick="changeLightbox(-1)" class="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-2xl transition-all z-10"><i class="fas fa-chevron-left"></i></button>
+                <button onclick="changeLightbox(1)" class="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white text-2xl transition-all z-10"><i class="fas fa-chevron-right"></i></button>
+                <img id="lightboxImg" class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl">
             </div>
 
             <!-- Location -->
@@ -115,7 +121,7 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 mb-1">
                         <span class="font-bold text-xs text-slate-200" th:text="${comment.user.nama}">User</span>
-                        <span class="text-[9px] text-slate-500" th:text="${comment.tanggal != null ? #temporals.format(comment.tanggal, 'dd MMM yyyy HH:mm') : ''}">date</span>
+                        <span class="text-[9px] text-slate-500" th:text="${comment.tanggalStr != null ? comment.tanggalStr : ''}">date</span>
                     </div>
                     <p class="text-xs text-slate-300 leading-relaxed" th:text="${comment.isiKomentar}">Komentar</p>
                 </div>
@@ -133,5 +139,25 @@
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
     </style>
+    <script>
+        let lightboxImages = [];
+        let lightboxIndex = 0;
+        function openLightbox(src) {
+            lightboxImages = [];
+            document.querySelectorAll('[onclick*="openLightbox"]').forEach(el => {
+                const m = el.getAttribute('onclick').match(/'([^']+)'/);
+                if (m) lightboxImages.push(m[1]);
+            });
+            lightboxIndex = lightboxImages.indexOf(src);
+            if (lightboxIndex === -1) { lightboxImages = [src]; lightboxIndex = 0; }
+            document.getElementById('lightboxImg').src = src;
+            document.getElementById('lightbox').classList.remove('hidden');
+            document.getElementById('lightbox').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeLightbox(e) { if (e && e.target !== e.currentTarget) return; document.getElementById('lightbox').classList.remove('flex'); document.getElementById('lightbox').classList.add('hidden'); document.body.style.overflow = ''; }
+        function changeLightbox(dir) { lightboxIndex = (lightboxIndex + dir + lightboxImages.length) % lightboxImages.length; document.getElementById('lightboxImg').src = lightboxImages[lightboxIndex]; }
+        document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { const lb = document.getElementById('lightbox'); if (!lb.classList.contains('hidden')) { lb.classList.remove('flex'); lb.classList.add('hidden'); document.body.style.overflow = ''; } } });
+    </script>
 </body>
 </html>

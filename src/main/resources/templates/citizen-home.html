@@ -6,6 +6,8 @@
     <title>Smart Community - Portal Warga</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.6.1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-slate-100 min-h-screen font-sans">
 
@@ -26,6 +28,25 @@
                     <i class="fas fa-star text-amber-400 text-[9px]"></i>
                     <span th:text="${userPoints != null ? userPoints : 0}"></span> pts
                 </span>
+                <!-- Notification Bell -->
+                <div class="relative">
+                    <button onclick="toggleNotifDropdown()" class="flex items-center gap-1.5 text-[10px] font-semibold text-slate-300 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 hover:border-indigo-500/30 hover:text-indigo-400 transition-all relative">
+                        <i class="fas fa-bell text-indigo-400"></i>
+                        <span id="notifBadge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[7px] font-bold text-white flex items-center justify-center">0</span>
+                    </button>
+                    <div id="notifDropdown" class="hidden absolute right-0 mt-2 w-80 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl">
+                        <div class="px-4 py-3 border-b border-slate-700 flex justify-between items-center bg-slate-700/30">
+                            <span class="text-xs font-bold text-slate-200"><i class="fas fa-bell text-indigo-400 mr-1"></i> Notifikasi</span>
+                            <button onclick="markAllRead()" class="text-[9px] text-indigo-400 hover:text-indigo-300 font-bold">Tandai Dibaca</button>
+                        </div>
+                        <div id="notifList" class="max-h-64 overflow-y-auto">
+                            <div class="p-4 text-center text-slate-500 text-xs"><i class="fas fa-circle-notch animate-spin mr-1"></i> Memuat...</div>
+                        </div>
+                        <div class="px-4 py-2 border-t border-slate-700 text-center bg-slate-700/20">
+                            <a th:href="@{/citizen/profile}" class="text-[9px] text-indigo-400 hover:text-indigo-300 font-bold">Lihat Semua Notifikasi</a>
+                        </div>
+                    </div>
+                </div>
                 <a th:href="@{/citizen/profile}" class="flex items-center gap-1.5 text-[10px] font-semibold text-slate-300 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 hover:border-indigo-500/30 hover:text-indigo-400 transition-all">
                     <i class="fas fa-user text-indigo-400"></i>
                     <span class="hidden sm:inline" th:text="${userName != null ? userName : 'Profil'}">Profil</span>
@@ -49,8 +70,12 @@
         </div>
     </div>
 
-    <div th:if="${param.submitted}" class="fixed top-4 right-4 z-50 bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-bold px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 animate-slide-in border border-emerald-400/30">
-        <i class="fas fa-check-circle"></i> Pengaduan berhasil dikirim!
+    <!-- Success Toast -->
+    <div th:if="${param.submitted}" class="fixed top-4 right-4 z-50 bg-emerald-500/90 backdrop-blur-sm text-white text-xs font-bold px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 animate-slide-in border border-emerald-400/30" id="successToast">
+        <i class="fas fa-check-circle"></i> Pengaduan berhasil dikirim! <button onclick="this.parentElement.remove()" class="ml-2 text-white/70 hover:text-white">&times;</button>
+    </div>
+    <div th:if="${param.commented}" class="fixed top-4 right-4 z-50 bg-blue-500/90 backdrop-blur-sm text-white text-xs font-bold px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 animate-slide-in border border-blue-400/30" id="commentSuccess">
+        <i class="fas fa-check-circle"></i> Komentar berhasil ditambahkan! <button onclick="this.parentElement.remove()" class="ml-2 text-white/70 hover:text-white">&times;</button>
     </div>
 
     <div class="container mx-auto px-4 py-6 max-w-6xl">
@@ -66,28 +91,16 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <!-- Left Sidebar - Stats & Filters -->
+            <!-- Left Sidebar -->
             <div class="lg:col-span-1 space-y-4">
                 <!-- Stats Card -->
                 <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 shadow-lg backdrop-blur-sm">
                     <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4"><i class="fas fa-chart-simple mr-1"></i> Statistik</h3>
                     <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-slate-400">Total Laporan</span>
-                            <span class="text-sm font-black text-white" id="totalCount">0</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-slate-400"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block mr-1"></span>Pending</span>
-                            <span class="text-sm font-black text-amber-400" id="pendingCount">0</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-slate-400"><span class="w-2 h-2 rounded-full bg-blue-400 inline-block mr-1"></span>Diproses</span>
-                            <span class="text-sm font-black text-blue-400" id="prosesCount">0</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-slate-400"><span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1"></span>Selesai</span>
-                            <span class="text-sm font-black text-emerald-400" id="selesaiCount">0</span>
-                        </div>
+                        <div class="flex justify-between items-center"><span class="text-xs text-slate-400">Total Laporan</span><span class="text-sm font-black text-white" id="totalCount">0</span></div>
+                        <div class="flex justify-between items-center"><span class="text-xs text-slate-400"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block mr-1"></span>Pending</span><span class="text-sm font-black text-amber-400" id="pendingCount">0</span></div>
+                        <div class="flex justify-between items-center"><span class="text-xs text-slate-400"><span class="w-2 h-2 rounded-full bg-blue-400 inline-block mr-1"></span>Diproses</span><span class="text-sm font-black text-blue-400" id="prosesCount">0</span></div>
+                        <div class="flex justify-between items-center"><span class="text-xs text-slate-400"><span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-1"></span>Selesai</span><span class="text-sm font-black text-emerald-400" id="selesaiCount">0</span></div>
                     </div>
                 </div>
 
@@ -118,24 +131,24 @@
                 </div>
             </div>
 
-            <!-- Main Content - Complaint Feed -->
+            <!-- Main Content -->
             <div class="lg:col-span-3">
-                <!-- Loading -->
+                <!-- Search Bar -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                        <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Cari pengaduan..." class="w-full bg-slate-800/60 border border-slate-700/60 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all backdrop-blur-sm">
+                    </div>
+                </div>
                 <div id="loadingIndicator" class="flex flex-col items-center justify-center py-20 text-slate-400">
                     <div class="w-12 h-12 rounded-full border-4 border-slate-700 border-t-indigo-500 animate-spin mb-4"></div>
                     <span class="text-xs font-medium tracking-widest">Memuat Laporan Komunitas...</span>
                 </div>
-
-                <!-- Empty State -->
                 <div id="emptyState" class="hidden flex flex-col items-center justify-center py-20 text-slate-500">
-                    <div class="w-20 h-20 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center mb-4">
-                        <i class="fas fa-inbox text-2xl text-slate-600"></i>
-                    </div>
+                    <div class="w-20 h-20 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center mb-4"><i class="fas fa-inbox text-2xl text-slate-600"></i></div>
                     <span class="text-sm font-semibold">Belum ada laporan</span>
                     <span class="text-xs text-slate-500 mt-1">Jadilah yang pertama membuat pengaduan!</span>
                 </div>
-
-                <!-- Feed Area -->
                 <div id="asyncFeedArea" class="space-y-4 hidden"></div>
             </div>
         </div>
@@ -143,7 +156,7 @@
 
     <!-- Create Complaint Modal -->
     <div id="modalForm" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-2xl p-6 max-w-lg w-full border border-slate-700/60 shadow-2xl">
+        <div class="bg-slate-800 rounded-2xl p-6 max-w-lg w-full border border-slate-700/60 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold"><i class="fas fa-plus-circle text-indigo-400 mr-2"></i>Buat Pengaduan Baru</h2>
                 <button onclick="document.getElementById('modalForm').classList.add('hidden')" class="text-slate-400 hover:text-white text-xl">&times;</button>
@@ -151,6 +164,19 @@
             <form th:action="@{/citizen/create-complaint}" method="post" enctype="multipart/form-data" class="space-y-3">
                 <input type="text" name="judul" required placeholder="Judul pengaduan..." class="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
                 <textarea name="isiPengaduan" required rows="4" placeholder="Deskripsikan keluhan Anda..." class="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+                <div class="relative">
+                    <select name="kategori" class="w-full bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500 appearance-none cursor-pointer">
+                        <option value="" class="bg-slate-800 text-slate-400">Pilih Kategori (Otomatis jika kosong)</option>
+                        <option value="INFRASTRUKTUR" class="bg-slate-800 text-slate-200">🏗️ Infrastruktur</option>
+                        <option value="LINGKUNGAN" class="bg-slate-800 text-slate-200">🌿 Lingkungan</option>
+                        <option value="SOSIAL" class="bg-slate-800 text-slate-200">🤝 Sosial</option>
+                        <option value="KEAMANAN" class="bg-slate-800 text-slate-200">🛡️ Keamanan</option>
+                        <option value="KESEHATAN" class="bg-slate-800 text-slate-200">🏥 Kesehatan</option>
+                        <option value="PENDIDIKAN" class="bg-slate-800 text-slate-200">📚 Pendidikan</option>
+                        <option value="UMUM" class="bg-slate-800 text-slate-200">📋 Umum</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none text-xs"></i>
+                </div>
                 <div class="bg-slate-700/30 rounded-lg p-3 border border-dashed border-slate-600">
                     <input type="file" name="buktiFoto" accept="image/*" class="w-full text-sm text-slate-400 file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
                 </div>
@@ -162,7 +188,7 @@
 
     <!-- Comment Modal -->
     <div id="commentModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-slate-800 rounded-2xl w-full max-w-lg border border-slate-700/60 shadow-2xl overflow-hidden" id="commentModalContent">
+        <div class="bg-slate-800 rounded-2xl w-full max-w-lg border border-slate-700/60 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col" id="commentModalContent">
         </div>
     </div>
 
@@ -170,18 +196,160 @@
         let allComplaints = [];
         let currentCategory = 'ALL';
         let currentStatus = 'ALL';
+        let currentCommentId = null;
+        let notifDropdownOpen = false;
+        let notifWsConnected = false;
+
+        // Parse Java LocalDateTime array [y,M,d,h,m,s] to readable string
+        function fmtDate(arr, showTime) {
+            if (!arr || !Array.isArray(arr) || arr.length < 3) return '';
+            const d = new Date(arr[0], arr[1]-1, arr[2], arr[3]||0, arr[4]||0);
+            if (isNaN(d.getTime())) return '';
+            const opts = { day:'numeric', month:'short', year:'numeric' };
+            if (showTime) opts.hour = '2-digit'; opts.minute = '2-digit';
+            return d.toLocaleDateString('id-ID', opts);
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
             loadFeed();
+            loadNotifCount();
+            connectWebSocket();
+            setTimeout(() => {
+                document.querySelectorAll('[id$="Toast"], #commentSuccess').forEach(t => {
+                    if (t) setTimeout(() => { if (t.parentNode) t.remove(); }, 4000);
+                });
+            }, 500);
+            // Infinite scroll
+            window.addEventListener('scroll', function() {
+                const feed = document.getElementById('asyncFeedArea');
+                if (!feed || feed.classList.contains('hidden')) return;
+                const rect = feed.getBoundingClientRect();
+                if (rect.bottom < window.innerHeight + 300) {
+                    loadMoreFeed();
+                }
+            });
+        });
+
+        let feedPage = 0;
+        const feedPageSize = 10;
+        let feedLoading = false;
+        let feedDone = false;
+
+        function loadMoreFeed() {
+            if (feedLoading || feedDone) return;
+            feedLoading = true;
+            feedPage++;
+            fetch('/api/feed/complaints?page=' + feedPage + '&size=' + feedPageSize, { credentials: 'same-origin' })
+                .then(res => res.json())
+                .then(data => {
+                    feedLoading = false;
+                    if (!data.content || data.content.length === 0) {
+                        feedDone = true;
+                        return;
+                    }
+                    allComplaints = allComplaints.concat(data.content);
+                    applyFilters();
+                    if (data.last) feedDone = true;
+                }).catch(() => { feedLoading = false; feedPage--; });
+        }
+
+        function connectWebSocket() {
+            if (typeof SockJS === 'undefined' || notifWsConnected) return;
+            try {
+                const socket = new SockJS('/ws-notif');
+                const client = Stomp.over(socket);
+                client.connect({}, function() {
+                    notifWsConnected = true;
+                    client.subscribe('/topic/notifications', function() {
+                        loadNotifCount();
+                    });
+                });
+            } catch(e) { console.log('WebSocket not available'); }
+        }
+
+        function loadNotifCount() {
+            fetch('/api/notifications/unread-count', { credentials: 'same-origin' })
+                .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+                .then(data => {
+                    const badge = document.getElementById('notifBadge');
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }).catch(() => {});
+        }
+
+        function toggleNotifDropdown() {
+            notifDropdownOpen = !notifDropdownOpen;
+            const dd = document.getElementById('notifDropdown');
+            if (notifDropdownOpen) {
+                dd.classList.remove('hidden');
+                loadNotifications();
+            } else {
+                dd.classList.add('hidden');
+            }
+        }
+
+        function loadNotifications() {
+            fetch('/api/notifications', { credentials: 'same-origin' })
+                .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+                .then(data => {
+                    const list = document.getElementById('notifList');
+                    if (!data.notifications || data.notifications.length === 0) {
+                        list.innerHTML = '<div class="p-4 text-center text-slate-500 text-xs"><i class="fas fa-bell-slash mr-1"></i> Tidak ada notifikasi</div>';
+                        return;
+                    }
+                    list.innerHTML = data.notifications.map(n => {
+                        const isRead = n.read || n.isRead;
+                        const iconMap = { STATUS_CHANGE: 'fa-rotate', NEW_COMMENT: 'fa-comment', NEW_COMPLAINT: 'fa-plus-circle', SYSTEM: 'fa-gear' };
+                        const colorMap = { STATUS_CHANGE: 'text-blue-400', NEW_COMMENT: 'text-emerald-400', NEW_COMPLAINT: 'text-amber-400', SYSTEM: 'text-slate-400' };
+                        const icon = iconMap[n.type] || 'fa-bell';
+                        const color = colorMap[n.type] || 'text-indigo-400';
+                        const date = fmtDate(n.createdAt, true);
+                        return `<div class="px-4 py-3 border-b border-slate-700/50 hover:bg-slate-700/20 transition-colors ${isRead ? 'opacity-60' : ''}" onclick="${isRead ? '' : "markNotifRead(" + n.id + ")"}" style="cursor:pointer">
+                            <div class="flex items-start gap-3">
+                                <div class="w-7 h-7 rounded-full bg-slate-700/50 flex items-center justify-center flex-shrink-0"><i class="fas ${icon} text-[10px] ${color}"></i></div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-xs text-slate-200 leading-relaxed">${n.message}</p>
+                                    <span class="text-[9px] text-slate-500">${date}</span>
+                                </div>
+                                ${isRead ? '' : '<span class="w-2 h-2 rounded-full bg-indigo-400 flex-shrink-0 mt-1"></span>'}
+                            </div>
+                        </div>`;
+                    }).join('');
+                }).catch(() => {
+                    document.getElementById('notifList').innerHTML = '<div class="p-4 text-center text-slate-500 text-xs">Gagal memuat notifikasi</div>';
+                });
+        }
+
+        function markNotifRead(id) {
+            fetch('/api/notifications/' + id + '/read', { method: 'POST', credentials: 'same-origin' })
+                .catch(() => {}).then(() => { loadNotifCount(); loadNotifications(); });
+        }
+
+        function markAllRead() {
+            fetch('/api/notifications/read-all', { method: 'POST', credentials: 'same-origin' })
+                .catch(() => {}).then(() => { loadNotifCount(); loadNotifications(); });
+        }
+
+        document.addEventListener('click', function(e) {
+            if (notifDropdownOpen && !e.target.closest('.relative')) {
+                document.getElementById('notifDropdown').classList.add('hidden');
+                notifDropdownOpen = false;
+            }
         });
 
         function loadFeed() {
-            fetch('/api/feed/complaints')
+            feedPage = 0; feedDone = false;
+            fetch('/api/feed/complaints?page=0&size=' + feedPageSize, { credentials: 'same-origin' })
                 .then(res => res.json())
                 .then(data => {
-                    allComplaints = data;
-                    renderFeed(data);
-                    updateStats(data);
+                    allComplaints = data.content || data;
+                    renderFeed(allComplaints);
+                    updateStats(allComplaints);
+                    if (data.last) feedDone = true;
                 }).catch(err => {
                     console.error("Error loading data:", err);
                     document.getElementById('loadingIndicator').innerHTML = `
@@ -197,44 +365,26 @@
             const container = document.getElementById('asyncFeedArea');
             const loading = document.getElementById('loadingIndicator');
             const empty = document.getElementById('emptyState');
-
             loading.classList.add('hidden');
-
             if (data.length === 0) {
-                container.classList.add('hidden');
-                empty.classList.remove('hidden');
-                return;
+                container.classList.add('hidden'); empty.classList.remove('hidden'); return;
             }
-
             empty.classList.add('hidden');
             container.classList.remove('hidden');
             container.innerHTML = '';
 
             data.forEach(c => {
+                const comments = c.comments || [];
+                const commentCount = comments.length;
                 let badgeClass = c.status === 'SELESAI' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : (c.status === 'PROSES' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20');
                 let badgeIcon = c.status === 'SELESAI' ? 'fa-check-circle' : (c.status === 'PROSES' ? 'fa-spinner' : 'fa-clock');
                 let badgeLabel = c.status === 'SELESAI' ? 'Selesai' : (c.status === 'PROSES' ? 'Diproses' : 'Pending');
                 let namaUser = c.isAnonymous ? 'Warga Anonim' : (c.user ? c.user.nama : 'Warga');
                 let initial = c.isAnonymous ? '?' : (c.user && c.user.nama ? c.user.nama.charAt(0).toUpperCase() : '?');
-                let dateStr = c.tanggal ? new Date(c.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-                let kategoriIcon = {
-                    INFRASTRUKTUR: 'fa-road', LINGKUNGAN: 'fa-tree', SOSIAL: 'fa-hand-holding-heart',
-                    KEAMANAN: 'fa-shield', KESEHATAN: 'fa-heart-pulse', PENDIDIKAN: 'fa-book', UMUM: 'fa-circle-info'
-                };
-                let kategoriColors = {
-                    INFRASTRUKTUR: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20',
-                    LINGKUNGAN: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
-                    SOSIAL: 'text-pink-400 bg-pink-500/10 border-pink-500/20',
-                    KEAMANAN: 'text-red-400 bg-red-500/10 border-red-500/20',
-                    KESEHATAN: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
-                    PENDIDIKAN: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20',
-                    UMUM: 'text-slate-400 bg-slate-500/10 border-slate-500/20'
-                };
-                let urgencyColors = {
-                    TINGGI: 'text-red-400 bg-red-500/10 border-red-500/20',
-                    SEDANG: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
-                    RENDAH: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-                };
+                let dateStr = fmtDate(c.tanggal, false);
+                let kategoriIcon = { INFRASTRUKTUR: 'fa-road', LINGKUNGAN: 'fa-tree', SOSIAL: 'fa-hand-holding-heart', KEAMANAN: 'fa-shield', KESEHATAN: 'fa-heart-pulse', PENDIDIKAN: 'fa-book', UMUM: 'fa-circle-info' };
+                let kategoriColors = { INFRASTRUKTUR: 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20', LINGKUNGAN: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', SOSIAL: 'text-pink-400 bg-pink-500/10 border-pink-500/20', KEAMANAN: 'text-red-400 bg-red-500/10 border-red-500/20', KESEHATAN: 'text-rose-400 bg-rose-500/10 border-rose-500/20', PENDIDIKAN: 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20', UMUM: 'text-slate-400 bg-slate-500/10 border-slate-500/20' };
+                let urgencyColors = { TINGGI: 'text-red-400 bg-red-500/10 border-red-500/20', SEDANG: 'text-amber-400 bg-amber-500/10 border-amber-500/20', RENDAH: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' };
                 let kIcon = kategoriIcon[c.kategori] || 'fa-circle-info';
                 let kColor = kategoriColors[c.kategori] || kategoriColors.UMUM;
                 let uColor = urgencyColors[c.urgency] || urgencyColors.RENDAH;
@@ -266,19 +416,16 @@
                             <span class="inline-flex items-center gap-1 text-[10px] font-bold ${badgeClass} px-2.5 py-1 rounded-full border"><i class="fas ${badgeIcon}"></i> ${badgeLabel}</span>
                         </div>
                     </div>
-
                     ${photoHtml}
-
                     <h3 class="text-base font-extrabold text-slate-100 mb-2">${c.judul}</h3>
                     <p class="text-slate-400 text-xs leading-relaxed mb-4 line-clamp-3">${c.isiPengaduan}</p>
-
                     <div class="flex items-center justify-between pt-3 border-t border-slate-700/50">
                         <div class="flex items-center gap-2">
                             <button onclick="sendUpvote(${c.id})" class="bg-slate-700/40 hover:bg-indigo-500/20 text-slate-300 hover:text-indigo-400 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-700 hover:border-indigo-500/30 transition-all flex items-center gap-1.5">
                                 <i class="fas fa-arrow-up"></i> Dukung <span class="bg-slate-800/50 px-1.5 py-0.5 rounded text-[10px]" id="up-count-${c.id}">${c.upvotesCount || 0}</span>
                             </button>
                             <button onclick="viewComments(${c.id})" class="bg-slate-700/40 hover:bg-blue-500/20 text-slate-300 hover:text-blue-400 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-700 hover:border-blue-500/30 transition-all flex items-center gap-1.5">
-                                <i class="fas fa-comment"></i> Komentar
+                                <i class="fas fa-comment"></i> ${commentCount > 0 ? `<span class="bg-slate-800/50 px-1.5 py-0.5 rounded text-[10px]" id="cmt-count-${c.id}">${commentCount}</span>` : 'Komentar'}
                             </button>
                         </div>
                         ${c.isAnonymous ? '<span class="text-[10px] text-slate-500 flex items-center gap-1"><i class="fas fa-user-secret text-indigo-400/60"></i> Anonim</span>' : ''}
@@ -292,11 +439,7 @@
             currentCategory = kategori;
             document.querySelectorAll('[id^="filter-"]').forEach(b => {
                 const id = b.id.replace('filter-', '');
-                if (id === kategori) {
-                    b.className = 'w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-indigo-500/20 text-indigo-400 border border-indigo-500/30';
-                } else {
-                    b.className = 'w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:bg-slate-700/40 hover:text-slate-200 border border-transparent';
-                }
+                b.className = id === kategori ? 'w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:bg-slate-700/40 hover:text-slate-200 border border-transparent';
             });
             applyFilters();
         }
@@ -305,22 +448,19 @@
             currentStatus = status;
             document.querySelectorAll('[id^="sfilter-"]').forEach(b => {
                 const id = b.id.replace('sfilter-', '');
-                if (id === status) {
-                    b.className = 'w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-indigo-500/20 text-indigo-400 border border-indigo-500/30';
-                } else {
-                    b.className = 'w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:bg-slate-700/40 hover:text-slate-200 border border-transparent';
-                }
+                b.className = id === status ? 'w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:bg-slate-700/40 hover:text-slate-200 border border-transparent';
             });
             applyFilters();
         }
 
         function applyFilters() {
-            const filtered = allComplaints.filter(c => {
-                const matchKategori = currentCategory === 'ALL' || (c.kategori || 'UMUM') === currentCategory;
-                const matchStatus = currentStatus === 'ALL' || (c.status || 'PENDING') === currentStatus;
-                return matchKategori && matchStatus;
-            });
-            renderFeed(filtered);
+            const search = (document.getElementById('searchInput').value || '').toLowerCase();
+            renderFeed(allComplaints.filter(c => {
+                const matchCategory = (currentCategory === 'ALL' || (c.kategori || 'UMUM') === currentCategory);
+                const matchStatus = (currentStatus === 'ALL' || (c.status || 'PENDING') === currentStatus);
+                const matchSearch = !search || (c.judul && c.judul.toLowerCase().includes(search)) || (c.isiPengaduan && c.isiPengaduan.toLowerCase().includes(search)) || (c.user && c.user.nama && c.user.nama.toLowerCase().includes(search));
+                return matchCategory && matchStatus && matchSearch;
+            }));
         }
 
         function updateStats(data) {
@@ -331,40 +471,50 @@
         }
 
         function sendUpvote(id) {
-            fetch('/api/complaints/' + id + '/upvote', { method: 'POST' })
+            fetch('/api/complaints/' + id + '/upvote', { method: 'POST', credentials: 'same-origin' })
                 .then(res => res.json())
-                .then(count => {
-                    document.getElementById('up-count-' + id).innerText = count;
+                .then(data => {
+                    if (data.error) { alert(data.error); return; }
+                    const span = document.getElementById('up-count-' + id);
+                    if (span) { span.innerText = data.count; span.classList.add('animate-upvote'); setTimeout(() => span.classList.remove('animate-upvote'), 400); }
                     const btn = document.querySelector(`button[onclick="sendUpvote(${id})"]`);
                     if (btn) {
                         btn.classList.remove('border-slate-700');
-                        btn.classList.add('border-indigo-500/30', 'bg-indigo-500/20', 'text-indigo-400');
+                        btn.classList.add('border-indigo-500/30', 'bg-indigo-500/20', 'text-indigo-400', 'animate-upvote');
+                        btn.disabled = true;
+                        setTimeout(() => btn.classList.remove('animate-upvote'), 400);
                     }
-                });
+                }).catch(() => {});
         }
 
         function viewComments(id) {
+            currentCommentId = id;
             const modal = document.getElementById('commentModal');
             const content = document.getElementById('commentModalContent');
             content.innerHTML = `<div class="p-6 text-center text-slate-400"><i class="fas fa-circle-notch animate-spin text-xl block mb-2"></i><span class="text-xs">Memuat komentar...</span></div>`;
             modal.classList.remove('hidden');
-            fetch('/api/complaints/' + id)
-                .then(res => res.json())
+            loadCommentModal(id);
+        }
+
+        function loadCommentModal(id) {
+            fetch('/api/complaints/' + id, { credentials: 'same-origin' })
+                .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
                 .then(complaint => {
-                    let html = `
-                        <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-700/30">
-                            <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2"><i class="fas fa-comments text-blue-400"></i> Komentar</h3>
-                            <button onclick="document.getElementById('commentModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-200"><i class="fas fa-times"></i></button>
-                        </div>
-                        <div class="p-4 max-h-80 overflow-y-auto space-y-3" id="commentList">
-                    `;
+                    if (complaint.error) { throw new Error(complaint.error); }
                     const comments = complaint.comments || [];
+                    let html = `
+                        <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-700/30 flex-shrink-0">
+                            <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2"><i class="fas fa-comments text-blue-400"></i> Komentar <span class="text-slate-400 font-normal text-xs" id="modalCmtCount">(${comments.length})</span></h3>
+                            <button onclick="closeCommentModal()" class="text-slate-400 hover:text-slate-200"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="p-4 overflow-y-auto space-y-3 flex-1 min-h-0" id="commentList">
+                    `;
                     if (comments.length === 0) {
-                        html += `<div class="text-center py-8 text-slate-500"><i class="fas fa-comment-slash text-2xl mb-2 block"></i><span class="text-xs">Belum ada komentar</span></div>`;
+                        html += `<div class="text-center py-8 text-slate-500"><i class="fas fa-comment-slash text-2xl mb-2 block"></i><span class="text-xs">Belum ada komentar. Jadilah yang pertama!</span></div>`;
                     } else {
                         comments.forEach(cm => {
                             const cmName = cm.user ? cm.user.nama : 'Warga';
-                            const cmDate = cm.tanggal ? new Date(cm.tanggal).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+                            const cmDate = fmtDate(cm.tanggal, true);
                             html += `
                                 <div class="bg-slate-700/30 rounded-xl p-3 border border-slate-700/50">
                                     <div class="flex items-center gap-2 mb-1">
@@ -376,61 +526,81 @@
                                 </div>`;
                         });
                     }
-                    html += `</div>`;
-                    html += `
-                        <div class="border-t border-slate-700 p-4">
-                            <p class="text-[10px] text-slate-500 text-center">Fitur komentar akan segera hadir</p>
+                    html += `</div>
+                        <div class="border-t border-slate-700 p-4 flex-shrink-0">
+                            <div class="flex gap-2">
+                                <textarea id="commentInput" rows="2" placeholder="Tulis komentar Anda..." class="flex-1 bg-slate-700/50 border border-slate-600 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+                                <button onclick="submitComment()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5 self-end">
+                                    <i class="fas fa-paper-plane"></i> Kirim
+                                </button>
+                            </div>
                         </div>`;
                     content.innerHTML = html;
                 }).catch(() => {
-                    content.innerHTML = `
-                        <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-700/30">
+                    document.getElementById('commentModalContent').innerHTML = `
+                        <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-700/30 flex-shrink-0">
                             <h3 class="font-bold text-slate-100 text-sm"><i class="fas fa-comments text-blue-400 mr-2"></i> Komentar</h3>
-                            <button onclick="document.getElementById('commentModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-200"><i class="fas fa-times"></i></button>
+                            <button onclick="closeCommentModal()" class="text-slate-400 hover:text-slate-200"><i class="fas fa-times"></i></button>
                         </div>
-                        <div class="p-6 text-center text-slate-500"><i class="fas fa-exclamation-triangle text-2xl mb-2 block text-amber-400"></i><span class="text-xs">Gagal memuat komentar</span></div>`;
+                        <div class="p-6 text-center text-slate-500 flex-1"><i class="fas fa-exclamation-triangle text-2xl mb-2 block text-amber-400"></i><span class="text-xs">Gagal memuat komentar</span></div>`;
                 });
         }
+
+        function submitComment() {
+            const input = document.getElementById('commentInput');
+            const text = input.value.trim();
+            if (!text) return;
+            input.disabled = true;
+            fetch('/api/complaints/' + currentCommentId + '/comment', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isiKomentar: text })
+            }).then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); }).then(result => {
+                if (result.success) {
+                    loadCommentModal(currentCommentId);
+                    const badge = document.getElementById('cmt-count-' + currentCommentId);
+                    if (badge) badge.textContent = result.commentCount;
+                } else { alert('Gagal: ' + (result.error || 'Unknown')); input.disabled = false; }
+            }).catch(() => {
+                input.disabled = false;
+                alert('Gagal mengirim komentar');
+            });
+        }
+
+        function closeCommentModal() {
+            document.getElementById('commentModal').classList.add('hidden');
+        }
+
+        // Scroll-to-top button
+        window.addEventListener('scroll', function() {
+            const btn = document.getElementById('scrollTopBtn');
+            if (btn) btn.classList.toggle('opacity-0', window.scrollY < 300);
+        });
+        function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
     </script>
 
+    <!-- Scroll-to-top button -->
+    <button id="scrollTopBtn" onclick="scrollToTop()" class="fixed bottom-6 right-6 z-40 w-10 h-10 rounded-full bg-indigo-600 text-white shadow-lg flex items-center justify-center opacity-0 hover:bg-indigo-500 transition-all">
+        <i class="fas fa-arrow-up text-xs"></i>
+    </button>
+
     <style>
-        .line-clamp-3 {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-        .marquee-content {
-            animation: marquee 20s linear infinite;
-        }
-        .marquee-content:hover {
-            animation-play-state: paused;
-        }
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #475569;
-            border-radius: 3px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #64748b;
-        }
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        .animate-slide-in {
-            animation: slideIn 0.5s ease-out;
-        }
+        .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        .marquee-content { animation: marquee 20s linear infinite; }
+        .marquee-content:hover { animation-play-state: paused; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .animate-slide-in { animation: slideIn 0.5s ease-out; }
+        @keyframes upvotePop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
+        .animate-upvote { animation: upvotePop 0.4s ease-in-out; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
+        #scrollTopBtn { transition: all 0.3s ease; }
     </style>
 </body>
 </html>
