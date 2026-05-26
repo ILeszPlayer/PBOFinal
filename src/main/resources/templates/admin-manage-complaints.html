@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Kelola Pengaduan Warga</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-900 text-slate-100 flex min-h-screen font-sans">
+
+    <aside class="w-64 bg-slate-800 border-r border-slate-700 p-6 flex flex-col justify-between flex-shrink-0">
+        <div class="space-y-6">
+            <div class="flex items-center gap-2 px-2 text-indigo-400 font-black tracking-wider">
+                <i class="fas fa-shield-halved text-xl"></i> CORE COMMAND
+            </div>
+            <nav class="space-y-2 text-xs font-bold">
+                <a th:href="@{/admin/dashboard}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-chart-line"></i> Monitoring Dashboard</a>
+                <a th:href="@{/admin/complaints/manage}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-600 text-white shadow-md"><i class="fas fa-folder-gear"></i> Kelola Pengaduan</a>
+                <a th:href="@{/admin/warga}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-users-gear"></i> Manajemen Warga</a>
+            </nav>
+        </div>
+        <a th:href="@{/logout}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all font-bold text-xs"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+    </aside>
+
+    <main class="flex-1 p-8 overflow-y-auto">
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-2xl font-black tracking-tight">Pusat Data & Mutasi Pengaduan</h1>
+                <p class="text-slate-400 text-xs mt-0.5">Lakukan pembaruan status keluhan warga dan publikasikan maklumat broadcast di sini.</p>
+            </div>
+            <button onclick="document.getElementById('broadcastModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all"><i class="fas fa-bullhorn mr-1"></i> Buat Broadcast</button>
+        </div>
+
+        <div th:if="${param.mutationSuccess}" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+            <i class="fas fa-check-circle"></i> Status pengaduan warga berhasil diperbarui!
+        </div>
+
+        <div th:if="${param.broadcastSuccess}" class="bg-blue-500/10 border border-blue-500/30 text-blue-400 text-xs font-bold px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+            <i class="fas fa-check-circle"></i> Broadcast berhasil dikirim!
+        </div>
+
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl overflow-hidden shadow-xl">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-700/40 text-[10px] font-bold uppercase tracking-widest text-slate-400 border-b border-slate-700">
+                            <th class="p-4 w-10">#</th>
+                            <th class="p-4">Pelapor</th>
+                            <th class="p-4">Judul Laporan</th>
+                            <th class="p-4">Kategori</th>
+                            <th class="p-4">Urgensi</th>
+                            <th class="p-4">Tanggal</th>
+                            <th class="p-4">Status</th>
+                            <th class="p-4 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-xs font-medium text-slate-300 divide-y divide-slate-700/60">
+                        <tr th:each="c, stat : ${complaints}" class="hover:bg-slate-700/20 transition-colors">
+                            <td class="p-4 text-slate-500" th:text="${stat.count}">1</td>
+                            <td class="p-4">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0" th:text="${c.isAnonymous} ? '?' : (${c.user != null} ? ${#strings.substring(c.user.nama, 0, 1)} : '?')">U</div>
+                                    <span class="font-semibold text-slate-200" th:text="${c.isAnonymous} ? 'Anonim' : (${c.user != null} ? ${c.user.nama} : 'Warga')">Pelapor</span>
+                                </div>
+                            </td>
+                            <td class="p-4 max-w-[200px]">
+                                <span class="text-slate-200 font-medium" th:text="${c.judul}">Judul</span>
+                            </td>
+                            <td class="p-4">
+                                <span class="inline-flex items-center gap-1 bg-indigo-500/10 text-indigo-400 px-2.5 py-1 rounded-full text-[10px] font-bold border border-indigo-500/20">
+                                    <i class="fas fa-tag text-[8px]"></i>
+                                    <span th:text="${c.kategori != null ? c.kategori.displayName : 'Umum'}">Kategori</span>
+                                </span>
+                            </td>
+                            <td class="p-4">
+                                <span th:if="${c.urgency != null}" th:class="${c.urgency.name() == 'TINGGI'} ? 'inline-flex items-center gap-1 bg-red-500/10 text-red-400 px-2 py-1 rounded-full text-[10px] font-bold' : (${c.urgency.name() == 'SEDANG'} ? 'inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 px-2 py-1 rounded-full text-[10px] font-bold' : 'inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-full text-[10px] font-bold')">
+                                    <i class="fas fa-exclamation-circle text-[8px]"></i>
+                                    <span th:text="${c.urgency.displayName}">Sedang</span>
+                                </span>
+                            </td>
+                            <td class="p-4 text-slate-400 text-[10px]" th:text="${c.tanggal != null} ? ${#temporals.format(c.tanggal, 'dd MMM yyyy')} : '-'">Tanggal</td>
+                            <td class="p-4" th:id="'status-cell-' + ${c.id}">
+                                <span th:id="'status-badge-' + ${c.id}" th:class="${c.status != null and c.status.name() == 'SELESAI'} ? 'inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[10px] font-bold' : (${c.status != null and c.status.name() == 'PROSES'} ? 'inline-flex items-center gap-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-full text-[10px] font-bold' : 'inline-flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-full text-[10px] font-bold')">
+                                    <i th:class="${c.status != null and c.status.name() == 'SELESAI'} ? 'fas fa-check-circle' : (${c.status != null and c.status.name() == 'PROSES'} ? 'fas fa-spinner' : 'fas fa-clock')"></i>
+                                    <span th:text="${c.status != null ? c.status.displayName : 'PENDING'}">STATUS</span>
+                                </span>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex items-center justify-center gap-1.5" th:id="'status-actions-' + ${c.id}">
+                                    <button onclick="updateStatus(${c.id}, 'PENDING')" th:class="${c.status != null and c.status.name() == 'PENDING'} ? 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 cursor-default' : 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30 border border-transparent transition-all'">
+                                        <i class="fas fa-clock mr-0.5"></i> Pending
+                                    </button>
+                                    <button onclick="updateStatus(${c.id}, 'PROSES')" th:class="${c.status != null and c.status.name() == 'PROSES'} ? 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30 cursor-default' : 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 hover:bg-blue-500/20 hover:text-blue-400 hover:border-blue-500/30 border border-transparent transition-all'">
+                                        <i class="fas fa-spinner mr-0.5"></i> Proses
+                                    </button>
+                                    <button onclick="updateStatus(${c.id}, 'SELESAI')" th:class="${c.status != null and c.status.name() == 'SELESAI'} ? 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default' : 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30 border border-transparent transition-all'">
+                                        <i class="fas fa-check mr-0.5"></i> Selesai
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(complaints)}">
+                            <td colspan="8" class="p-12 text-center text-slate-500">
+                                <i class="fas fa-folder-open text-3xl mb-3 block text-slate-600"></i>
+                                <span class="text-sm font-medium">Belum ada pengaduan yang masuk</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="broadcastModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-700/30">
+                <h3 class="font-bold text-slate-100 text-xs flex items-center gap-2"><i class="fas fa-bullhorn text-blue-400"></i> Buat Broadcast Baru</h3>
+                <button onclick="document.getElementById('broadcastModal').classList.add('hidden')" class="text-slate-400 hover:text-slate-200"><i class="fas fa-times"></i></button>
+            </div>
+            <form th:action="@{/admin/broadcast/submit}" method="POST" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Judul Pengumuman</label>
+                    <input type="text" name="judul" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-200 focus:outline-none focus:border-blue-500 text-xs">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Isi Pengumuman</label>
+                    <textarea name="isiBroadcast" rows="4" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-slate-200 focus:outline-none focus:border-blue-500 text-xs resize-none"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2.5 rounded-xl transition-all shadow-lg">Siarkan Sekarang</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function updateStatus(id, status) {
+            fetch('/admin/complaints/' + id + '/update-status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'status=' + status
+            }).then(res => {
+                if (res.ok) {
+                    const badge = document.getElementById('status-badge-' + id);
+                    const allBtns = document.querySelectorAll('#status-actions-' + id + ' button');
+                    allBtns.forEach(b => {
+                        b.className = 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 hover:border border border-transparent transition-all';
+                        if (b.textContent.trim().toLowerCase() === status.toLowerCase() || 
+                            (status === 'PROSES' && b.textContent.trim().toLowerCase() === 'proses') ||
+                            (status === 'SELESAI' && b.textContent.trim().toLowerCase() === 'selesai')) {
+                            const colors = {
+                                PENDING: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+                                PROSES: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+                                SELESAI: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                            };
+                            b.className = 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold ' + (colors[status] || '') + ' cursor-default';
+                        } else {
+                            const hovers = {
+                                PENDING: 'hover:bg-amber-500/20 hover:text-amber-400 hover:border-amber-500/30',
+                                PROSES: 'hover:bg-blue-500/20 hover:text-blue-400 hover:border-blue-500/30',
+                                SELESAI: 'hover:bg-emerald-500/20 hover:text-emerald-400 hover:border-emerald-500/30'
+                            };
+                            const txt = b.textContent.trim().toLowerCase();
+                            let s = txt === 'pending' ? 'PENDING' : txt === 'proses' ? 'PROSES' : 'SELESAI';
+                            b.className = 'px-2.5 py-1.5 rounded-lg text-[10px] font-bold bg-slate-700/40 text-slate-400 border border-transparent ' + (hovers[s] || '') + ' transition-all';
+                        }
+                    });
+                    if (badge) {
+                        const icons = { PENDING: 'fa-clock', PROSES: 'fa-spinner', SELESAI: 'fa-check-circle' };
+                        const labels = { PENDING: 'Pending', PROSES: 'Diproses', SELESAI: 'Selesai' };
+                        const colors = {
+                            PENDING: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+                            PROSES: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+                            SELESAI: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        };
+                        badge.className = 'inline-flex items-center gap-1 ' + (colors[status] || colors.PENDING) + ' px-2.5 py-1 rounded-full text-[10px] font-bold';
+                        badge.innerHTML = '<i class="fas ' + (icons[status] || icons.PENDING) + '"></i> <span>' + (labels[status] || labels.PENDING) + '</span>';
+                    }
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>

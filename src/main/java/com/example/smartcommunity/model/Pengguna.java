@@ -1,6 +1,7 @@
 package com.example.smartcommunity.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import java.util.List;
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "user_type", discriminatorType = DiscriminatorType.STRING, length = 20)
-public abstract class User {
+public abstract class Pengguna {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,6 +30,9 @@ public abstract class User {
     @Column(name = "reputation_points", nullable = false)
     private int reputationPoints = 0;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserProfile profile;
 
@@ -40,6 +44,8 @@ public abstract class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Notification> notifications = new ArrayList<>();
+
+    public abstract String getDashboardRoute();
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -53,6 +59,8 @@ public abstract class User {
     public void setRole(String role) { this.role = role; }
     public int getReputationPoints() { return reputationPoints; }
     public void setReputationPoints(int reputationPoints) { this.reputationPoints = reputationPoints; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public UserProfile getProfile() { return profile; }
     public void setProfile(UserProfile profile) { this.profile = profile; }
     public List<Complaint> getComplaints() { return complaints; }

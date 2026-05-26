@@ -38,7 +38,7 @@ tr:nth-child(even) td{background:#fafafa;}
 <td th:text="${c.urgency.displayName}">Urg</td>
 <td th:text="${c.status.displayName}">Status</td>
 <td th:text="${c.upvotesCount}">0</td>
-<td th:text="${c.status == 'SELESAI' or c.status == 'PROSES'} ? ${c.slaHours} + ' jam' : '-'">-</td>
+<td th:text="${c.status.name() == 'SELESAI' or c.status.name() == 'PROSES'} ? ${c.slaHours} + ' jam' : '-'">-</td>
 <td th:text="${#temporals.format(c.tanggal, 'dd MMM yyyy')}">Date</td>
 </tr>
 </tbody>

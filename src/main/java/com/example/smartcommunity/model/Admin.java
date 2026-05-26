@@ -6,7 +6,9 @@ import java.util.List;
 
 @Entity
 @DiscriminatorValue("ADMIN")
-public class Admin extends User {
+public class Admin extends Pengguna {
+
+    private String levelAkses = "SUPER_ADMIN";
 
     @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Broadcast> broadcasts = new ArrayList<>();
@@ -22,6 +24,13 @@ public class Admin extends User {
         setRole("ADMIN");
     }
 
+    @Override
+    public String getDashboardRoute() {
+        return "/admin/dashboard";
+    }
+
+    public String getLevelAkses() { return levelAkses; }
+    public void setLevelAkses(String levelAkses) { this.levelAkses = levelAkses; }
     public List<Broadcast> getBroadcasts() { return broadcasts; }
     public void setBroadcasts(List<Broadcast> broadcasts) { this.broadcasts = broadcasts; }
 }

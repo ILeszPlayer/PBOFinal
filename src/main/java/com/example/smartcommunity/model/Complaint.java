@@ -1,5 +1,7 @@
 package com.example.smartcommunity.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -47,31 +49,31 @@ public class Complaint {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "judul", nullable = false)
     private String judul;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(name = "isi_pengaduan", columnDefinition = "TEXT", nullable = false)
     private String isiPengaduan;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "kategori", nullable = false)
     private Kategori kategori;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "urgency", nullable = false)
     private Urgency urgency = Urgency.SEDANG;
 
-    @Column(nullable = false)
+    @Column(name = "tanggal", nullable = false)
     private LocalDateTime tanggal;
 
-    @Column
+    @Column(name = "processed_at")
     private LocalDateTime processedAt;
 
-    @Column
+    @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "status", nullable = false)
     private Status status;
 
     @Column(name = "bukti_foto")
@@ -83,10 +85,10 @@ public class Complaint {
     @Column(name = "is_anonymous", nullable = false)
     private boolean isAnonymous = false;
 
-    @Column
+    @Column(name = "latitude")
     private Double latitude;
 
-    @Column
+    @Column(name = "longitude")
     private Double longitude;
 
     @Column(name = "lokasi_nama")
@@ -94,8 +96,10 @@ public class Complaint {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JsonIgnoreProperties({"complaints", "comments", "notifications", "profile", "password", "hibernateLazyInitializer", "handler"})
+    private Pengguna user;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "complaint", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("tanggal ASC")
     private List<Comment> comments = new ArrayList<>();
@@ -156,8 +160,8 @@ public class Complaint {
     public void setLongitude(Double longitude) { this.longitude = longitude; }
     public String getLokasiNama() { return lokasiNama; }
     public void setLokasiNama(String lokasiNama) { this.lokasiNama = lokasiNama; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public Pengguna getUser() { return user; }
+    public void setUser(Pengguna user) { this.user = user; }
     public List<Comment> getComments() { return comments; }
     public void setComments(List<Comment> comments) { this.comments = comments; }
 }

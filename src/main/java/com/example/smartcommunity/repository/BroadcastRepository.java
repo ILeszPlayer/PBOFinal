@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface BroadcastRepository extends JpaRepository<Broadcast, Long> {
     List<Broadcast> findAllByOrderByTanggalDesc();
+    List<Broadcast> findAllByOrderByIdDesc();
 }

@@ -18,13 +18,20 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
     List<Complaint> findByJudulContainingIgnoreCaseOrIsiPengaduanContainingIgnoreCase(String judul, String isi);
     List<Complaint> findByLatitudeIsNotNullAndLongitudeIsNotNull();
     long countByStatus(Complaint.Status status);
+    long countByStatus(String status);
 
-    @Query("SELECT c.kategori, COUNT(c) FROM Complaint c GROUP BY c.kategori")
+    @Query(value = "SELECT kategori, COUNT(id) FROM complaints GROUP BY kategori", nativeQuery = true)
     List<Object[]> countGroupByKategori();
 
-    @Query("SELECT c.urgency, COUNT(c) FROM Complaint c GROUP BY c.urgency")
+    @Query(value = "SELECT urgency, COUNT(id) FROM complaints GROUP BY urgency", nativeQuery = true)
     List<Object[]> countGroupByUrgency();
 
-    @Query("SELECT FUNCTION('MONTH', c.tanggal), COUNT(c) FROM Complaint c WHERE c.status = 'SELESAI' GROUP BY FUNCTION('MONTH', c.tanggal) ORDER BY FUNCTION('MONTH', c.tanggal)")
+    @Query(value = "SELECT MONTH(tanggal), COUNT(id) FROM complaints WHERE status = 'SELESAI' GROUP BY MONTH(tanggal) ORDER BY MONTH(tanggal)", nativeQuery = true)
     List<Object[]> countResolvedByMonth();
+
+    @Query(value = "SELECT MONTH(tanggal), COUNT(id) FROM complaints WHERE status = ?1 GROUP BY MONTH(tanggal) ORDER BY MONTH(tanggal)", nativeQuery = true)
+    List<Object[]> getMonthlyResolutionStats(String status);
+
+    @Query(value = "SELECT MONTH(tanggal), COUNT(id) FROM complaints WHERE status = 'SELESAI' GROUP BY MONTH(tanggal) ORDER BY MONTH(tanggal)", nativeQuery = true)
+    List<Object[]> getMonthlyResolutionStats();
 }

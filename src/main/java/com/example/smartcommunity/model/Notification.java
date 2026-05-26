@@ -33,7 +33,7 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Pengguna user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "complaint_id")
@@ -41,7 +41,7 @@ public class Notification {
 
     public Notification() {}
 
-    public Notification(Type type, String message, User user, Complaint complaint) {
+    public Notification(Type type, String message, Pengguna user, Complaint complaint) {
         this.type = type;
         this.message = message;
         this.user = user;
@@ -64,8 +64,8 @@ public class Notification {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public boolean isIsRead() { return isRead; }
     public void setIsRead(boolean isRead) { this.isRead = isRead; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public Pengguna getUser() { return user; }
+    public void setUser(Pengguna user) { this.user = user; }
     public Complaint getComplaint() { return complaint; }
     public void setComplaint(Complaint complaint) { this.complaint = complaint; }
 }

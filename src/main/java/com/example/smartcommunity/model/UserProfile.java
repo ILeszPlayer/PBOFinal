@@ -13,7 +13,7 @@ public class UserProfile {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Pengguna user;
 
     @Column(unique = true, length = 16)
     private String nik;
@@ -28,7 +28,7 @@ public class UserProfile {
 
     public UserProfile() {}
 
-    public UserProfile(User user, String nik, String alamat, String nomorTelepon, LocalDate tanggalLahir) {
+    public UserProfile(Pengguna user, String nik, String alamat, String nomorTelepon, LocalDate tanggalLahir) {
         this.user = user;
         this.nik = nik;
         this.alamat = alamat;
@@ -38,8 +38,8 @@ public class UserProfile {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public Pengguna getUser() { return user; }
+    public void setUser(Pengguna user) { this.user = user; }
     public String getNik() { return nik; }
     public void setNik(String nik) { this.nik = nik; }
     public String getAlamat() { return alamat; }

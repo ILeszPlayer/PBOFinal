@@ -50,9 +50,9 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
 <div class="input-group"><input type="date" id="tanggalLahir" name="tanggalLahir" placeholder=" "><label for="tanggalLahir"><i class="fas fa-cake-candles" style="margin-right:0.4rem;"></i>Tanggal Lahir</label></div>
 </div>
 <div class="input-group"><input type="text" id="alamat" name="alamat" placeholder=" " required><label for="alamat"><i class="fas fa-map-pin" style="margin-right:0.4rem;"></i>Alamat Lengkap</label></div>
-<div th:if="${param.error}" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem;">
-<p style="color:#fca5a5;font-size:0.85rem;"><i class="fas fa-circle-exclamation" style="margin-right:0.5rem;"></i><span th:text="${param.error[0]}">Email sudah terdaftar</span></p>
-</div>
+            <div th:if="${error != null}" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem;">
+                <p style="color:#fca5a5;font-size:0.85rem;"><i class="fas fa-circle-exclamation" style="margin-right:0.5rem;"></i><span th:text="${error}">Email sudah terdaftar</span></p>
+            </div>
 <button type="submit" class="btn-primary"><i class="fas fa-user-plus" style="margin-right:0.5rem;"></i>Daftar Akun</button>
 </form>
 <div style="margin-top:1.5rem;text-align:center;">
@@ -60,7 +60,7 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
 <a th:href="@{/login}" style="color:#818cf8;font-size:0.9rem;text-decoration:none;font-weight:500;">Masuk di sini</a>
 </div>
 </div>
-<div th:if="${param.error}" class="toast error show" id="errorToast"><i class="fas fa-circle-exclamation" style="font-size:1.2rem;"></i><span th:text="${param.error[0]}">Pendaftaran gagal</span></div>
+    <div th:if="${error != null}" class="toast error show" id="errorToast"><i class="fas fa-circle-exclamation" style="font-size:1.2rem;"></i><span th:text="${error}">Pendaftaran gagal</span></div>
 <script>
 function validateForm(){const p=document.getElementById('password');const n=document.getElementById('nik');let v=true;document.querySelectorAll('.input-group input').forEach(i=>i.classList.remove('error'));if(p.value.length<6){p.classList.add('error');v=false;}
 if(n.value.length!==16||!/^\d{16}$/.test(n.value)){n.classList.add('error');v=false;}

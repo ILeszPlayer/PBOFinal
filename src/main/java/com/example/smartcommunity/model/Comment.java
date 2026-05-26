@@ -1,5 +1,6 @@
 package com.example.smartcommunity.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -19,15 +20,17 @@ public class Comment {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JsonIgnoreProperties({"complaints", "comments", "notifications", "profile", "password", "hibernateLazyInitializer", "handler"})
+    private Pengguna user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "complaint_id", nullable = false)
+    @JsonIgnoreProperties({"comments", "hibernateLazyInitializer", "handler"})
     private Complaint complaint;
 
     public Comment() {}
 
-    public Comment(String isiKomentar, User user, Complaint complaint) {
+    public Comment(String isiKomentar, Pengguna user, Complaint complaint) {
         this.isiKomentar = isiKomentar;
         this.user = user;
         this.complaint = complaint;
@@ -45,8 +48,8 @@ public class Comment {
     public void setIsiKomentar(String isiKomentar) { this.isiKomentar = isiKomentar; }
     public LocalDateTime getTanggal() { return tanggal; }
     public void setTanggal(LocalDateTime tanggal) { this.tanggal = tanggal; }
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public Pengguna getUser() { return user; }
+    public void setUser(Pengguna user) { this.user = user; }
     public Complaint getComplaint() { return complaint; }
     public void setComplaint(Complaint complaint) { this.complaint = complaint; }
 }

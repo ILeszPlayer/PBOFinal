@@ -22,11 +22,11 @@ public class Broadcast {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id", nullable = false)
-    private User admin;
+    private Pengguna admin;
 
     public Broadcast() {}
 
-    public Broadcast(String judul, String isiBroadcast, User admin) {
+    public Broadcast(String judul, String isiBroadcast, Pengguna admin) {
         this.judul = judul;
         this.isiBroadcast = isiBroadcast;
         this.admin = admin;
@@ -46,6 +46,6 @@ public class Broadcast {
     public void setIsiBroadcast(String isiBroadcast) { this.isiBroadcast = isiBroadcast; }
     public LocalDateTime getTanggal() { return tanggal; }
     public void setTanggal(LocalDateTime tanggal) { this.tanggal = tanggal; }
-    public User getAdmin() { return admin; }
-    public void setAdmin(User admin) { this.admin = admin; }
+    public Pengguna getAdmin() { return admin; }
+    public void setAdmin(Pengguna admin) { this.admin = admin; }
 }

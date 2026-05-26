@@ -3,13 +3,12 @@ package com.example.smartcommunity.service.impl;
 import com.example.smartcommunity.dto.CreateComplaintRequest;
 import com.example.smartcommunity.model.Complaint;
 import com.example.smartcommunity.model.Notification;
-import com.example.smartcommunity.model.User;
+import com.example.smartcommunity.model.Pengguna;
 import com.example.smartcommunity.repository.ComplaintRepository;
-import com.example.smartcommunity.repository.NotificationRepository;
-import com.example.smartcommunity.repository.UserRepository;
+import com.example.smartcommunity.repository.PenggunaRepository;
 import com.example.smartcommunity.service.ComplaintService;
 import com.example.smartcommunity.service.NotificationService;
-import com.example.smartcommunity.service.UserService;
+import com.example.smartcommunity.service.PenggunaService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,83 +20,35 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Service
 @Transactional
 public class ComplaintServiceImpl implements ComplaintService {
 
     private final ComplaintRepository complaintRepository;
-    private final UserRepository userRepository;
-    private final UserService userService;
+    private final PenggunaRepository penggunaRepository;
+    private final PenggunaService penggunaService;
     private final NotificationService notificationService;
 
     @Value("${app.upload.dir:src/main/resources/static/uploads}")
     private String uploadDir;
 
-    private static final Map<String, Complaint.Kategori> KEYWORD_CATEGORIES = new LinkedHashMap<>();
-    static {
-        KEYWORD_CATEGORIES.put("jalan", Complaint.Kategori.INFRASTRUKTUR);
-        KEYWORD_CATEGORIES.put("lubang", Complaint.Kategori.INFRASTRUKTUR);
-        KEYWORD_CATEGORIES.put("trotoar", Complaint.Kategori.INFRASTRUKTUR);
-        KEYWORD_CATEGORIES.put("jembatan", Complaint.Kategori.INFRASTRUKTUR);
-        KEYWORD_CATEGORIES.put("aspal", Complaint.Kategori.INFRASTRUKTUR);
-        KEYWORD_CATEGORIES.put("lampu", Complaint.Kategori.INFRASTRUKTUR);
-        KEYWORD_CATEGORIES.put("selokan", Complaint.Kategori.INFRASTRUKTUR);
-        KEYWORD_CATEGORIES.put("sampah", Complaint.Kategori.LINGKUNGAN);
-        KEYWORD_CATEGORIES.put("bau", Complaint.Kategori.LINGKUNGAN);
-        KEYWORD_CATEGORIES.put("pohon", Complaint.Kategori.LINGKUNGAN);
-        KEYWORD_CATEGORIES.put("taman", Complaint.Kategori.LINGKUNGAN);
-        KEYWORD_CATEGORIES.put("polusi", Complaint.Kategori.LINGKUNGAN);
-        KEYWORD_CATEGORIES.put("got", Complaint.Kategori.LINGKUNGAN);
-        KEYWORD_CATEGORIES.put("keamanan", Complaint.Kategori.KEAMANAN);
-        KEYWORD_CATEGORIES.put("kriminal", Complaint.Kategori.KEAMANAN);
-        KEYWORD_CATEGORIES.put("maling", Complaint.Kategori.KEAMANAN);
-        KEYWORD_CATEGORIES.put("begal", Complaint.Kategori.KEAMANAN);
-        KEYWORD_CATEGORIES.put("tawuran", Complaint.Kategori.KEAMANAN);
-        KEYWORD_CATEGORIES.put("kesehatan", Complaint.Kategori.KESEHATAN);
-        KEYWORD_CATEGORIES.put("rumah sakit", Complaint.Kategori.KESEHATAN);
-        KEYWORD_CATEGORIES.put("puskesmas", Complaint.Kategori.KESEHATAN);
-        KEYWORD_CATEGORIES.put("obat", Complaint.Kategori.KESEHATAN);
-        KEYWORD_CATEGORIES.put("pendidikan", Complaint.Kategori.PENDIDIKAN);
-        KEYWORD_CATEGORIES.put("sekolah", Complaint.Kategori.PENDIDIKAN);
-        KEYWORD_CATEGORIES.put("guru", Complaint.Kategori.PENDIDIKAN);
-        KEYWORD_CATEGORIES.put("sosial", Complaint.Kategori.SOSIAL);
-        KEYWORD_CATEGORIES.put("bansos", Complaint.Kategori.SOSIAL);
-        KEYWORD_CATEGORIES.put("bantuan", Complaint.Kategori.SOSIAL);
-        KEYWORD_CATEGORIES.put("warga", Complaint.Kategori.SOSIAL);
-    }
-
-    private static final Map<String, Integer> URGENCY_KEYWORDS = new LinkedHashMap<>();
-    static {
-        URGENCY_KEYWORDS.put("darurat", 3);
-        URGENCY_KEYWORDS.put("banjir", 3);
-        URGENCY_KEYWORDS.put("kecelakaan", 3);
-        URGENCY_KEYWORDS.put("kebakaran", 3);
-        URGENCY_KEYWORDS.put("longsor", 3);
-        URGENCY_KEYWORDS.put("ambruk", 3);
-        URGENCY_KEYWORDS.put("mendesak", 3);
-        URGENCY_KEYWORDS.put("kritis", 3);
-        URGENCY_KEYWORDS.put("segara", 2);
-        URGENCY_KEYWORDS.put("penting", 2);
-        URGENCY_KEYWORDS.put("butuh", 2);
-        URGENCY_KEYWORDS.put("tolong", 2);
-        URGENCY_KEYWORDS.put("cepat", 2);
-    }
-
     public ComplaintServiceImpl(ComplaintRepository complaintRepository,
-                                UserRepository userRepository,
-                                UserService userService,
+                                PenggunaRepository penggunaRepository,
+                                PenggunaService penggunaService,
                                 NotificationService notificationService) {
         this.complaintRepository = complaintRepository;
-        this.userRepository = userRepository;
-        this.userService = userService;
+        this.penggunaRepository = penggunaRepository;
+        this.penggunaService = penggunaService;
         this.notificationService = notificationService;
     }
 
     @Override
     public Complaint createComplaint(CreateComplaintRequest request) {
-        User user = userRepository.findById(request.getUserId())
+        Pengguna user = penggunaRepository.findById(request.getUserId())
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
 
         String isi = request.getIsiPengaduan().toLowerCase();
@@ -143,7 +94,7 @@ public class ComplaintServiceImpl implements ComplaintService {
         }
 
         complaint = complaintRepository.save(complaint);
-        userService.awardPoints(request.getUserId(), 10);
+        penggunaService.awardPoints(request.getUserId(), 10);
 
         try {
             notificationService.createNotification(
@@ -179,7 +130,7 @@ public class ComplaintServiceImpl implements ComplaintService {
         complaint = complaintRepository.save(complaint);
 
         try {
-            User complainant = complaint.getUser();
+            Pengguna complainant = complaint.getUser();
             String statusMsg = switch (status) {
                 case PROSES -> "Pengaduan \"" + complaint.getJudul() + "\" sedang diproses.";
                 case SELESAI -> "Pengaduan \"" + complaint.getJudul() + "\" telah selesai ditangani. Terima kasih!";
@@ -191,7 +142,7 @@ public class ComplaintServiceImpl implements ComplaintService {
                 complainant,
                 complaint
             );
-            userService.recalculateReputation(complainant.getId());
+            penggunaService.recalculateReputation(complainant.getId());
         } catch (Exception ignored) {}
 
         return complaint;
@@ -202,8 +153,7 @@ public class ComplaintServiceImpl implements ComplaintService {
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Pengaduan tidak ditemukan"));
         complaint.setUpvotesCount(complaint.getUpvotesCount() + 1);
-        complaint = complaintRepository.save(complaint);
-        return complaint;
+        return complaintRepository.save(complaint);
     }
 
     @Override
@@ -234,16 +184,19 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     @Override
     public List<Complaint> getComplaintsByCategory(Complaint.Kategori kategori) {
+        if (kategori == null) return getAllComplaints();
         return complaintRepository.findByKategori(kategori);
     }
 
     @Override
     public List<Complaint> getComplaintsByStatus(Complaint.Status status) {
+        if (status == null) return getAllComplaints();
         return complaintRepository.findByStatus(status);
     }
 
     @Override
     public List<Complaint> getComplaintsByUrgency(Complaint.Urgency urgency) {
+        if (urgency == null) return getAllComplaints();
         return complaintRepository.findByUrgency(urgency);
     }
 
@@ -265,6 +218,7 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     @Override
     public long countByStatus(Complaint.Status status) {
+        if (status == null) return 0;
         return complaintRepository.countByStatus(status);
     }
 
@@ -275,17 +229,29 @@ public class ComplaintServiceImpl implements ComplaintService {
 
     @Override
     public List<Object[]> countByKategori() {
-        return complaintRepository.countGroupByKategori();
+        try {
+            return complaintRepository.countGroupByKategori();
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     @Override
     public List<Object[]> countByUrgency() {
-        return complaintRepository.countGroupByUrgency();
+        try {
+            return complaintRepository.countGroupByUrgency();
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     @Override
     public List<Object[]> countResolvedByMonth() {
-        return complaintRepository.countResolvedByMonth();
+        try {
+            return complaintRepository.countResolvedByMonth();
+        } catch (Exception e) {
+            return new ArrayList<>();
+        }
     }
 
     @Override
@@ -300,7 +266,38 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     private Complaint.Kategori classifyCategory(String text) {
-        for (Map.Entry<String, Complaint.Kategori> entry : KEYWORD_CATEGORIES.entrySet()) {
+        java.util.Map<String, Complaint.Kategori> keywordCategories = new java.util.LinkedHashMap<>();
+        keywordCategories.put("jalan", Complaint.Kategori.INFRASTRUKTUR);
+        keywordCategories.put("lubang", Complaint.Kategori.INFRASTRUKTUR);
+        keywordCategories.put("trotoar", Complaint.Kategori.INFRASTRUKTUR);
+        keywordCategories.put("jembatan", Complaint.Kategori.INFRASTRUKTUR);
+        keywordCategories.put("aspal", Complaint.Kategori.INFRASTRUKTUR);
+        keywordCategories.put("lampu", Complaint.Kategori.INFRASTRUKTUR);
+        keywordCategories.put("selokan", Complaint.Kategori.INFRASTRUKTUR);
+        keywordCategories.put("sampah", Complaint.Kategori.LINGKUNGAN);
+        keywordCategories.put("bau", Complaint.Kategori.LINGKUNGAN);
+        keywordCategories.put("pohon", Complaint.Kategori.LINGKUNGAN);
+        keywordCategories.put("taman", Complaint.Kategori.LINGKUNGAN);
+        keywordCategories.put("polusi", Complaint.Kategori.LINGKUNGAN);
+        keywordCategories.put("got", Complaint.Kategori.LINGKUNGAN);
+        keywordCategories.put("keamanan", Complaint.Kategori.KEAMANAN);
+        keywordCategories.put("kriminal", Complaint.Kategori.KEAMANAN);
+        keywordCategories.put("maling", Complaint.Kategori.KEAMANAN);
+        keywordCategories.put("begal", Complaint.Kategori.KEAMANAN);
+        keywordCategories.put("tawuran", Complaint.Kategori.KEAMANAN);
+        keywordCategories.put("kesehatan", Complaint.Kategori.KESEHATAN);
+        keywordCategories.put("rumah sakit", Complaint.Kategori.KESEHATAN);
+        keywordCategories.put("puskesmas", Complaint.Kategori.KESEHATAN);
+        keywordCategories.put("obat", Complaint.Kategori.KESEHATAN);
+        keywordCategories.put("pendidikan", Complaint.Kategori.PENDIDIKAN);
+        keywordCategories.put("sekolah", Complaint.Kategori.PENDIDIKAN);
+        keywordCategories.put("guru", Complaint.Kategori.PENDIDIKAN);
+        keywordCategories.put("sosial", Complaint.Kategori.SOSIAL);
+        keywordCategories.put("bansos", Complaint.Kategori.SOSIAL);
+        keywordCategories.put("bantuan", Complaint.Kategori.SOSIAL);
+        keywordCategories.put("warga", Complaint.Kategori.SOSIAL);
+
+        for (java.util.Map.Entry<String, Complaint.Kategori> entry : keywordCategories.entrySet()) {
             if (text.contains(entry.getKey())) {
                 return entry.getValue();
             }
@@ -309,8 +306,23 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     private Complaint.Urgency classifyUrgency(String text) {
+        java.util.Map<String, Integer> urgencyKeywords = new java.util.LinkedHashMap<>();
+        urgencyKeywords.put("darurat", 3);
+        urgencyKeywords.put("banjir", 3);
+        urgencyKeywords.put("kecelakaan", 3);
+        urgencyKeywords.put("kebakaran", 3);
+        urgencyKeywords.put("longsor", 3);
+        urgencyKeywords.put("ambruk", 3);
+        urgencyKeywords.put("mendesak", 3);
+        urgencyKeywords.put("kritis", 3);
+        urgencyKeywords.put("segara", 2);
+        urgencyKeywords.put("penting", 2);
+        urgencyKeywords.put("butuh", 2);
+        urgencyKeywords.put("tolong", 2);
+        urgencyKeywords.put("cepat", 2);
+
         int maxScore = 0;
-        for (Map.Entry<String, Integer> entry : URGENCY_KEYWORDS.entrySet()) {
+        for (java.util.Map.Entry<String, Integer> entry : urgencyKeywords.entrySet()) {
             if (text.contains(entry.getKey())) {
                 maxScore = Math.max(maxScore, entry.getValue());
             }

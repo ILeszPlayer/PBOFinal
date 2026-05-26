@@ -1,81 +1,82 @@
 package com.example.smartcommunity.service.impl;
 
 import com.example.smartcommunity.dto.RegisterCitizenRequest;
-import com.example.smartcommunity.model.Citizen;
 import com.example.smartcommunity.model.Complaint;
-import com.example.smartcommunity.model.User;
+import com.example.smartcommunity.model.Pengguna;
 import com.example.smartcommunity.model.UserProfile;
+import com.example.smartcommunity.model.Warga;
+import com.example.smartcommunity.repository.PenggunaRepository;
 import com.example.smartcommunity.repository.UserProfileRepository;
-import com.example.smartcommunity.repository.UserRepository;
-import com.example.smartcommunity.service.UserService;
+import com.example.smartcommunity.service.PenggunaService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class UserServiceImpl implements UserService {
+public class PenggunaServiceImpl implements PenggunaService {
 
-    private final UserRepository userRepository;
+    private final PenggunaRepository penggunaRepository;
     private final UserProfileRepository userProfileRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository,
-                           UserProfileRepository userProfileRepository,
-                           PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+    public PenggunaServiceImpl(PenggunaRepository penggunaRepository,
+                               UserProfileRepository userProfileRepository,
+                               PasswordEncoder passwordEncoder) {
+        this.penggunaRepository = penggunaRepository;
         this.userProfileRepository = userProfileRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
-    public User registerCitizen(RegisterCitizenRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+    public Pengguna registerCitizen(RegisterCitizenRequest request) {
+        if (penggunaRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email sudah terdaftar");
         }
 
-        Citizen citizen = new Citizen(request.getNama(), request.getEmail(),
+        Warga warga = new Warga(request.getNama(), request.getEmail(),
                 passwordEncoder.encode(request.getPassword()));
-        citizen = userRepository.save(citizen);
+        warga = penggunaRepository.save(warga);
 
         LocalDate tglLahir = null;
         if (request.getTanggalLahir() != null && !request.getTanggalLahir().isEmpty()) {
             tglLahir = LocalDate.parse(request.getTanggalLahir());
         }
 
-        UserProfile profile = new UserProfile(citizen, request.getNik(),
+        UserProfile profile = new UserProfile(warga, request.getNik(),
                 request.getAlamat(), request.getNomorTelepon(), tglLahir);
         userProfileRepository.save(profile);
 
-        return citizen;
+        return warga;
     }
 
     @Override
-    public User findById(Long id) {
-        return userRepository.findById(id)
+    public Pengguna findById(Long id) {
+        return penggunaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
     }
 
     @Override
-    public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
+    public Pengguna findByEmail(String email) {
+        return penggunaRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
     }
 
     @Override
-    public User awardPoints(Long userId, int points) {
-        User user = userRepository.findById(userId)
+    public Pengguna awardPoints(Long userId, int points) {
+        Pengguna user = penggunaRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
         user.setReputationPoints(user.getReputationPoints() + points);
-        return userRepository.save(user);
+        return penggunaRepository.save(user);
     }
 
     @Override
-    public User recalculateReputation(Long userId) {
-        User user = userRepository.findById(userId)
+    public Pengguna recalculateReputation(Long userId) {
+        Pengguna user = penggunaRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
 
         long approvedCount = user.getComplaints().stream()
@@ -87,16 +88,23 @@ public class UserServiceImpl implements UserService {
 
         int newPoints = ((int) approvedCount * 20) + (totalUpvotes * 5);
         user.setReputationPoints(newPoints);
-        return userRepository.save(user);
+        return penggunaRepository.save(user);
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<Pengguna> getAllUsers() {
+        return penggunaRepository.findAll();
     }
 
     @Override
     public long countUsers() {
-        return userRepository.count();
+        return penggunaRepository.count();
+    }
+
+    @Override
+    public List<Pengguna> findAllCitizens() {
+        return penggunaRepository.findAll().stream()
+                .filter(u -> "CITIZEN".equals(u.getRole()))
+                .collect(Collectors.toList());
     }
 }

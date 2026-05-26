@@ -1,6 +1,7 @@
 package com.example.smartcommunity.controller;
 
-import jakarta.servlet.http.HttpSession;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -8,20 +9,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class RootController {
 
     @GetMapping("/")
-    public String root(HttpSession session) {
-        if (session.getAttribute("loggedUserId") != null) {
-            String role = (String) session.getAttribute("loggedUserRole");
-            if ("ADMIN".equals(role)) {
+    public String root() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated()
+                && !"anonymousUser".equals(auth.getPrincipal())) {
+            if (auth.getAuthorities().stream()
+                    .anyMatch(a -> "ROLE_ADMIN".equals(a.getAuthority()))) {
                 return "redirect:/admin/dashboard";
             }
-            return "redirect:/citizen/home";
-        }
-        return "redirect:/login";
-    }
-
-    @GetMapping("/home")
-    public String homeRedirect(HttpSession session) {
-        if (session.getAttribute("loggedUserId") != null) {
             return "redirect:/citizen/home";
         }
         return "redirect:/login";

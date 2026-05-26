@@ -2,7 +2,7 @@ package com.example.smartcommunity.service.impl;
 
 import com.example.smartcommunity.model.Complaint;
 import com.example.smartcommunity.model.Notification;
-import com.example.smartcommunity.model.User;
+import com.example.smartcommunity.model.Pengguna;
 import com.example.smartcommunity.repository.NotificationRepository;
 import com.example.smartcommunity.service.NotificationService;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public Notification createNotification(Notification.Type type, String message, User user, Complaint complaint) {
+    public Notification createNotification(Notification.Type type, String message, Pengguna user, Complaint complaint) {
         Notification notification = new Notification(type, message, user, complaint);
         return notificationRepository.save(notification);
     }

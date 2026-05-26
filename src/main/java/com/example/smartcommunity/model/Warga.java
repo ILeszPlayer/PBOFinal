@@ -5,16 +5,21 @@ import jakarta.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("CITIZEN")
-public class Citizen extends User {
+public class Warga extends Pengguna {
 
-    public Citizen() {
+    public Warga() {
         setRole("CITIZEN");
     }
 
-    public Citizen(String nama, String email, String password) {
+    public Warga(String nama, String email, String password) {
         setNama(nama);
         setEmail(email);
         setPassword(password);
         setRole("CITIZEN");
+    }
+
+    @Override
+    public String getDashboardRoute() {
+        return "/citizen/home";
     }
 }

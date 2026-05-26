@@ -1,14 +1,14 @@
 package com.example.smartcommunity.repository;
 
-import com.example.smartcommunity.model.User;
+import com.example.smartcommunity.model.Pengguna;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface PenggunaRepository extends JpaRepository<Pengguna, Long> {
     boolean existsByEmail(String email);
-    Optional<User> findByEmail(String email);
-    Optional<User> findByNama(String nama);
+    Optional<Pengguna> findByEmail(String email);
+    Optional<Pengguna> findByNama(String nama);
 }

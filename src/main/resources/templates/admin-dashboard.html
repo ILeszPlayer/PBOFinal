@@ -1,169 +1,117 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="id">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Admin - KomunServis</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-*{font-family:'Inter',sans-serif;margin:0;padding:0;box-sizing:border-box;}
-body{background:#f1f5f9;display:flex;min-height:100vh;}
-.sidebar{width:260px;background:linear-gradient(180deg,#0f172a 0%,#1e1b4b 100%);padding:1.5rem 0;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:50;}
-.main-content{margin-left:260px;flex:1;padding:2rem;}
-.nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1.5rem;color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;}
-.nav-item:hover,.nav-item.active{color:#fff;background:rgba(99,102,241,0.1);border-left-color:#6366f1;}
-.nav-item i{width:20px;text-align:center;}
-.kpi-card{background:#fff;border-radius:16px;padding:1.25rem 1.5rem;border:1px solid rgba(0,0,0,0.04);box-shadow:0 1px 3px rgba(0,0,0,0.04);}
-.kpi-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;}
-.chart-card{background:#fff;border-radius:16px;padding:1.5rem;border:1px solid rgba(0,0,0,0.04);box-shadow:0 1px 3px rgba(0,0,0,0.04);}
-.table-wrap{background:#fff;border-radius:16px;border:1px solid rgba(0,0,0,0.04);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04);}
-.table-wrap th{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:#64748b;font-weight:600;padding:0.75rem 1rem;text-align:left;border-bottom:1px solid #e2e8f0;background:#f8fafc;}
-.table-wrap td{padding:0.75rem 1rem;border-bottom:1px solid #f1f5f9;font-size:0.85rem;color:#334155;}
-.table-wrap tr:hover td{background:#f8fafc;}
-.search-input{padding:0.6rem 1rem 0.6rem 2.3rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.85rem;outline:none;background:#fff;transition:all 0.2s;}
-.search-input:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,0.1);}
-.status-select{padding:0.35rem 0.75rem;border-radius:8px;font-size:0.8rem;font-weight:500;border:1.5px solid #e2e8f0;outline:none;cursor:pointer;background:#fff;}
-.toast-container{position:fixed;top:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.75rem;}
-.toast{padding:1rem 1.5rem;border-radius:12px;color:#fff;font-weight:500;font-size:0.9rem;backdrop-filter:blur(12px);display:flex;align-items:center;gap:0.75rem;transform:translateX(120%);transition:transform 0.5s cubic-bezier(0.68,-0.55,0.265,1.55);box-shadow:0 10px 30px -5px rgba(0,0,0,0.15);}
-.toast.show{transform:translateX(0);}
-.toast.success{background:rgba(16,185,129,0.95);border:1px solid rgba(16,185,129,0.3);}
-.modal-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:1rem;}
-.modal-overlay.open{display:flex;}
-.modal-content{background:#fff;border-radius:20px;max-width:480px;width:100%;padding:2rem;}
-@media print{.sidebar,.no-print{display:none!important;}.main-content{margin-left:0;padding:0;}.kpi-card,.chart-card,.table-wrap{box-shadow:none;border:1px solid #ddd;break-inside:avoid;}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - KomunServis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-<div class="sidebar">
-<div style="padding:0 1.5rem 2rem;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:1.5rem;">
-<div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.5rem;">🏘️</span><span style="font-weight:700;color:#fff;font-size:1.1rem;">KomunServis</span></div>
-<span style="font-size:0.75rem;color:rgba(255,255,255,0.3);padding-left:2rem;">Panel Admin</span>
-</div>
-<nav style="flex:1;">
-<a href="#" class="nav-item active"><i class="fas fa-chart-pie"></i> Dashboard</a>
-<a href="#" class="nav-item"><i class="fas fa-users"></i> Warga</a>
-<a href="#" class="nav-item"><i class="fas fa-bullhorn"></i> Broadcast</a>
-<a href="#" class="nav-item" onclick="window.print()"><i class="fas fa-download"></i> Export</a>
-</nav>
-<div style="border-top:1px solid rgba(255,255,255,0.06);padding:1rem 1.5rem;">
-<a th:href="@{/logout}" style="display:flex;align-items:center;gap:0.75rem;color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;"><i class="fas fa-right-from-bracket"></i> Keluar</a>
-</div>
-</div>
-<div class="toast-container" id="toastContainer">
-<div th:if="${session.flashAttributes?.success}" class="toast success show"><i class="fas fa-check-circle" style="font-size:1.2rem;"></i><span th:text="${session.flashAttributes.success}">Sukses</span></div>
-</div>
-<div class="main-content">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
-<div><h1 style="font-size:1.5rem;font-weight:700;color:#0f172a;">Dashboard Admin</h1><p style="color:#64748b;font-size:0.9rem;">Overview dan manajemen pengaduan komunitas</p></div>
-<div style="display:flex;gap:0.75rem;" class="no-print">
-<button onclick="document.getElementById('broadcastModal').classList.add('open')" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:10px;font-weight:600;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;"><i class="fas fa-bullhorn"></i> Broadcast</button>
-<button onclick="window.print()" style="background:#f1f5f9;color:#475569;border:1.5px solid #e2e8f0;padding:0.6rem 1.2rem;border-radius:10px;font-weight:500;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;gap:0.4rem;"><i class="fas fa-download"></i> Export</button>
-</div>
-</div>
-<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;">
-<div class="kpi-card"><div style="display:flex;align-items:center;gap:1rem;"><div class="kpi-icon" style="background:#eef2ff;color:#6366f1;"><i class="fas fa-file-lines"></i></div><div><div style="font-size:1.8rem;font-weight:700;color:#0f172a;" th:text="${totalComplaints}">0</div><div style="font-size:0.8rem;color:#64748b;font-weight:500;">Total</div></div></div></div>
-<div class="kpi-card"><div style="display:flex;align-items:center;gap:1rem;"><div class="kpi-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-hourglass-half"></i></div><div><div style="font-size:1.8rem;font-weight:700;color:#0f172a;" th:text="${pendingCount}">0</div><div style="font-size:0.8rem;color:#64748b;font-weight:500;">Pending</div></div></div></div>
-<div class="kpi-card"><div style="display:flex;align-items:center;gap:1rem;"><div class="kpi-icon" style="background:#f3e8ff;color:#7c3aed;"><i class="fas fa-spinner"></i></div><div><div style="font-size:1.8rem;font-weight:700;color:#0f172a;" th:text="${processCount}">0</div><div style="font-size:0.8rem;color:#64748b;font-weight:500;">Diproses</div></div></div></div>
-<div class="kpi-card"><div style="display:flex;align-items:center;gap:1rem;"><div class="kpi-icon" style="background:#d1fae5;color:#059669;"><i class="fas fa-check-circle"></i></div><div><div style="font-size:1.8rem;font-weight:700;color:#0f172a;" th:text="${completedCount}">0</div><div style="font-size:0.8rem;color:#64748b;font-weight:500;">Selesai</div></div></div></div>
-<div class="kpi-card"><div style="display:flex;align-items:center;gap:1rem;"><div class="kpi-icon" style="background:#e0f2fe;color:#0284c7;"><i class="fas fa-users"></i></div><div><div style="font-size:1.8rem;font-weight:700;color:#0f172a;" th:text="${totalUsers}">0</div><div style="font-size:0.8rem;color:#64748b;font-weight:500;">Warga</div></div></div></div>
-</div>
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:2rem;">
-<div class="chart-card"><h3 style="font-size:0.95rem;font-weight:600;color:#0f172a;margin-bottom:1rem;"><i class="fas fa-chart-pie" style="color:#6366f1;margin-right:0.4rem;"></i>Kategori</h3><canvas id="categoryChart" height="200"></canvas></div>
-<div class="chart-card"><h3 style="font-size:0.95rem;font-weight:600;color:#0f172a;margin-bottom:1rem;"><i class="fas fa-chart-line" style="color:#6366f1;margin-right:0.4rem;"></i>Selesai/Bulan</h3><canvas id="monthlyChart" height="200"></canvas></div>
-<div class="chart-card"><h3 style="font-size:0.95rem;font-weight:600;color:#0f172a;margin-bottom:1rem;"><i class="fas fa-exclamation-triangle" style="color:#6366f1;margin-right:0.4rem;"></i>Urgensi</h3><canvas id="urgencyChart" height="200"></canvas></div>
-</div>
-<div style="margin-bottom:1.5rem;">
-<div style="width:100%;height:250px;border-radius:16px;overflow:hidden;border:1px solid rgba(0,0,0,0.06);box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-<div id="adminMap" style="width:100%;height:100%;"></div>
-</div>
-</div>
-<div style="margin-bottom:1rem;" class="no-print">
-<form method="get" th:action="@{/admin/dashboard}" style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-<div style="position:relative;flex:1;min-width:180px;"><i class="fas fa-search" style="position:absolute;left:0.8rem;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:0.85rem;"></i><input type="text" name="search" class="search-input" placeholder="Cari..." th:value="${search}" style="width:100%;padding-left:2.3rem;"></div>
-<select name="kategori" style="padding:0.6rem 1rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.85rem;outline:none;background:#fff;"><option value="">Semua Kategori</option><option th:each="k : ${kategoriValues}" th:value="${k.name()}" th:text="${k.displayName}" th:selected="${selectedKategori == k.name()}"></option></select>
-<select name="urgency" style="padding:0.6rem 1rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.85rem;outline:none;background:#fff;"><option value="">Semua Urgensi</option><option th:each="u : ${urgencyValues}" th:value="${u.name()}" th:text="${u.displayName}" th:selected="${selectedUrgency == u.name()}"></option></select>
-<button type="submit" style="background:#6366f1;color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:10px;font-weight:500;cursor:pointer;font-size:0.85rem;"><i class="fas fa-filter"></i></button>
-<a th:href="@{/admin/dashboard}" style="display:inline-flex;align-items:center;gap:0.3rem;background:#f1f5f9;color:#475569;padding:0.6rem 1.2rem;border-radius:10px;font-size:0.85rem;font-weight:500;text-decoration:none;"><i class="fas fa-rotate-left"></i></a>
-</form>
-</div>
-<div class="table-wrap">
-<div style="padding:1rem 1.5rem;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
-<h2 style="font-size:1rem;font-weight:600;color:#0f172a;">Daftar Pengaduan</h2>
-<span style="font-size:0.85rem;color:#64748b;" th:text="${#lists.size(complaints)} + ' pengaduan'"></span>
-</div>
-<div style="overflow-x:auto;">
-<table style="width:100%;border-collapse:collapse;">
-<thead><tr><th>No</th><th>Pengadu</th><th>Judul</th><th>Kategori</th><th>Urgensi</th><th>SLA</th><th>Upvotes</th><th>Status</th><th>Tanggal</th><th>Aksi</th></tr></thead>
-<tbody>
-<tr th:each="c, stat : ${complaints}">
-<td style="color:#94a3b8;" th:text="${stat.count}">1</td>
-<td th:text="${c.displayUser}" style="font-weight:500;">User</td>
-<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;color:#0f172a;" th:text="${c.judul}">Judul</td>
-<td><span style="display:inline-block;padding:0.2rem 0.6rem;border-radius:100px;font-size:0.7rem;font-weight:600;" th:text="${c.kategori.displayName}" th:classappend="'pill-' + ${c.kategori.name().toLowerCase()}"></span></td>
-<td><span class="px-2 py-0.5 rounded-full text-xs font-medium" th:classappend="${c.urgency.name() == 'TINGGI'} ? 'bg-red-100 text-red-700' : ${c.urgency.name() == 'SEDANG'} ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'" th:text="${c.urgency.displayName}"></span></td>
-<td style="font-size:0.8rem;">
-<th:block th:if="${c.status == 'PROSES' or c.status == 'SELESAI'}"><span th:classappend="${c.slaCompliant} ? 'text-emerald-600' : 'text-red-600'" th:text="${c.slaHours} + 'j'"></span></th:block>
-<th:block th:if="${c.status == 'PENDING'}"><span style="color:#94a3b8;">-</span></th:block>
-</td>
-<td><i class="fas fa-arrow-up" style="color:#6366f1;margin-right:0.2rem;"></i><span th:text="${c.upvotesCount}">0</span></td>
-<td><form th:action="@{/admin/update-status}" method="post" style="display:inline;"><input type="hidden" name="complaintId" th:value="${c.id}"><select name="status" class="status-select" onchange="this.form.submit()" th:classappend="${c.status.name() == 'PENDING'} ? 'bg-amber-50 text-amber-700 border-amber-200' : ${c.status.name() == 'PROSES'} ? 'bg-violet-50 text-violet-700 border-violet-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"><option value="PENDING" th:selected="${c.status.name() == 'PENDING'}">Pending</option><option value="PROSES" th:selected="${c.status.name() == 'PROSES'}">Diproses</option><option value="SELESAI" th:selected="${c.status.name() == 'SELESAI'}">Selesai</option></select></form></td>
-<td style="font-size:0.85rem;color:#64748b;" th:text="${#temporals.format(c.tanggal, 'dd MMM')}">01 Jan</td>
-<td><a th:href="@{/citizen/detail/{id}(id=${c.id})}" style="color:#6366f1;text-decoration:none;font-size:0.85rem;"><i class="fas fa-eye"></i></a></td>
-</tr>
-<tr th:if="${#lists.isEmpty(complaints)}"><td colspan="10" style="text-align:center;padding:2rem;color:#94a3b8;"><i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>Belum ada pengaduan.</td></tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div id="broadcastModal" class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
-<div class="modal-content">
-<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-<h2 style="font-size:1.2rem;font-weight:700;color:#0f172a;"><i class="fas fa-bullhorn" style="color:#6366f1;margin-right:0.5rem;"></i>Kirim Broadcast</h2>
-<button onclick="document.getElementById('broadcastModal').classList.remove('open')" style="background:none;border:none;font-size:1.5rem;color:#94a3b8;cursor:pointer;">&times;</button>
-</div>
-<form th:action="@{/admin/broadcast}" method="post">
-<div style="margin-bottom:1rem;"><label style="display:block;font-size:0.85rem;font-weight:500;color:#374151;margin-bottom:0.3rem;">Judul</label><input type="text" name="judul" required style="width:100%;padding:0.7rem 1rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.9rem;outline:none;"></div>
-<div style="margin-bottom:1rem;"><label style="display:block;font-size:0.85rem;font-weight:500;color:#374151;margin-bottom:0.3rem;">Isi Pesan</label><textarea name="isiBroadcast" rows="3" required style="width:100%;padding:0.7rem 1rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.9rem;outline:none;resize:vertical;"></textarea></div>
-<button type="submit" style="width:100%;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;padding:0.8rem;border-radius:12px;font-weight:600;font-size:1rem;cursor:pointer;"><i class="fas fa-paper-plane" style="margin-right:0.5rem;"></i>Kirim Broadcast</button>
-</form>
-</div>
-</div>
-<script>
-document.querySelectorAll('.toast.show').forEach(t=>{setTimeout(()=>t.classList.remove('show'),4000);});
-function showToast(msg,type){const c=document.getElementById('toastContainer');const t=document.createElement('div');t.className='toast '+type;const i=type==='success'?'fa-check-circle':'fa-circle-exclamation';t.innerHTML='<i class="fas '+i+'" style="font-size:1.2rem;"></i><span>'+msg+'</span>';c.appendChild(t);setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),500);},4000);}
+<body class="bg-slate-900 text-slate-100 flex min-h-screen font-sans">
 
-const catLabels=[<th:block th:each="entry : ${categoryCounts}">'<span th:text="${entry.key}"></span>',</th:block>];
-const catData=[<th:block th:each="entry : ${categoryCounts}"><span th:text="${entry.value}"></span>,</th:block>];
-new Chart(document.getElementById('categoryChart'),{type:'doughnut',data:{labels:catLabels,datasets:[{data:catData,backgroundColor:['#6366f1','#10b981','#f59e0b','#ef4444','#06b6d4','#8b5cf6','#64748b'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:12,usePointStyle:true,font:{size:10}}}},cutout:'65%'}});
+    <aside class="w-64 bg-slate-800 border-r border-slate-700 p-6 flex flex-col justify-between flex-shrink-0">
+        <div class="space-y-6">
+            <div class="flex items-center gap-2 px-2 text-indigo-400 font-black tracking-wider"><i class="fas fa-shield-halved text-xl"></i> CORE COMMAND</div>
+            <nav class="space-y-2 text-xs font-bold">
+                <a th:href="@{/admin/dashboard}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-indigo-600 text-white shadow-md"><i class="fas fa-chart-line"></i> Monitoring Dashboard</a>
+                <a th:href="@{/admin/complaints/manage}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-folder-gear"></i> Kelola Pengaduan</a>
+                <a th:href="@{/admin/warga}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-700/50 hover:text-slate-200 transition-all"><i class="fas fa-users-gear"></i> Manajemen Warga</a>
+            </nav>
+        </div>
+        <a th:href="@{/logout}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition-all font-bold text-xs"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+    </aside>
 
-const monthLabels=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
-const monthData=[<th:block th:each="entry : ${monthlyResolved}"><span th:text="${entry.value}"></span>,</th:block>];
-new Chart(document.getElementById('monthlyChart'),{type:'line',data:{labels:monthLabels.slice(0,monthData.length),datasets:[{label:'Selesai',data:monthData,borderColor:'#6366f1',backgroundColor:'rgba(99,102,241,0.1)',fill:true,tension:0.4,pointBackgroundColor:'#6366f1',pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:4,borderWidth:3}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:11}},grid:{color:'rgba(0,0,0,0.04)'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
+    <main class="flex-1 p-8 overflow-y-auto">
+        <div class="mb-8">
+            <h1 class="text-2xl font-black tracking-tight">Monitoring Dashboard</h1>
+            <p class="text-slate-400 text-xs mt-0.5">Overview data pengaduan dan aktivitas komunitas</p>
+        </div>
 
-const urgLabels=[<th:block th:each="entry : ${urgencyCounts}">'<span th:text="${entry.key}"></span>',</th:block>];
-const urgData=[<th:block th:each="entry : ${urgencyCounts}"><span th:text="${entry.value}"></span>,</th:block>];
-new Chart(document.getElementById('urgencyChart'),{type:'bar',data:{labels:urgLabels,datasets:[{label:'Jumlah',data:urgData,backgroundColor:['#10b981','#f59e0b','#ef4444'],borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1,font:{size:11}},grid:{color:'rgba(0,0,0,0.04)'}},x:{grid:{display:false},ticks:{font:{size:11}}}}}});
+        <!-- Stat Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700 p-5 rounded-2xl shadow-lg">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Kasus</span>
+                    <div class="w-9 h-9 rounded-xl bg-indigo-500/15 flex items-center justify-center"><i class="fas fa-folder-open text-indigo-400 text-sm"></i></div>
+                </div>
+                <h2 class="text-3xl font-black text-slate-100" th:text="${totalComplaints}">0</h2>
+                <span class="text-[10px] text-slate-500 mt-1 block">Seluruh pengaduan masuk</span>
+            </div>
+            <div class="bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700 p-5 rounded-2xl shadow-lg">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pending</span>
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center"><i class="fas fa-clock text-amber-400 text-sm"></i></div>
+                </div>
+                <h2 class="text-3xl font-black text-amber-400" th:text="${pendingCount}">0</h2>
+                <span class="text-[10px] text-slate-500 mt-1 block">Menunggu diproses</span>
+            </div>
+            <div class="bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700 p-5 rounded-2xl shadow-lg">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Diproses</span>
+                    <div class="w-9 h-9 rounded-xl bg-blue-500/15 flex items-center justify-center"><i class="fas fa-spinner text-blue-400 text-sm"></i></div>
+                </div>
+                <h2 class="text-3xl font-black text-blue-400" th:text="${processedCount}">0</h2>
+                <span class="text-[10px] text-slate-500 mt-1 block">Sedang ditangani</span>
+            </div>
+            <div class="bg-gradient-to-br from-slate-800 to-slate-800/50 border border-slate-700 p-5 rounded-2xl shadow-lg">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Selesai</span>
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center"><i class="fas fa-check-circle text-emerald-400 text-sm"></i></div>
+                </div>
+                <h2 class="text-3xl font-black text-emerald-400" th:text="${resolvedCount}">0</h2>
+                <span class="text-[10px] text-slate-500 mt-1 block">Telah terselesaikan</span>
+            </div>
+        </div>
 
-// Leaflet Admin Map
-var adminMap = L.map('adminMap').setView([-6.9175, 107.6191], 12);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {attribution:'&copy; OSM', maxZoom:18}).addTo(adminMap);
-var adminGeo = [
-    <th:block th:each="c : ${geoComplaints}">
-    {lat:<span th:text="${c.latitude}">0</span>, lng:<span th:text="${c.longitude}">0</span>, title:'<span th:text="${c.judul}">T</span>', status:'<span th:text="${c.status.name()}">S</span>', id:<span th:text="${c.id}">0</span>},
-    </th:block>
-];
-adminGeo.forEach(function(c){
-    var clr = c.status==='PENDING'?'red':c.status==='PROSES'?'orange':'green';
-    L.marker([c.lat,c.lng], {icon:L.icon({iconUrl:'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-'+clr+'.png',shadowUrl:'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]})})
-    .addTo(adminMap)
-    .bindPopup('<b>'+c.title+'</b><br><span style="font-size:0.8rem;">Status: '+c.status+'</span><br><a href="/citizen/detail/'+c.id+'" style="color:#6366f1;">Detail</a>');
-});
-</script>
+        <!-- Bottom Grid: Chart + Recent Complaints -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Monthly Chart -->
+            <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-lg">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4"><i class="fas fa-chart-bar text-indigo-400 mr-1"></i> Grafik Bulanan (Selesai)</h3>
+                <div th:if="${#lists.isEmpty(chartMonths)}" class="py-10 text-center text-slate-500">
+                    <i class="fas fa-chart-simple text-3xl mb-2 block text-slate-600"></i>
+                    <span class="text-xs">Belum ada data grafik</span>
+                </div>
+                <div th:unless="${#lists.isEmpty(chartMonths)}" class="space-y-3">
+                    <div th:each="i : ${#numbers.sequence(0, #lists.size(chartMonths) - 1)}" class="flex items-center gap-3">
+                        <span class="text-[10px] font-bold text-slate-400 w-12 flex-shrink-0">Bln <span th:text="${chartMonths[i]}">1</span></span>
+                        <div class="flex-1 bg-slate-700/50 rounded-full h-4 overflow-hidden">
+                            <div class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500" th:style="'width: ' + (${maxCount > 0 ? (chartCounts[i] * 100 / maxCount) : 0}) + '%'"></div>
+                        </div>
+                        <span class="text-xs font-bold text-slate-300 w-10 text-right" th:text="${chartCounts[i]}">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Complaints -->
+            <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fas fa-list text-indigo-400 mr-1"></i> Pengaduan Terbaru</h3>
+                    <a th:href="@{/admin/complaints/manage}" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold">Lihat Semua <i class="fas fa-arrow-right ml-1"></i></a>
+                </div>
+                <div th:if="${#lists.isEmpty(complaints)}" class="py-8 text-center text-slate-500">
+                    <i class="fas fa-inbox text-2xl mb-2 block text-slate-600"></i>
+                    <span class="text-xs">Belum ada pengaduan</span>
+                </div>
+                <div th:unless="${#lists.isEmpty(complaints)}">
+                    <div th:each="c, stat : ${complaints}" th:if="${stat.index < 5}" class="flex items-start gap-3 py-3 border-b border-slate-700/50 last:border-0">
+                        <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" th:classappend="${c.status != null and c.status.name() == 'SELESAI'} ? 'bg-emerald-500/20' : (${c.status != null and c.status.name() == 'PROSES'} ? 'bg-blue-500/20' : 'bg-amber-500/20')">
+                            <i th:classappend="${c.status != null and c.status.name() == 'SELESAI'} ? 'fas fa-check-circle text-emerald-400' : (${c.status != null and c.status.name() == 'PROSES'} ? 'fas fa-spinner text-blue-400' : 'fas fa-clock text-amber-400')" class="text-xs"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-slate-200 truncate" th:text="${c.judul}">Judul</p>
+                            <p class="text-[10px] text-slate-500 mt-0.5">
+                                <span th:text="${c.isAnonymous} ? 'Anonim' : (${c.user != null} ? ${c.user.nama} : 'Warga')">Pelapor</span>
+                                <span class="mx-1">•</span>
+                                <span th:text="${c.tanggal != null ? #temporals.format(c.tanggal, 'dd MMM') : '-'}">Tgl</span>
+                            </p>
+                        </div>
+                        <span class="text-[9px] font-bold px-2 py-1 rounded-full" th:classappend="${c.status != null and c.status.name() == 'SELESAI'} ? 'bg-emerald-500/10 text-emerald-400' : (${c.status != null and c.status.name() == 'PROSES'} ? 'bg-blue-500/10 text-blue-400' : 'bg-amber-500/10 text-amber-400')" th:text="${c.status != null ? c.status.displayName : 'Pending'}">Status</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
 </body>
 </html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broadcast - KomunServis</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*{font-family:'Inter',sans-serif;margin:0;padding:0;box-sizing:border-box;}
+body{background:#f1f5f9;display:flex;min-height:100vh;}
+.sidebar{width:260px;background:linear-gradient(180deg,#0f172a 0%,#1e1b4b 100%);padding:1.5rem 0;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:50;}
+.main-content{margin-left:260px;flex:1;padding:2rem;}
+.nav-item{display:flex;align-items:center;gap:0.75rem;padding:0.8rem 1.5rem;color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.9rem;font-weight:500;transition:all 0.2s;border-left:3px solid transparent;}
+.nav-item:hover,.nav-item.active{color:#fff;background:rgba(99,102,241,0.1);border-left-color:#6366f1;}
+.nav-item i{width:20px;text-align:center;}
+.card{border-radius:16px;border:1px solid rgba(0,0,0,0.06);overflow:hidden;}
+.toast-container{position:fixed;top:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:0.75rem;}
+.toast{padding:1rem 1.5rem;border-radius:12px;color:#fff;font-weight:500;font-size:0.9rem;backdrop-filter:blur(12px);display:flex;align-items:center;gap:0.75rem;transform:translateX(120%);transition:transform 0.5s cubic-bezier(0.68,-0.55,0.265,1.55);box-shadow:0 10px 30px -5px rgba(0,0,0,0.15);}
+.toast.show{transform:translateX(0);}
+.toast.success{background:rgba(16,185,129,0.95);}
+@media print{.sidebar,.no-print{display:none!important;}.main-content{margin-left:0;padding:0;}}
+</style>
+</head>
+<body>
+<div class="sidebar">
+<div style="padding:0 1.5rem 2rem;border-bottom:1px solid rgba(255,255,255,0.06);margin-bottom:1.5rem;">
+<div style="display:flex;align-items:center;gap:0.5rem;"><span style="font-size:1.5rem;">🏘️</span><span style="font-weight:700;color:#fff;font-size:1.1rem;">KomunServis</span></div>
+<span style="font-size:0.75rem;color:rgba(255,255,255,0.3);padding-left:2rem;">Panel Admin</span>
+</div>
+<nav style="flex:1;">
+<a th:href="@{/admin/dashboard}" class="nav-item"><i class="fas fa-chart-pie"></i> Dashboard</a>
+<a th:href="@{/admin/users}" class="nav-item"><i class="fas fa-users"></i> Warga</a>
+<a th:href="@{/admin/broadcasts}" class="nav-item active"><i class="fas fa-bullhorn"></i> Broadcast</a>
+<a href="#" class="nav-item" onclick="window.print()"><i class="fas fa-download"></i> Export</a>
+</nav>
+<div style="border-top:1px solid rgba(255,255,255,0.06);padding:1rem 1.5rem;">
+<a th:href="@{/logout}" style="display:flex;align-items:center;gap:0.75rem;color:rgba(255,255,255,0.5);text-decoration:none;font-size:0.85rem;"><i class="fas fa-right-from-bracket"></i> Keluar</a>
+</div>
+</div>
+<div class="toast-container" id="toastContainer">
+<div th:if="${session.flashAttributes?.success}" class="toast success show"><i class="fas fa-check-circle" style="font-size:1.2rem;"></i><span th:text="${session.flashAttributes.success}">Sukses</span></div>
+</div>
+<div class="main-content">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
+<div><h1 style="font-size:1.5rem;font-weight:700;color:#0f172a;">Manajemen Broadcast</h1><p style="color:#64748b;font-size:0.9rem;">Kirim dan kelola pengumuman untuk seluruh warga</p></div>
+<button onclick="document.getElementById('broadcastModal').classList.add('open')" class="no-print" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;padding:0.6rem 1.2rem;border-radius:10px;font-weight:600;font-size:0.85rem;cursor:pointer;"><i class="fas fa-plus"></i> Broadcast Baru</button>
+</div>
+
+<!-- Create Broadcast Card -->
+<div id="broadcastModal" class="no-print" style="display:none;margin-bottom:2rem;">
+<div class="card" style="background:#fff;padding:1.5rem;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+<h2 style="font-size:1.1rem;font-weight:600;color:#0f172a;"><i class="fas fa-bullhorn" style="color:#6366f1;margin-right:0.5rem;"></i>Broadcast Baru</h2>
+<button onclick="document.getElementById('broadcastModal').style.display='none'" style="background:none;border:none;font-size:1.5rem;color:#94a3b8;cursor:pointer;">&times;</button>
+</div>
+<form th:action="@{/admin/broadcast}" method="post">
+<div style="margin-bottom:1rem;"><label style="display:block;font-size:0.85rem;font-weight:500;color:#374151;margin-bottom:0.3rem;">Judul Broadcast</label><input type="text" name="judul" required style="width:100%;padding:0.7rem 1rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.9rem;outline:none;"></div>
+<div style="margin-bottom:1rem;"><label style="display:block;font-size:0.85rem;font-weight:500;color:#374151;margin-bottom:0.3rem;">Isi Pesan</label><textarea name="isiBroadcast" rows="3" required style="width:100%;padding:0.7rem 1rem;border:1.5px solid #e2e8f0;border-radius:10px;font-size:0.9rem;outline:none;resize:vertical;"></textarea></div>
+<button type="submit" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;padding:0.7rem 1.5rem;border-radius:10px;font-weight:600;font-size:0.9rem;cursor:pointer;"><i class="fas fa-paper-plane"></i> Kirim Broadcast</button>
+</form>
+</div>
+</div>
+
+<!-- Broadcast History -->
+<div class="card" style="background:#fff;">
+<div style="padding:1.25rem 1.5rem;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
+<h2 style="font-size:1rem;font-weight:600;color:#0f172a;"><i class="fas fa-history" style="color:#6366f1;margin-right:0.4rem;"></i>Riwayat Broadcast</h2>
+<span style="font-size:0.85rem;color:#64748b;" th:text="${#lists.size(broadcasts)} + ' broadcast'"></span>
+</div>
+<div style="padding:0;">
+<div th:each="b : ${broadcasts}" style="padding:1.25rem 1.5rem;border-bottom:1px solid #f1f5f9;">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;">
+<div style="flex:1;">
+<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.3rem;">
+<i class="fas fa-bullhorn" style="color:#6366f1;font-size:0.9rem;"></i>
+<h3 style="font-size:1rem;font-weight:600;color:#0f172a;" th:text="${b.judul}">Judul Broadcast</h3>
+</div>
+<p style="color:#475569;font-size:0.88rem;line-height:1.5;" th:text="${b.isiBroadcast}">Isi broadcast...</p>
+</div>
+<div style="text-align:right;flex-shrink:0;min-width:120px;">
+<p style="font-size:0.78rem;color:#94a3b8;"><i class="far fa-clock"></i> <span th:text="${#temporals.format(b.tanggal, 'dd MMM yyyy HH:mm')}"></span></p>
+<p style="font-size:0.75rem;color:#64748b;margin-top:0.2rem;">oleh <span th:text="${b.admin.nama}">Admin</span></p>
+</div>
+</div>
+</div>
+<div th:if="${#lists.isEmpty(broadcasts)}" style="padding:3rem;text-align:center;color:#94a3b8;">
+<i class="fas fa-inbox" style="font-size:2rem;display:block;margin-bottom:0.5rem;"></i>
+<p>Belum ada broadcast yang dikirim.</p>
+</div>
+</div>
+</div>
+</div>
+<script>
+document.querySelectorAll('.toast.show').forEach(function(t){setTimeout(function(){t.classList.remove('show')},4000);});
+</script>
+</body>
+</html>

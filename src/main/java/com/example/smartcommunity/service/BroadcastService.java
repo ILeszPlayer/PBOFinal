@@ -8,4 +8,6 @@ import java.util.List;
 public interface BroadcastService {
     Broadcast createBroadcast(CreateBroadcastRequest request);
     List<Broadcast> getAllBroadcasts();
+    List<Broadcast> findAllActive();
+    Broadcast save(Broadcast broadcast);
 }

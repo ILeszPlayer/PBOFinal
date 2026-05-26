@@ -1,7 +1,7 @@
 package com.example.smartcommunity.config;
 
-import com.example.smartcommunity.model.User;
-import com.example.smartcommunity.repository.UserRepository;
+import com.example.smartcommunity.model.Pengguna;
+import com.example.smartcommunity.repository.PenggunaRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,15 +13,15 @@ import java.util.List;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final PenggunaRepository penggunaRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public CustomUserDetailsService(PenggunaRepository penggunaRepository) {
+        this.penggunaRepository = penggunaRepository;
     }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userRepository.findByEmail(email)
+        Pengguna user = penggunaRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User tidak ditemukan: " + email));
 
         return new org.springframework.security.core.userdetails.User(
