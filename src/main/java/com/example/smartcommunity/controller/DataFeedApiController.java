@@ -4,6 +4,7 @@ import com.example.smartcommunity.model.Comment;
 import com.example.smartcommunity.model.Complaint;
 import com.example.smartcommunity.model.Notification;
 import com.example.smartcommunity.model.Pengguna;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import com.example.smartcommunity.repository.CommentRepository;
 import com.example.smartcommunity.repository.ComplaintRepository;
 import com.example.smartcommunity.repository.PenggunaRepository;
@@ -92,8 +93,16 @@ public class DataFeedApiController {
     }
 
     @GetMapping("/complaints/{id}")
-    public ResponseEntity<Map<String, Object>> getComplaint(@PathVariable Long id) {
+    public ResponseEntity<Map<String, Object>> getComplaint(@PathVariable Long id, Authentication authentication) {
         Map<String, Object> result = new LinkedHashMap<>();
+        Long currentUserId = null;
+        if (authentication != null) {
+            try {
+                Pengguna currentUser = penggunaRepository.findByEmail(authentication.getName()).orElse(null);
+                if (currentUser != null) currentUserId = currentUser.getId();
+            } catch (Exception ignored) {}
+        }
+        result.put("currentUserId", currentUserId);
         try {
             // Load complaint via native query - no lazy loading at all
             List<Object[]> complaintRows = complaintRepository.findComplaintRawDataById(id);
@@ -152,6 +161,7 @@ public class DataFeedApiController {
                 Map<String, Object> userMap = new LinkedHashMap<>();
                 userMap.put("nama", cr[3] != null ? cr[3].toString() : "Warga");
                 cmMap.put("user", userMap);
+                cmMap.put("userId", cr[4] != null ? ((Number) cr[4]).longValue() : null);
                 commentsData.add(cmMap);
             }
             result.put("comments", commentsData);
@@ -227,5 +237,28 @@ public class DataFeedApiController {
             "success", true,
             "commentCount", commentCount
         ));
+    }
+
+    @Transactional
+    @DeleteMapping("/complaints/{complaintId}/comment/{commentId}")
+    public ResponseEntity<Map<String, Object>> deleteComment(
+            @PathVariable Long complaintId,
+            @PathVariable Long commentId,
+            Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Harus login"));
+        }
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Komentar tidak ditemukan"));
+        Pengguna user = penggunaRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        if (!comment.getUser().getId().equals(user.getId())) {
+            return ResponseEntity.status(403).body(Map.of("error", "Anda tidak berhak menghapus komentar ini"));
+        }
+
+        commentRepository.delete(comment);
+        int commentCount = commentRepository.findByComplaintIdOrderByTanggalAsc(complaintId).size();
+        return ResponseEntity.ok(Map.of("success", true, "commentCount", commentCount));
     }
 }

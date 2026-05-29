@@ -55,14 +55,7 @@ public class CitizenWebController {
     @GetMapping("/home")
     public String renderHomeSkeleton(Authentication authentication, Model model) {
         model.addAttribute("broadcasts", broadcastService.findAllActive());
-        if (authentication != null) {
-            try {
-                Pengguna user = penggunaService.findByEmail(authentication.getName());
-                model.addAttribute("userName", user.getNama());
-                model.addAttribute("userPoints", user.getReputationPoints());
-                model.addAttribute("userTier", user.getReputationTier());
-            } catch (Exception ignored) {}
-        }
+        addAuthAttributes(authentication, model);
         return "citizen-home";
     }
 
@@ -128,9 +121,7 @@ public class CitizenWebController {
         if (tierProgressPercent > 100) tierProgressPercent = 100;
 
         model.addAttribute("user", user);
-        model.addAttribute("userName", user.getNama());
-        model.addAttribute("userPoints", user.getReputationPoints());
-        model.addAttribute("userTier", user.getReputationTier());
+        addAuthAttributes(authentication, model);
         model.addAttribute("myComplaints", myComplaints);
         model.addAttribute("totalUpvotes", totalUpvotes);
         model.addAttribute("reputationTier", currentTier);
@@ -144,15 +135,7 @@ public class CitizenWebController {
     public String viewDetail(@PathVariable Long id, Authentication authentication, Model model) {
         Complaint complaint = complaintService.findById(id);
         model.addAttribute("complaint", complaint);
-
-        if (authentication != null) {
-            try {
-                Pengguna user = penggunaService.findByEmail(authentication.getName());
-                model.addAttribute("userName", user.getNama());
-                model.addAttribute("userPoints", user.getReputationPoints());
-                model.addAttribute("userTier", user.getReputationTier());
-            } catch (Exception ignored) {}
-        }
+        addAuthAttributes(authentication, model);
 
         // Load comments via native query to avoid lazy-loading issues
         List<Object[]> rows = commentRepository.findCommentRawDataByComplaintId(id);
@@ -226,9 +209,7 @@ public class CitizenWebController {
         if (complaint.getStatus() != Complaint.Status.PENDING) {
             return "redirect:/citizen/profile?error=Hanya pengaduan pending yang bisa diedit";
         }
-        model.addAttribute("userName", user.getNama());
-        model.addAttribute("userPoints", user.getReputationPoints());
-        model.addAttribute("userTier", user.getReputationTier());
+        addAuthAttributes(authentication, model);
         model.addAttribute("c", complaint);
         model.addAttribute("kategoris", Complaint.Kategori.values());
         return "citizen-complaint-edit";
@@ -277,29 +258,31 @@ public class CitizenWebController {
         }
     }
 
-    @GetMapping("/polls")
-    public String renderPollsPage(Authentication authentication, Model model) {
+    private void addAuthAttributes(Authentication authentication, Model model) {
+        model.addAttribute("isAuthenticated", false);
+        model.addAttribute("isAdmin", false);
         if (authentication != null) {
             try {
                 Pengguna user = penggunaService.findByEmail(authentication.getName());
+                model.addAttribute("isAuthenticated", true);
+                model.addAttribute("isAdmin", "ADMIN".equals(user.getRole()));
                 model.addAttribute("userName", user.getNama());
                 model.addAttribute("userPoints", user.getReputationPoints());
                 model.addAttribute("userTier", user.getReputationTier());
+                model.addAttribute("userId", user.getId());
             } catch (Exception ignored) {}
         }
+    }
+
+    @GetMapping("/polls")
+    public String renderPollsPage(Authentication authentication, Model model) {
+        addAuthAttributes(authentication, model);
         return "citizen-polls";
     }
 
     @GetMapping("/leaderboard")
     public String leaderboardPage(Authentication authentication, Model model) {
-        if (authentication != null) {
-            try {
-                Pengguna user = penggunaService.findByEmail(authentication.getName());
-                model.addAttribute("userName", user.getNama());
-                model.addAttribute("userPoints", user.getReputationPoints());
-                model.addAttribute("userTier", user.getReputationTier());
-            } catch (Exception ignored) {}
-        }
+        addAuthAttributes(authentication, model);
         List<Pengguna> allCitizens = penggunaService.findAllCitizens().stream()
             .filter(u -> u.getRole().equals("CITIZEN"))
             .sorted(Comparator.comparingInt(Pengguna::getReputationPoints).reversed())
@@ -310,14 +293,7 @@ public class CitizenWebController {
 
     @GetMapping("/broadcasts")
     public String broadcastsPage(Authentication authentication, Model model) {
-        if (authentication != null) {
-            try {
-                Pengguna user = penggunaService.findByEmail(authentication.getName());
-                model.addAttribute("userName", user.getNama());
-                model.addAttribute("userPoints", user.getReputationPoints());
-                model.addAttribute("userTier", user.getReputationTier());
-            } catch (Exception ignored) {}
-        }
+        addAuthAttributes(authentication, model);
         List<Broadcast> allBroadcasts = broadcastRepository.findAllByOrderByTanggalDesc();
         model.addAttribute("broadcasts", allBroadcasts);
         return "citizen-broadcasts";
@@ -327,9 +303,7 @@ public class CitizenWebController {
     public String editProfilePage(Authentication authentication, Model model) {
         Pengguna user = penggunaService.findByEmail(authentication.getName());
         model.addAttribute("user", user);
-        model.addAttribute("userName", user.getNama());
-        model.addAttribute("userPoints", user.getReputationPoints());
-        model.addAttribute("userTier", user.getReputationTier());
+        addAuthAttributes(authentication, model);
         return "citizen-edit-profile";
     }
 
@@ -358,9 +332,7 @@ public class CitizenWebController {
     @GetMapping("/upvoted")
     public String upvotedPage(Authentication authentication, Model model) {
         Pengguna user = penggunaService.findByEmail(authentication.getName());
-        model.addAttribute("userName", user.getNama());
-        model.addAttribute("userPoints", user.getReputationPoints());
-        model.addAttribute("userTier", user.getReputationTier());
+        addAuthAttributes(authentication, model);
         // Get all complaints the user upvoted
         List<Complaint> allComplaints = complaintRepository.findAllByOrderByTanggalDesc();
         List<Complaint> upvoted = allComplaints.stream()
@@ -372,12 +344,10 @@ public class CitizenWebController {
 
     @GetMapping("/notifications")
     public String notificationsPage(Authentication authentication, Model model) {
+        addAuthAttributes(authentication, model);
         if (authentication != null) {
             try {
                 Pengguna user = penggunaService.findByEmail(authentication.getName());
-                model.addAttribute("userName", user.getNama());
-                model.addAttribute("userPoints", user.getReputationPoints());
-                model.addAttribute("userTier", user.getReputationTier());
                 List<Notification> notifs = notificationService.getNotificationsByUser(user.getId());
                 model.addAttribute("notifications", notifs);
             } catch (Exception ignored) {}

@@ -25,11 +25,11 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/login", "/register", "/css/**", "/js/**",
+                .requestMatchers("/", "/login", "/register", "/css/**", "/js/**",
                     "/images/**", "/uploads/**", "/favicon.ico",
                     "/ws-notif/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/citizen/**", "/home").hasRole("CITIZEN")
+                .requestMatchers("/citizen/**", "/home", "/api/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
