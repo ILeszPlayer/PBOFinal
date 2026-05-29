@@ -3,6 +3,7 @@ package com.example.smartcommunity.controller;
 import com.example.smartcommunity.repository.CommentRepository;
 import com.example.smartcommunity.repository.ComplaintRepository;
 import com.example.smartcommunity.repository.PenggunaRepository;
+import com.example.smartcommunity.repository.PollRepository;
 import com.example.smartcommunity.service.BroadcastService;
 import com.example.smartcommunity.service.NotificationService;
 import com.example.smartcommunity.service.PenggunaService;
@@ -29,6 +30,7 @@ class AdminWebControllerTest {
     @MockBean private PenggunaRepository penggunaRepository;
     @MockBean private NotificationService notificationService;
     @MockBean private CommentRepository commentRepository;
+    @MockBean private PollRepository pollRepository;
 
     @Test
     @WithMockUser(roles = "ADMIN")

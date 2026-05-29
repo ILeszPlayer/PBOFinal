@@ -35,11 +35,31 @@ class DataFeedApiControllerTest {
     @MockBean private PenggunaRepository penggunaRepository;
     @MockBean private NotificationService notificationService;
 
+    private Complaint createMockComplaint(Long id) {
+        Complaint c = new Complaint();
+        c.setId(id);
+        c.setJudul("Test Judul");
+        c.setIsiPengaduan("Test Isi");
+        c.setKategori(Complaint.Kategori.UMUM);
+        c.setStatus(Complaint.Status.PENDING);
+        c.setUrgency(Complaint.Urgency.RENDAH);
+        c.setTanggal(java.time.LocalDateTime.now());
+        c.setUpvotesCount(0);
+        c.setIsAnonymous(false);
+        return c;
+    }
+
     @Test
     @WithMockUser
     void getComplaintsAsync_ReturnsPage() throws Exception {
-        Page<Complaint> page = new PageImpl<>(List.of(new Complaint()));
+        Complaint c = createMockComplaint(1L);
+        Warga w = new Warga();
+        w.setId(1L);
+        w.setNama("Test User");
+        c.setUser(w);
+        Page<Complaint> page = new PageImpl<>(List.of(c));
         when(complaintRepository.findAllByOrderByUpvotesCountDesc(any(Pageable.class))).thenReturn(page);
+        when(commentRepository.findByComplaintIdOrderByTanggalAsc(1L)).thenReturn(List.of());
 
         mockMvc.perform(get("/api/feed/complaints?page=0&size=10"))
                 .andExpect(status().isOk())
@@ -49,7 +69,7 @@ class DataFeedApiControllerTest {
     @Test
     @WithMockUser
     void getComplaint_ReturnsComplaint() throws Exception {
-        when(complaintRepository.existsById(1L)).thenReturn(true);
+        when(complaintRepository.findById(1L)).thenReturn(Optional.of(createMockComplaint(1L)));
         when(commentRepository.findCommentRawDataByComplaintId(1L)).thenReturn(List.of());
 
         mockMvc.perform(get("/api/complaints/1"))
@@ -60,7 +80,7 @@ class DataFeedApiControllerTest {
     @Test
     @WithMockUser
     void getComplaint_NotFound_ReturnsError() throws Exception {
-        when(complaintRepository.existsById(99L)).thenReturn(false);
+        when(complaintRepository.findById(99L)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/complaints/99"))
                 .andExpect(status().isBadRequest())
@@ -70,8 +90,7 @@ class DataFeedApiControllerTest {
     @Test
     @WithMockUser(username = "test@test.com")
     void upvoteComplaint_Increments() throws Exception {
-        Complaint c = new Complaint();
-        c.setId(1L);
+        Complaint c = createMockComplaint(1L);
         c.setUpvotesCount(5);
         Warga user = new Warga();
         user.setId(1L);
@@ -89,8 +108,7 @@ class DataFeedApiControllerTest {
     @Test
     @WithMockUser(username = "test@test.com")
     void addComment_ReturnsSuccess() throws Exception {
-        Complaint c = new Complaint();
-        c.setId(1L);
+        Complaint c = createMockComplaint(1L);
         Warga user = new Warga();
         user.setId(1L);
         user.setEmail("test@test.com");
@@ -99,7 +117,6 @@ class DataFeedApiControllerTest {
         when(complaintRepository.findById(1L)).thenReturn(Optional.of(c));
         when(penggunaRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
         when(commentRepository.save(any())).thenAnswer(i -> i.getArgument(0));
-        when(complaintRepository.findById(1L)).thenReturn(Optional.of(c));
 
         mockMvc.perform(post("/api/complaints/1/comment").with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)

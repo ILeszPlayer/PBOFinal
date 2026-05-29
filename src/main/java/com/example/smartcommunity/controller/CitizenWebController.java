@@ -10,6 +10,7 @@ import com.example.smartcommunity.service.BroadcastService;
 import com.example.smartcommunity.service.ComplaintService;
 import com.example.smartcommunity.service.PenggunaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
@@ -59,6 +61,9 @@ public class CitizenWebController {
             @RequestParam(value = "kategori", required = false) String kategori,
             @RequestParam(value = "buktiFoto", required = false) MultipartFile buktiFoto,
             @RequestParam(value = "isAnonymous", defaultValue = "false") boolean isAnonymous,
+            @RequestParam(value = "latitude", required = false) Double latitude,
+            @RequestParam(value = "longitude", required = false) Double longitude,
+            @RequestParam(value = "lokasiNama", required = false) String lokasiNama,
             Authentication authentication) {
         String email = authentication.getName();
         Pengguna user = penggunaService.findByEmail(email);
@@ -70,6 +75,9 @@ public class CitizenWebController {
         request.setKategori(kategori);
         request.setBuktiFoto(buktiFoto);
         request.setIsAnonymous(isAnonymous);
+        request.setLatitude(latitude);
+        request.setLongitude(longitude);
+        request.setLokasiNama(lokasiNama);
 
         complaintService.createComplaint(request);
         return "redirect:/citizen/home?submitted=true";
@@ -167,5 +175,39 @@ public class CitizenWebController {
     public String upvoteFromDetail(@PathVariable Long id) {
         complaintService.upvote(id);
         return "redirect:/citizen/detail/" + id;
+    }
+
+    @PostMapping("/complaint/{id}/delete")
+    public String deleteOwnComplaint(@PathVariable Long id, Authentication authentication) {
+        String email = authentication.getName();
+        Pengguna user = penggunaService.findByEmail(email);
+        Complaint complaint = complaintService.findById(id);
+        if (!complaint.getUser().getId().equals(user.getId())) {
+            return "redirect:/citizen/profile?error=Bukan pengaduan Anda";
+        }
+        if (complaint.getStatus() == Complaint.Status.SELESAI) {
+            return "redirect:/citizen/profile?error=Tidak bisa menghapus pengaduan yang sudah selesai";
+        }
+        complaintService.deleteComplaint(id);
+        return "redirect:/citizen/profile?deleted=true";
+    }
+
+    @GetMapping("/api/my-complaints")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getMyComplaints(Authentication authentication) {
+        String email = authentication.getName();
+        Pengguna user = penggunaService.findByEmail(email);
+        List<Complaint> complaints = complaintService.getComplaintsByUser(user.getId());
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Complaint c : complaints) {
+            Map<String, Object> item = new java.util.LinkedHashMap<>();
+            item.put("id", c.getId());
+            item.put("judul", c.getJudul());
+            item.put("status", c.getStatus() != null ? c.getStatus().name() : "PENDING");
+            item.put("upvotesCount", c.getUpvotesCount());
+            item.put("tanggal", c.getTanggal() != null ? List.of(c.getTanggal().getYear(), c.getTanggal().getMonthValue(), c.getTanggal().getDayOfMonth()) : null);
+            result.add(item);
+        }
+        return ResponseEntity.ok(result);
     }
 }

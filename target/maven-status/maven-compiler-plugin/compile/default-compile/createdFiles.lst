@@ -13,6 +13,7 @@ com\example\smartcommunity\dto\RegisterCitizenRequest.class
 com\example\smartcommunity\service\impl\PollServiceImpl.class
 com\example\smartcommunity\model\Pengguna.class
 com\example\smartcommunity\repository\BroadcastRepository.class
+com\example\smartcommunity\controller\PollApiController.class
 com\example\smartcommunity\model\Complaint.class
 com\example\smartcommunity\service\PollService.class
 com\example\smartcommunity\repository\CommentRepository.class
@@ -31,6 +32,7 @@ com\example\smartcommunity\model\Complaint$Kategori.class
 com\example\smartcommunity\service\PenggunaService.class
 com\example\smartcommunity\config\DataInitializer.class
 com\example\smartcommunity\exception\GlobalExceptionHandler.class
+com\example\smartcommunity\controller\NotificationController.class
 com\example\smartcommunity\model\PollVote.class
 com\example\smartcommunity\SmartCommunityApplication.class
 com\example\smartcommunity\dto\CreateBroadcastRequest.class
@@ -43,6 +45,7 @@ com\example\smartcommunity\config\SecurityConfig.class
 com\example\smartcommunity\model\Complaint$Urgency.class
 com\example\smartcommunity\model\Poll.class
 com\example\smartcommunity\controller\RootController.class
+com\example\smartcommunity\config\WebSocketConfig.class
 com\example\smartcommunity\dto\CreateComplaintRequest.class
 com\example\smartcommunity\service\CommentService.class
 com\example\smartcommunity\controller\CitizenWebController.class

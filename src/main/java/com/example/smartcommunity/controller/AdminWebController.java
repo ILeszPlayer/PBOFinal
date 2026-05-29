@@ -4,9 +4,11 @@ import com.example.smartcommunity.model.Complaint;
 import com.example.smartcommunity.model.Broadcast;
 import com.example.smartcommunity.model.Notification;
 import com.example.smartcommunity.model.Pengguna;
+import com.example.smartcommunity.model.Poll;
 import com.example.smartcommunity.repository.CommentRepository;
 import com.example.smartcommunity.repository.ComplaintRepository;
 import com.example.smartcommunity.repository.PenggunaRepository;
+import com.example.smartcommunity.repository.PollRepository;
 import com.example.smartcommunity.service.BroadcastService;
 import com.example.smartcommunity.service.NotificationService;
 import com.example.smartcommunity.service.PenggunaService;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +50,12 @@ public class AdminWebController {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired(required = false)
+    private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private PollRepository pollRepository;
 
     private String mapIncomingStatus(String status) {
         if (status == null) return "PENDING";
@@ -174,7 +183,7 @@ public class AdminWebController {
                 if (complaint.getProcessedAt() == null) complaint.setProcessedAt(now);
             }
             complaintRepository.save(complaint);
-            if (complaint.getUser() != null && !complaint.isAnonymous()) {
+            if (complaint.getUser() != null && !complaint.isIsAnonymous()) {
                 try { notificationService.createNotification(Notification.Type.STATUS_CHANGE, "Status pengaduan \"" + complaint.getJudul() + "\" berubah dari " + oldStatus.getDisplayName() + " menjadi " + newStatus.getDisplayName(), complaint.getUser(), complaint); } catch (Exception ignored) {}
             }
         } catch (Exception e) { /* fallback */ }
@@ -183,16 +192,26 @@ public class AdminWebController {
 
     @PostMapping("/api/complaints/{id}/update-status")
     @ResponseBody
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<Map<String, Object>> processStatusMutationAjax(
             @PathVariable Long id,
-            @RequestParam("status") String status) {
+            @RequestParam(value = "status", required = false, defaultValue = "PENDING") String status) {
         try {
             Complaint complaint = complaintRepository.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException("Target complaint structure missing"));
+                    .orElseThrow(() -> new IllegalArgumentException("Pengaduan tidak ditemukan"));
             String mappedStatus = mapIncomingStatus(status);
             Complaint.Status newStatus = Complaint.Status.valueOf(mappedStatus);
             Complaint.Status oldStatus = complaint.getStatus();
+
+            if (oldStatus == newStatus) {
+                return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "status", mappedStatus,
+                    "displayName", newStatus.getDisplayName(),
+                    "message", "Status sudah " + newStatus.getDisplayName().toLowerCase()
+                ));
+            }
+
             complaint.setStatus(newStatus);
             LocalDateTime now = LocalDateTime.now();
             if (newStatus == Complaint.Status.PROSES && complaint.getProcessedAt() == null) {
@@ -201,11 +220,14 @@ public class AdminWebController {
             if (newStatus == Complaint.Status.SELESAI) {
                 complaint.setResolvedAt(now);
                 if (complaint.getProcessedAt() == null) complaint.setProcessedAt(now);
+                if (complaint.getUser() != null) {
+                    try { userService.recalculateReputation(complaint.getUser().getId()); } catch (Exception ignored) {}
+                }
             }
-            complaintRepository.save(complaint);
+            complaintRepository.flush();
 
-            // Notify complaint owner if not anonymous
-            if (complaint.getUser() != null && !complaint.isAnonymous()) {
+            // Notify complaint owner
+            if (complaint.getUser() != null && !complaint.isIsAnonymous()) {
                 try {
                     notificationService.createNotification(
                         Notification.Type.STATUS_CHANGE,
@@ -215,6 +237,13 @@ public class AdminWebController {
                     );
                 } catch (Exception ignored) {}
             }
+
+            // Broadcast notification via WebSocket
+            try {
+                if (messagingTemplate != null) {
+                    messagingTemplate.convertAndSend("/topic/notifications", Map.of("type", "STATUS_CHANGE"));
+                }
+            } catch (Exception ignored) {}
 
             return ResponseEntity.ok(Map.of(
                 "success", true,
@@ -226,6 +255,65 @@ public class AdminWebController {
                 "success", false, "error", e.getMessage()
             ));
         }
+    }
+
+    @GetMapping("/api/stats/daily")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getDailyStats() {
+        try {
+            long total = complaintRepository.count();
+            long pending = complaintRepository.countByStatus("PENDING");
+            long processed = complaintRepository.countByStatus("PROSES");
+            long resolved = complaintRepository.countByStatus("SELESAI");
+
+            List<Object[]> kategoriData = complaintRepository.countGroupByKategori();
+            Map<String, Long> kategoriMap = new LinkedHashMap<>();
+            if (kategoriData != null) {
+                for (Object[] row : kategoriData) {
+                    kategoriMap.put(row[0] != null ? row[0].toString() : "UMUM",
+                        row[1] != null ? ((Number) row[1]).longValue() : 0);
+                }
+            }
+
+            List<Object[]> urgencyData = complaintRepository.countGroupByUrgency();
+            Map<String, Long> urgencyMap = new LinkedHashMap<>();
+            if (urgencyData != null) {
+                for (Object[] row : urgencyData) {
+                    urgencyMap.put(row[0] != null ? row[0].toString() : "RENDAH",
+                        row[1] != null ? ((Number) row[1]).longValue() : 0);
+                }
+            }
+
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("total", total);
+            result.put("pending", pending);
+            result.put("processed", processed);
+            result.put("resolved", resolved);
+            result.put("categories", kategoriMap);
+            result.put("urgencies", urgencyMap);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.ok(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/api/geo/complaints")
+    @ResponseBody
+    public ResponseEntity<List<Map<String, Object>>> getGeoTaggedComplaints() {
+        List<Complaint> geoTagged = complaintRepository.findByLatitudeIsNotNullAndLongitudeIsNotNull();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Complaint c : geoTagged) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("id", c.getId());
+            item.put("judul", c.getJudul());
+            item.put("latitude", c.getLatitude());
+            item.put("longitude", c.getLongitude());
+            item.put("status", c.getStatus() != null ? c.getStatus().name() : "PENDING");
+            item.put("urgency", c.getUrgency() != null ? c.getUrgency().name() : "RENDAH");
+            item.put("upvotesCount", c.getUpvotesCount());
+            result.add(item);
+        }
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/broadcast/submit")
@@ -339,6 +427,51 @@ public class AdminWebController {
         return "redirect:/admin/warga?success=Warga berhasil dihapus";
     }
 
+    // ─── Poll Management ──────────────────────────────────────────────
+    @GetMapping("/polls")
+    public String viewPolls(Model model) {
+        try {
+            model.addAttribute("polls", pollRepository.findAllByOrderByCreatedAtDesc());
+        } catch (Exception e) {
+            model.addAttribute("polls", new ArrayList<>());
+        }
+        return "admin-polls";
+    }
+
+    @PostMapping("/polls/create")
+    public String createPoll(@RequestParam("question") String question,
+                             Authentication authentication) {
+        Pengguna admin = penggunaRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Admin tidak ditemukan"));
+        Poll poll = new Poll(question, admin);
+        try {
+            pollRepository.save(poll);
+        } catch (Exception e) {
+            throw new RuntimeException("Gagal membuat polling: " + e.getMessage());
+        }
+        return "redirect:/admin/polls?success=Polling berhasil dibuat";
+    }
+
+    @PostMapping("/polls/{id}/close")
+    public String closePoll(@PathVariable Long id) {
+        try {
+            Poll poll = pollRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Polling tidak ditemukan"));
+            poll.setIsActive(false);
+            poll.setClosedAt(LocalDateTime.now());
+            pollRepository.save(poll);
+        } catch (Exception e) {
+            return "redirect:/admin/polls?error=Gagal menutup polling";
+        }
+        return "redirect:/admin/polls?success=Polling ditutup";
+    }
+
+    // ─── Map View ─────────────────────────────────────────────────────
+    @GetMapping("/map")
+    public String viewMap() {
+        return "admin-map";
+    }
+
     @GetMapping("/stats/kategori")
     @ResponseBody
     public ResponseEntity<List<Map<String, Object>>> getKategoriStats() {
@@ -392,7 +525,7 @@ public class AdminWebController {
             sb.append(c.getUrgency() != null ? c.getUrgency().name() : "RENDAH").append(",");
             sb.append(c.getStatus() != null ? c.getStatus().name() : "PENDING").append(",");
             sb.append(c.getTanggal() != null ? c.getTanggal().toString() : "").append(",");
-            sb.append(c.isAnonymous() ? "Anonim" : (c.getUser() != null ? escapeCsv(c.getUser().getNama()) : "Unknown")).append(",");
+            sb.append(c.isIsAnonymous() ? "Anonim" : (c.getUser() != null ? escapeCsv(c.getUser().getNama()) : "Unknown")).append(",");
             sb.append(c.getLatitude() != null ? c.getLatitude() : "").append(",");
             sb.append(c.getLongitude() != null ? c.getLongitude() : "").append(",");
             sb.append(c.getUpvotesCount()).append("\n");

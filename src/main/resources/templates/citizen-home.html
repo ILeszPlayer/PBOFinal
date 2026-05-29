@@ -129,6 +129,14 @@
                         <button onclick="filterStatus('SELESAI')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all text-slate-400 hover:bg-slate-700/40 hover:text-slate-200 border border-transparent" id="sfilter-SELESAI"><span class="w-2 h-2 rounded-full bg-emerald-400 inline-block mr-2"></span>Selesai</button>
                     </div>
                 </div>
+
+                <!-- Polls Widget -->
+                <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 shadow-lg backdrop-blur-sm">
+                    <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4"><i class="fas fa-poll text-indigo-400 mr-1"></i> Polling</h3>
+                    <div id="pollsContainer">
+                        <div class="text-center text-slate-500 text-xs py-4"><i class="fas fa-circle-notch animate-spin mr-1"></i> Memuat...</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Main Content -->
@@ -181,6 +189,10 @@
                     <input type="file" name="buktiFoto" accept="image/*" class="w-full text-sm text-slate-400 file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
                 </div>
                 <label class="flex items-center gap-2 text-sm text-slate-400 bg-slate-700/30 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-slate-700/50 transition-all"><input type="checkbox" name="isAnonymous" value="true" class="accent-indigo-500"> <i class="fas fa-user-secret text-indigo-400"></i> Laporkan secara anonim</label>
+                <button type="button" onclick="getLocation()" class="w-full bg-slate-700/40 hover:bg-slate-600/40 text-slate-300 font-bold py-2 rounded-xl transition-all text-xs border border-slate-700 flex items-center justify-center gap-2 shadow-lg" id="locBtn"><i class="fas fa-map-marker-alt text-indigo-400"></i> <span id="locText">Tambahkan Lokasi Saya</span></button>
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
+                <input type="hidden" name="lokasiNama" id="lokasiNama">
                 <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl transition-all text-sm shadow-lg shadow-indigo-500/20">Kirim Pengaduan</button>
             </form>
         </div>
@@ -212,6 +224,7 @@
 
         document.addEventListener("DOMContentLoaded", function() {
             loadFeed();
+            loadPolls();
             loadNotifCount();
             connectWebSocket();
             setTimeout(() => {
@@ -341,6 +354,57 @@
             }
         });
 
+        function loadPolls() {
+            fetch('/api/polls', { credentials: 'same-origin' })
+                .then(res => res.json())
+                .then(polls => {
+                    const container = document.getElementById('pollsContainer');
+                    if (!polls || polls.length === 0) {
+                        container.innerHTML = '<div class="text-center text-slate-500 text-xs py-4"><i class="fas fa-poll mr-1"></i> Belum ada polling aktif</div>';
+                        return;
+                    }
+                    container.innerHTML = polls.map(p => {
+                        const voted = p.hasVoted;
+                        const pctYes = p.yesPercentage || 0;
+                        const pctNo = p.noPercentage || 0;
+                        return `<div class="mb-3 last:mb-0 p-3 rounded-xl bg-slate-700/30 border border-slate-700/50">
+                            <p class="text-xs font-bold text-slate-200 mb-2">${p.question}</p>
+                            ${voted ? `
+                                <div class="space-y-1.5">
+                                    <div><div class="flex justify-between text-[9px] text-slate-400 mb-0.5"><span>Setuju</span><span>${pctYes}% (${p.yesCount})</span></div><div class="h-2 bg-slate-700 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 rounded-full transition-all" style="width:${pctYes}%"></div></div></div>
+                                    <div><div class="flex justify-between text-[9px] text-slate-400 mb-0.5"><span>Tidak Setuju</span><span>${pctNo}% (${p.noCount})</span></div><div class="h-2 bg-slate-700 rounded-full overflow-hidden"><div class="h-full bg-red-500 rounded-full transition-all" style="width:${pctNo}%"></div></div></div>
+                                    <div class="text-[9px] text-slate-500 text-center mt-1">${p.totalVotes} suara</div>
+                                </div>
+                            ` : `
+                                <div class="flex gap-2">
+                                    <button onclick="votePoll(${p.id},'YES')" class="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all">Setuju</button>
+                                    <button onclick="votePoll(${p.id},'NO')" class="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all">Tidak</button>
+                                </div>
+                            `}
+                        </div>`;
+                    }).join('');
+                }).catch(() => {
+                    document.getElementById('pollsContainer').innerHTML = '<div class="text-center text-slate-500 text-xs py-4">Gagal memuat polling</div>';
+                });
+        }
+
+        function votePoll(id, vote) {
+            fetch('/api/polls/' + id + '/vote', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ vote: vote })
+            }).then(res => res.json()).then(data => {
+                if (data.success) {
+                    loadPolls();
+                } else {
+                    alert(data.error || 'Gagal memberikan suara');
+                }
+            }).catch(() => {
+                alert('Gagal menghubungi server');
+            });
+        }
+
         function loadFeed() {
             feedPage = 0; feedDone = false;
             fetch('/api/feed/complaints?page=0&size=' + feedPageSize, { credentials: 'same-origin' })
@@ -374,8 +438,7 @@
             container.innerHTML = '';
 
             data.forEach(c => {
-                const comments = c.comments || [];
-                const commentCount = comments.length;
+                const commentCount = c.commentCount || 0;
                 let badgeClass = c.status === 'SELESAI' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : (c.status === 'PROSES' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20');
                 let badgeIcon = c.status === 'SELESAI' ? 'fa-check-circle' : (c.status === 'PROSES' ? 'fa-spinner' : 'fa-clock');
                 let badgeLabel = c.status === 'SELESAI' ? 'Selesai' : (c.status === 'PROSES' ? 'Diproses' : 'Pending');
@@ -433,6 +496,36 @@
                 `;
                 container.appendChild(card);
             });
+        }
+
+        function getLocation() {
+            const btn = document.getElementById('locBtn');
+            const txt = document.getElementById('locText');
+            if (!navigator.geolocation) {
+                txt.textContent = 'Geolokasi tidak didukung browser';
+                return;
+            }
+            txt.textContent = 'Mendeteksi lokasi...';
+            btn.disabled = true;
+            navigator.geolocation.getCurrentPosition(pos => {
+                document.getElementById('latitude').value = pos.coords.latitude;
+                document.getElementById('longitude').value = pos.coords.longitude;
+                txt.textContent = '📍 ' + pos.coords.latitude.toFixed(4) + ', ' + pos.coords.longitude.toFixed(4);
+                btn.className = 'w-full bg-emerald-500/20 text-emerald-400 font-bold py-2 rounded-xl transition-all text-xs border border-emerald-500/30 flex items-center justify-center gap-2 shadow-lg';
+                btn.disabled = false;
+
+                // Reverse geocode
+                fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + pos.coords.latitude + '&lon=' + pos.coords.longitude + '&accept-language=id')
+                    .then(r => r.json())
+                    .then(d => {
+                        if (d && d.display_name) {
+                            document.getElementById('lokasiNama').value = d.display_name;
+                        }
+                    }).catch(() => {});
+            }, err => {
+                txt.textContent = 'Gagal: ' + (err.code === 1 ? 'Izinkan akses lokasi' : err.message);
+                btn.disabled = false;
+            }, { enableHighAccuracy: true, timeout: 10000 });
         }
 
         function filterCategory(kategori) {

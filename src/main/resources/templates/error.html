@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - KomunServis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-slate-100 min-h-screen flex items-center justify-center font-sans">
+    <div class="text-center max-w-md mx-auto p-8">
+        <div class="w-24 h-24 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-6 border border-red-500/20">
+            <i class="fas fa-exclamation-triangle text-red-400 text-4xl"></i>
+        </div>
+        <h1 class="text-3xl font-black mb-2">Terjadi Kesalahan</h1>
+        <p class="text-slate-400 text-sm mb-2">Maaf, terjadi kesalahan saat memproses permintaan Anda.</p>
+        <p th:if="${message}" class="text-xs text-slate-500 mb-6 bg-slate-800/60 rounded-xl p-4 border border-slate-700" th:text="${message}">Error message</p>
+        <div class="flex gap-3 justify-center">
+            <a th:href="@{/}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-lg flex items-center gap-2">
+                <i class="fas fa-home"></i> Kembali ke Beranda
+            </a>
+            <button onclick="history.back()" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs px-6 py-3 rounded-xl transition-all flex items-center gap-2">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </button>
+        </div>
+    </div>
+</body>
+</html>
