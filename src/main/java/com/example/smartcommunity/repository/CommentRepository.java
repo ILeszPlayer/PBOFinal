@@ -12,6 +12,6 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByComplaintIdOrderByTanggalAsc(Long complaintId);
 
-    @Query(value = "SELECT c.id, c.isi_komentar, c.tanggal, u.nama FROM comments c JOIN pengguna u ON c.user_id = u.id WHERE c.complaint_id = :complaintId ORDER BY c.tanggal ASC", nativeQuery = true)
+    @Query(value = "SELECT c.id, c.isi_komentar, c.tanggal, u.nama FROM comments c JOIN users u ON c.user_id = u.id WHERE c.complaint_id = :complaintId ORDER BY c.tanggal ASC", nativeQuery = true)
     List<Object[]> findCommentRawDataByComplaintId(@Param("complaintId") Long complaintId);
 }

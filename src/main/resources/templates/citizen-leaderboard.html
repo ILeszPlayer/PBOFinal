@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Papan Peringkat - KomunServis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-slate-100 min-h-screen font-sans">
+
+    <nav class="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-xl border-b border-slate-700/50 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="/citizen/home" class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm shadow-lg shadow-indigo-500/20"><i class="fas fa-users text-white"></i></a>
+                <div>
+                    <span class="font-black text-sm tracking-tight">Komunitas</span>
+                    <span class="text-indigo-400 font-black text-sm">Servis</span>
+                </div>
+                <div class="hidden md:flex items-center gap-1 ml-4">
+                    <a href="/citizen/home" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-home mr-1"></i> Beranda</a>
+                    <a href="/citizen/broadcasts" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-bullhorn mr-1"></i> Pengumuman</a>
+                    <a href="/citizen/leaderboard" class="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20 transition-all"><i class="fas fa-trophy mr-1"></i> Peringkat</a>
+                    <a href="/citizen/polls" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-poll mr-1"></i> Polling</a>
+                    <a href="/citizen/upvoted" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-arrow-up mr-1"></i> Didukung</a>
+                    <a href="/citizen/notifications" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-bell mr-1"></i> Notifikasi</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="hidden md:inline-flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700">
+                    <i class="fas fa-star text-amber-400 text-[9px]"></i>
+                    <span th:text="${userPoints != null ? userPoints : 0}"></span> pts
+                </span>
+                <a href="/citizen/profile" class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold border-2 border-slate-700 hover:border-indigo-400 transition-all"><span th:text="${#strings.substring(userName != null ? userName : 'U', 0, 1).toUpperCase()}">U</span></a>
+                <a href="/logout" class="text-red-400 hover:text-red-300 text-xs p-2 rounded-lg hover:bg-red-500/10 transition-all" title="Keluar"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6 max-w-3xl">
+        <div class="mb-6 text-center">
+            <h1 class="text-xl font-black tracking-tight text-slate-100"><i class="fas fa-trophy text-amber-400 mr-2"></i> Papan Peringkat Warga</h1>
+            <p class="text-xs text-slate-400 mt-1">Warga dengan reputasi terbaik di komunitas</p>
+        </div>
+
+        <div th:if="${#lists.isEmpty(citizens)}" class="text-center py-16 text-slate-500">
+            <i class="fas fa-users-slash text-4xl mb-3 block text-slate-600"></i>
+            <span class="text-sm">Belum ada warga terdaftar</span>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(citizens)}" class="space-y-2">
+            <div th:each="c, stat : ${citizens}" class="bg-slate-800/60 border border-slate-700 rounded-xl p-4 flex items-center gap-4 hover:bg-slate-700/40 transition-all">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm flex-shrink-0"
+                     th:classappend="${stat.index == 0} ? 'bg-amber-500/20 text-amber-400' : (${stat.index == 1} ? 'bg-slate-300/20 text-slate-300' : (${stat.index == 2} ? 'bg-amber-700/20 text-amber-600' : 'bg-indigo-500/10 text-indigo-400'))">
+                    <span th:text="${stat.index + 1}">1</span>
+                </div>
+                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0" th:text="${#strings.substring(c.nama, 0, 1)}">A</div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-slate-200 truncate" th:text="${c.nama}">Nama</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5" th:text="${c.reputationTier}">Tier</p>
+                </div>
+                <div class="text-right flex-shrink-0">
+                    <div class="text-lg font-black" th:classappend="${stat.index == 0} ? 'text-amber-400' : (${stat.index == 1} ? 'text-slate-300' : (${stat.index == 2} ? 'text-amber-600' : 'text-indigo-400'))" th:text="${c.reputationPoints}">0</div>
+                    <div class="text-[9px] text-slate-500">poin</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

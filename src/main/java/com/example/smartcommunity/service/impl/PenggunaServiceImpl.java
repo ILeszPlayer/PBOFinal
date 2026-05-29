@@ -102,6 +102,11 @@ public class PenggunaServiceImpl implements PenggunaService {
     }
 
     @Override
+    public void save(Pengguna user) {
+        penggunaRepository.save(user);
+    }
+
+    @Override
     public List<Pengguna> findAllCitizens() {
         return penggunaRepository.findAll().stream()
                 .filter(u -> "CITIZEN".equals(u.getRole()))

@@ -37,4 +37,7 @@ public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
 
     @Query(value = "SELECT MONTH(tanggal), COUNT(id) FROM complaints GROUP BY MONTH(tanggal) ORDER BY MONTH(tanggal)", nativeQuery = true)
     List<Object[]> getMonthlyStats();
+
+    @Query(value = "SELECT c.id, c.judul, c.isi_pengaduan, c.kategori, c.status, c.urgency, c.bukti_foto, c.upvotes_count, c.is_anonymous, c.tanggal, u.nama FROM complaints c LEFT JOIN users u ON c.user_id = u.id WHERE c.id = :id", nativeQuery = true)
+    List<Object[]> findComplaintRawDataById(@org.springframework.data.repository.query.Param("id") Long id);
 }

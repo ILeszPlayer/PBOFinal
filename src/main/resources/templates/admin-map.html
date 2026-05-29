@@ -9,9 +9,9 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
-<body class="bg-slate-900 text-slate-100 flex min-h-screen font-sans">
+<body class="bg-slate-900 text-slate-100 flex h-screen overflow-hidden font-sans">
 
-    <aside class="w-64 bg-slate-800 border-r border-slate-700 p-6 flex flex-col justify-between flex-shrink-0">
+    <aside class="w-64 bg-slate-800 border-r border-slate-700 p-6 flex flex-col justify-between flex-shrink-0 sticky top-0 h-screen">
         <div class="space-y-6">
             <div class="flex items-center gap-2 px-2 text-indigo-400 font-black tracking-wider"><i class="fas fa-shield-halved text-xl"></i> CORE COMMAND</div>
             <nav class="space-y-2 text-xs font-bold">
@@ -54,7 +54,7 @@
         let markersLayer = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            map = L.map('map').setView([-6.2088, 106.8456], 11);
+            map = L.map('map').setView([-6.9175, 107.6191], 12);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors',
                 maxZoom: 18

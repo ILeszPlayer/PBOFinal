@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polling Warga - KomunServis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-slate-100 min-h-screen font-sans">
+
+    <!-- Top Navigation Bar -->
+    <nav class="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-xl border-b border-slate-700/50 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="/citizen/home" class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm shadow-lg shadow-indigo-500/20"><i class="fas fa-users text-white"></i></a>
+                <div>
+                    <span class="font-black text-sm tracking-tight">Komunitas</span>
+                    <span class="text-indigo-400 font-black text-sm">Servis</span>
+                </div>
+                <div class="hidden md:flex items-center gap-1 ml-4">
+                    <a href="/citizen/home" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-home mr-1"></i> Beranda</a>
+                    <a href="/citizen/broadcasts" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-bullhorn mr-1"></i> Pengumuman</a>
+                    <a href="/citizen/leaderboard" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-trophy mr-1"></i> Peringkat</a>
+                    <a href="/citizen/polls" class="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20 transition-all"><i class="fas fa-poll mr-1"></i> Polling</a>
+                    <a href="/citizen/upvoted" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-arrow-up mr-1"></i> Didukung</a>
+                    <a href="/citizen/notifications" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-bell mr-1"></i> Notifikasi</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="hidden md:inline-flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700">
+                    <i class="fas fa-star text-amber-400 text-[9px]"></i>
+                    <span th:text="${userPoints != null ? userPoints : 0}"></span> pts
+                </span>
+                <a href="/citizen/profile" class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold border-2 border-slate-700 hover:border-indigo-400 transition-all"><span th:text="${#strings.substring(userName != null ? userName : 'U', 0, 1).toUpperCase()}">U</span></a>
+                <a href="/logout" class="text-red-400 hover:text-red-300 text-xs p-2 rounded-lg hover:bg-red-500/10 transition-all" title="Keluar"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+    </nav>
+                <a href="/logout" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 text-[10px] font-bold px-4 py-2 rounded-xl border border-red-500/20 transition-all"><i class="fas fa-sign-out-alt mr-1"></i> Keluar</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6 max-w-3xl">
+        <!-- Header -->
+        <div class="mb-6 text-center">
+            <h1 class="text-xl font-black tracking-tight text-slate-100">🗳️ Polling Warga</h1>
+            <p class="text-xs text-slate-400 mt-1">Berikan suaramu untuk setiap polling yang sedang berlangsung</p>
+        </div>
+
+        <!-- Polls List -->
+        <div id="pollsContainer" class="space-y-4">
+            <div class="text-center py-12 text-slate-500"><i class="fas fa-circle-notch animate-spin text-xl"></i></div>
+        </div>
+    </div>
+
+    <script>
+        function loadPolls() {
+            fetch('/api/polls', { credentials: 'same-origin' })
+                .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+                .then(polls => {
+                    const container = document.getElementById('pollsContainer');
+                    if (!polls || polls.length === 0) {
+                        container.innerHTML = `
+                            <div class="text-center py-16 text-slate-500">
+                                <i class="fas fa-poll text-4xl mb-4 block text-slate-600"></i>
+                                <span class="text-sm">Belum ada polling tersedia</span>
+                                <p class="text-[10px] text-slate-600 mt-1">Nantikan polling dari admin komunitas</p>
+                            </div>`;
+                        return;
+                    }
+                    container.innerHTML = polls.map(p => {
+                        const voted = p.hasVoted;
+                        const closed = p.closed;
+                        const pctYes = p.yesPercentage || 0;
+                        const pctNo = p.noPercentage || 0;
+                        const totalVotes = p.totalVotes || 0;
+                        const winner = pctYes > pctNo ? 'Setuju' : pctNo > pctYes ? 'Tidak Setuju' : 'Seri';
+                        return `
+                            <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-lg ${closed ? 'opacity-80' : ''}">
+                                <div class="flex items-start justify-between mb-4">
+                                    <div class="flex-1">
+                                        <h3 class="text-sm font-bold text-slate-100 leading-relaxed">${p.question}</h3>
+                                        <div class="flex items-center gap-2 mt-1.5">
+                                            <span class="inline-flex items-center gap-1 text-[9px] font-bold px-2 py-0.5 rounded-full ${closed ? 'bg-slate-600/20 text-slate-400 border border-slate-600/30' : 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'}">
+                                                <i class="fas ${closed ? 'fa-lock' : 'fa-circle'} ${closed ? '' : 'animate-pulse'} text-[7px]"></i>
+                                                ${closed ? 'Ditutup' : 'Aktif'}
+                                            </span>
+                                            <span class="text-[10px] text-slate-500">${totalVotes} suara</span>
+                                            ${closed && !voted ? '<span class="text-[10px] text-slate-500">·</span><span class="text-[10px] text-amber-400">Pemenang: ' + winner + '</span>' : ''}
+                                        </div>
+                                    </div>
+                                    <div class="w-12 h-12 rounded-xl bg-indigo-500/15 flex items-center justify-center flex-shrink-0">
+                                        <span class="text-lg">🗳️</span>
+                                    </div>
+                                </div>
+
+                                ${!closed && !voted ? `
+                                    <div class="flex gap-3 mb-4">
+                                        <button onclick="votePoll(${p.id},'YES')" class="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 hover:border-emerald-500/50 px-4 py-3 rounded-xl text-xs font-bold transition-all hover:shadow-lg hover:shadow-emerald-500/10 flex items-center justify-center gap-2">
+                                            <i class="fas fa-thumbs-up"></i> Setuju
+                                        </button>
+                                        <button onclick="votePoll(${p.id},'NO')" class="flex-1 bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 hover:border-red-500/50 px-4 py-3 rounded-xl text-xs font-bold transition-all hover:shadow-lg hover:shadow-red-500/10 flex items-center justify-center gap-2">
+                                            <i class="fas fa-thumbs-down"></i> Tidak Setuju
+                                        </button>
+                                    </div>
+                                ` : `
+                                    <div class="space-y-3 mb-4">
+                                        <div>
+                                            <div class="flex justify-between text-xs text-slate-400 mb-1"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span> Setuju</span><span class="font-bold text-slate-300">${pctYes}% (${p.yesCount})</span></div>
+                                            <div class="h-3 bg-slate-700 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 rounded-full transition-all" style="width:${pctYes}%"></div></div>
+                                        </div>
+                                        <div>
+                                            <div class="flex justify-between text-xs text-slate-400 mb-1"><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-red-500"></span> Tidak Setuju</span><span class="font-bold text-slate-300">${pctNo}% (${p.noCount})</span></div>
+                                            <div class="h-3 bg-slate-700 rounded-full overflow-hidden"><div class="h-full bg-red-500 rounded-full transition-all" style="width:${pctNo}%"></div></div>
+                                        </div>
+                                        <div class="text-center text-[10px] text-slate-500 pt-1 border-t border-slate-700/50">
+                                            ${closed ? 'Polling telah ditutup' : voted ? '<i class="fas fa-check-circle text-emerald-400 mr-1"></i>Kamu sudah memberikan suara' : ''}
+                                            ${voted && !closed ? '<span class="mx-1">·</span><button onclick="resetVote(' + p.id + ')" class="text-blue-400 hover:text-blue-300">Ubah suara</button>' : ''}
+                                        </div>
+                                    </div>
+                                `}
+                            </div>`;
+                    }).join('');
+                }).catch(err => {
+                    console.error('Polls load error:', err);
+                    document.getElementById('pollsContainer').innerHTML = `
+                        <div class="text-center py-16 text-slate-500">
+                            <i class="fas fa-exclamation-triangle text-3xl mb-3 block text-amber-400"></i>
+                            <span class="text-sm">Gagal memuat polling</span>
+                            <p class="text-[10px] text-slate-600 mt-1">${err.message || 'Unknown error'}</p>
+                        </div>`;
+                });
+        }
+
+        function votePoll(id, vote) {
+            const btn = event.target.closest('button');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-circle-notch animate-spin"></i>';
+            fetch('/api/polls/' + id + '/vote', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ vote: vote })
+            }).then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+            .then(data => {
+                if (data.success) { loadPolls(); }
+                else { btn.disabled = false; btn.innerHTML = vote === 'YES' ? '<i class="fas fa-thumbs-up"></i> Setuju' : '<i class="fas fa-thumbs-down"></i> Tidak Setuju'; alert(data.error || 'Gagal'); }
+            }).catch(err => {
+                btn.disabled = false;
+                btn.innerHTML = vote === 'YES' ? '<i class="fas fa-thumbs-up"></i> Setuju' : '<i class="fas fa-thumbs-down"></i> Tidak Setuju';
+                alert('Gagal: ' + err.message);
+            });
+        }
+
+        function resetVote(id) {
+            fetch('/api/polls/' + id + '/vote', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ vote: '' })
+            }).then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+            .then(data => { if (data.success) loadPolls(); else alert(data.error || 'Gagal'); })
+            .catch(err => alert('Gagal: ' + err.message));
+        }
+
+        document.addEventListener('DOMContentLoaded', loadPolls);
+    </script>
+</body>
+</html>

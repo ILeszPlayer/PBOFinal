@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -57,6 +58,9 @@ public class AdminWebController {
     @Autowired
     private PollRepository pollRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private String mapIncomingStatus(String status) {
         if (status == null) return "PENDING";
         return switch (status.toUpperCase()) {
@@ -81,26 +85,31 @@ public class AdminWebController {
 
         try {
             long total = complaintRepository.count();
-            long pending = complaintRepository.countByStatus("PENDING");
-            long processed = complaintRepository.countByStatus("PROSES");
-            long resolved = complaintRepository.countByStatus("SELESAI");
+            long pending = complaintRepository.countByStatus(Complaint.Status.PENDING);
+            long processed = complaintRepository.countByStatus(Complaint.Status.PROSES);
+            long resolved = complaintRepository.countByStatus(Complaint.Status.SELESAI);
             model.addAttribute("totalComplaints", total);
             model.addAttribute("pendingCount", pending);
             model.addAttribute("processedCount", processed);
             model.addAttribute("resolvedCount", resolved);
         } catch (Exception e) {
+            System.err.println("Dashboard stats failed: " + e.getMessage());
             model.addAttribute("totalComplaints", 0L);
             model.addAttribute("pendingCount", 0L);
             model.addAttribute("processedCount", 0L);
             model.addAttribute("resolvedCount", 0L);
         }
 
-        // Average SLA hours
+        // Average SLA hours & compliance rate
         try {
             List<Complaint> resolved = complaintRepository.findByStatus(Complaint.Status.SELESAI);
             double avgSla = resolved.stream().filter(c -> c.getProcessedAt() != null).mapToLong(Complaint::getSlaHours).average().orElse(0);
             model.addAttribute("avgSlaHours", Math.round(avgSla * 10.0) / 10.0);
-        } catch (Exception e) { model.addAttribute("avgSlaHours", 0); }
+            long totalResolved = resolved.size();
+            long compliantCount = resolved.stream().filter(c -> c.getProcessedAt() != null && c.isSlaCompliant()).count();
+            long slaRate = totalResolved > 0 ? Math.round((double) compliantCount / totalResolved * 100) : 0;
+            model.addAttribute("slaComplianceRate", slaRate);
+        } catch (Exception e) { model.addAttribute("avgSlaHours", 0); model.addAttribute("slaComplianceRate", 0); }
 
         // Top upvoted complaints
         try {
@@ -425,6 +434,38 @@ public class AdminWebController {
     public String deleteWarga(@PathVariable Long id) {
         penggunaRepository.deleteById(id);
         return "redirect:/admin/warga?success=Warga berhasil dihapus";
+    }
+
+    @PostMapping("/warga/{id}/edit")
+    public String editWarga(@PathVariable Long id,
+            @RequestParam("nama") String nama,
+            @RequestParam("email") String email,
+            @RequestParam("role") String role,
+            @RequestParam(value = "password", required = false) String password) {
+        try {
+            Pengguna user = penggunaRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Warga tidak ditemukan"));
+            user.setNama(nama);
+            user.setEmail(email);
+            user.setRole(role);
+            if (password != null && !password.trim().isEmpty()) {
+                user.setPassword(passwordEncoder.encode(password));
+            }
+            penggunaRepository.save(user);
+            return "redirect:/admin/warga/" + id + "?edited=true";
+        } catch (Exception e) {
+            return "redirect:/admin/warga/" + id + "?error=" + e.getMessage();
+        }
+    }
+
+    @PostMapping("/warga/{id}/notify")
+    public String sendNotificationToWarga(@PathVariable Long id,
+            @RequestParam String judul, @RequestParam String pesan) {
+        Pengguna user = penggunaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Warga tidak ditemukan"));
+        notificationService.createNotification(
+            Notification.Type.SYSTEM, pesan, user, null);
+        return "redirect:/admin/warga/" + id + "?notified=true";
     }
 
     // ─── Poll Management ──────────────────────────────────────────────

@@ -34,12 +34,22 @@ public class DataFeedApiController {
     @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getComplaintsAsync(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            Authentication authentication) {
         if (size > 50) size = 50;
         Page<Complaint> complaints = complaintRepository.findAllByOrderByUpvotesCountDesc(
                 PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "upvotesCount")));
 
+        Long currentUserId = null;
+        if (authentication != null) {
+            try {
+                Pengguna currentUser = penggunaRepository.findByEmail(authentication.getName()).orElse(null);
+                if (currentUser != null) currentUserId = currentUser.getId();
+            } catch (Exception ignored) {}
+        }
+
         List<Map<String, Object>> complaintList = new ArrayList<>();
+        Long uid = currentUserId;
         for (Complaint c : complaints.getContent()) {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("id", c.getId());
@@ -51,6 +61,7 @@ public class DataFeedApiController {
             item.put("buktiFoto", c.getBuktiFoto());
             item.put("upvotesCount", c.getUpvotesCount());
             item.put("isAnonymous", c.isIsAnonymous());
+            item.put("upvoted", uid != null && c.getUpvotedUserIds().contains(uid));
             item.put("tanggal", List.of(c.getTanggal().getYear(), c.getTanggal().getMonthValue(),
                 c.getTanggal().getDayOfMonth(), c.getTanggal().getHour(), c.getTanggal().getMinute(), c.getTanggal().getSecond()));
 
@@ -81,47 +92,65 @@ public class DataFeedApiController {
     }
 
     @GetMapping("/complaints/{id}")
-    @Transactional(readOnly = true)
     public ResponseEntity<Map<String, Object>> getComplaint(@PathVariable Long id) {
-        Optional<Complaint> optComplaint = complaintRepository.findById(id);
-        if (optComplaint.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Pengaduan tidak ditemukan"));
-        }
-        Complaint c = optComplaint.get();
         Map<String, Object> result = new LinkedHashMap<>();
-        result.put("id", id);
-        result.put("judul", c.getJudul());
-        result.put("isiPengaduan", c.getIsiPengaduan());
-        result.put("kategori", c.getKategori() != null ? c.getKategori().name() : "UMUM");
-        result.put("status", c.getStatus() != null ? c.getStatus().name() : "PENDING");
-        result.put("urgency", c.getUrgency() != null ? c.getUrgency().name() : "RENDAH");
-        result.put("buktiFoto", c.getBuktiFoto());
-        result.put("upvotesCount", c.getUpvotesCount());
-        result.put("isAnonymous", c.isIsAnonymous());
-        result.put("tanggal", List.of(c.getTanggal().getYear(), c.getTanggal().getMonthValue(),
-            c.getTanggal().getDayOfMonth(), c.getTanggal().getHour(), c.getTanggal().getMinute(), c.getTanggal().getSecond()));
-        if (c.getUser() != null && !c.isIsAnonymous()) {
-            Map<String, Object> userMap = new LinkedHashMap<>();
-            userMap.put("nama", c.getUser().getNama());
-            result.put("user", userMap);
+        try {
+            // Load complaint via native query - no lazy loading at all
+            List<Object[]> complaintRows = complaintRepository.findComplaintRawDataById(id);
+            if (complaintRows.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Pengaduan tidak ditemukan"));
+            }
+            Object[] row = complaintRows.get(0);
+            result.put("id", row[0]);
+            result.put("judul", row[1]);
+            result.put("isiPengaduan", row[2]);
+            result.put("kategori", row[3] != null ? row[3].toString() : "UMUM");
+            result.put("status", row[4] != null ? row[4].toString() : "PENDING");
+            result.put("urgency", row[5] != null ? row[5].toString() : "RENDAH");
+            result.put("buktiFoto", row[6]);
+            result.put("upvotesCount", row[7] != null ? ((Number) row[7]).intValue() : 0);
+            if (row[8] instanceof Boolean) {
+                result.put("isAnonymous", (Boolean) row[8]);
+            } else {
+                result.put("isAnonymous", row[8] != null && ((Number) row[8]).intValue() == 1);
+            }
+            // Format tanggal
+            if (row[9] instanceof java.sql.Timestamp ts) {
+                LocalDateTime ldt = ts.toLocalDateTime();
+                result.put("tanggal", List.of(ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth(),
+                    ldt.getHour(), ldt.getMinute(), ldt.getSecond()));
+            } else if (row[9] != null) {
+                result.put("tanggal", row[9].toString());
+            } else {
+                result.put("tanggal", null);
+            }
+            // User info
+            if (row[10] != null) {
+                Map<String, Object> userMap = new LinkedHashMap<>();
+                userMap.put("nama", row[10].toString());
+                result.put("user", userMap);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Gagal memuat detail pengaduan: " + e.getMessage()));
         }
 
+        // Load comments (separate native query)
         try {
             List<Object[]> rows = commentRepository.findCommentRawDataByComplaintId(id);
             List<Map<String, Object>> commentsData = new ArrayList<>();
-            for (Object[] row : rows) {
+            for (Object[] cr : rows) {
                 Map<String, Object> cmMap = new LinkedHashMap<>();
-                cmMap.put("id", row[0]);
-                cmMap.put("isiKomentar", row[1]);
-                if (row[2] instanceof java.sql.Timestamp ts) {
+                cmMap.put("id", cr[0]);
+                cmMap.put("isiKomentar", cr[1]);
+                if (cr[2] instanceof java.sql.Timestamp ts) {
                     LocalDateTime ldt = ts.toLocalDateTime();
                     cmMap.put("tanggal", List.of(ldt.getYear(), ldt.getMonthValue(), ldt.getDayOfMonth(),
                         ldt.getHour(), ldt.getMinute(), ldt.getSecond()));
                 } else {
-                    cmMap.put("tanggal", row[2]);
+                    cmMap.put("tanggal", cr[2]);
                 }
                 Map<String, Object> userMap = new LinkedHashMap<>();
-                userMap.put("nama", row[3] != null ? row[3] : "Warga");
+                userMap.put("nama", cr[3] != null ? cr[3].toString() : "Warga");
                 cmMap.put("user", userMap);
                 commentsData.add(cmMap);
             }
@@ -144,14 +173,18 @@ public class DataFeedApiController {
         Pengguna user = penggunaRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
 
-        if (complaint.getUpvotedUserIds().contains(user.getId())) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Anda sudah mendukung pengaduan ini"));
-        }
+        boolean alreadyUpvoted = complaint.getUpvotedUserIds().contains(user.getId());
 
-        complaint.getUpvotedUserIds().add(user.getId());
-        complaint.setUpvotesCount(complaint.getUpvotesCount() + 1);
+        if (alreadyUpvoted) {
+            // Toggle: remove upvote
+            complaint.getUpvotedUserIds().remove(user.getId());
+            complaint.setUpvotesCount(Math.max(0, complaint.getUpvotesCount() - 1));
+        } else {
+            complaint.getUpvotedUserIds().add(user.getId());
+            complaint.setUpvotesCount(complaint.getUpvotesCount() + 1);
+        }
         complaintRepository.save(complaint);
-        return ResponseEntity.ok(Map.of("success", true, "count", complaint.getUpvotesCount()));
+        return ResponseEntity.ok(Map.of("success", true, "count", complaint.getUpvotesCount(), "upvoted", !alreadyUpvoted));
     }
 
     @Transactional

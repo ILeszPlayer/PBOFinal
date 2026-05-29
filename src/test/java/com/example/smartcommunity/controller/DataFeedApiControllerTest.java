@@ -69,18 +69,36 @@ class DataFeedApiControllerTest {
     @Test
     @WithMockUser
     void getComplaint_ReturnsComplaint() throws Exception {
-        when(complaintRepository.findById(1L)).thenReturn(Optional.of(createMockComplaint(1L)));
-        when(commentRepository.findCommentRawDataByComplaintId(1L)).thenReturn(List.of());
+        Object[] rawRow = new Object[]{
+            1L,                                    // id
+            "Test Judul",                          // judul
+            "Test Isi",                            // isi_pengaduan
+            "UMUM",                                // kategori
+            "PENDING",                             // status
+            "RENDAH",                              // urgency
+            null,                                  // bukti_foto
+            0,                                     // upvotes_count
+            false,                                 // is_anonymous
+            java.sql.Timestamp.valueOf(java.time.LocalDateTime.now()), // tanggal
+            "Test User"                            // user nama
+        };
+        java.util.ArrayList<Object[]> rawList = new java.util.ArrayList<>();
+        rawList.add(rawRow);
+        when(complaintRepository.findComplaintRawDataById(1L)).thenReturn(rawList);
+        when(commentRepository.findCommentRawDataByComplaintId(1L)).thenReturn(new java.util.ArrayList<>());
 
         mockMvc.perform(get("/api/complaints/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1));
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.judul").value("Test Judul"))
+                .andExpect(jsonPath("$.kategori").value("UMUM"))
+                .andExpect(jsonPath("$.status").value("PENDING"));
     }
 
     @Test
     @WithMockUser
     void getComplaint_NotFound_ReturnsError() throws Exception {
-        when(complaintRepository.findById(99L)).thenReturn(Optional.empty());
+        when(complaintRepository.findComplaintRawDataById(99L)).thenReturn(new java.util.ArrayList<>());
 
         mockMvc.perform(get("/api/complaints/99"))
                 .andExpect(status().isBadRequest())

@@ -9,5 +9,6 @@ import java.util.Optional;
 @Repository
 public interface PollVoteRepository extends JpaRepository<PollVote, Long> {
     Optional<PollVote> findByPollIdAndUserId(Long pollId, Long userId);
+    void deleteByPollIdAndUserId(Long pollId, Long userId);
     long countByPollIdAndVote(Long pollId, PollVote.Vote vote);
 }

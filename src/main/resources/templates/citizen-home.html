@@ -22,6 +22,15 @@
                     <span class="font-black text-sm tracking-tight">Komunitas</span>
                     <span class="text-indigo-400 font-black text-sm">Servis</span>
                 </div>
+                <!-- Nav Links -->
+                <div class="hidden md:flex items-center gap-1 ml-4">
+                    <a href="/citizen/home" class="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-all"><i class="fas fa-home mr-1"></i> Beranda</a>
+                    <a href="/citizen/broadcasts" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-bullhorn mr-1"></i> Pengumuman</a>
+                    <a href="/citizen/leaderboard" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-trophy mr-1"></i> Peringkat</a>
+                    <a href="/citizen/polls" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-poll mr-1"></i> Polling</a>
+                    <a href="/citizen/upvoted" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-arrow-up mr-1"></i> Didukung</a>
+                    <a href="/citizen/notifications" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-bell mr-1"></i> Notifikasi</a>
+                </div>
             </div>
             <div class="flex items-center gap-2">
                 <span class="hidden md:inline-flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700">
@@ -43,7 +52,7 @@
                             <div class="p-4 text-center text-slate-500 text-xs"><i class="fas fa-circle-notch animate-spin mr-1"></i> Memuat...</div>
                         </div>
                         <div class="px-4 py-2 border-t border-slate-700 text-center bg-slate-700/20">
-                            <a th:href="@{/citizen/profile}" class="text-[9px] text-indigo-400 hover:text-indigo-300 font-bold">Lihat Semua Notifikasi</a>
+                            <a th:href="@{/citizen/notifications}" class="text-[9px] text-indigo-400 hover:text-indigo-300 font-bold">Lihat Semua Notifikasi</a>
                         </div>
                     </div>
                 </div>
@@ -132,11 +141,16 @@
 
                 <!-- Polls Widget -->
                 <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 shadow-lg backdrop-blur-sm">
-                    <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4"><i class="fas fa-poll text-indigo-400 mr-1"></i> Polling</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400"><i class="fas fa-poll text-indigo-400 mr-1"></i> Polling</h3>
+                        <a href="/citizen/polls" class="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold"><i class="fas fa-external-link-alt mr-1"></i> Lihat Semua</a>
+                    </div>
                     <div id="pollsContainer">
                         <div class="text-center text-slate-500 text-xs py-4"><i class="fas fa-circle-notch animate-spin mr-1"></i> Memuat...</div>
                     </div>
                 </div>
+
+
             </div>
 
             <!-- Main Content -->
@@ -359,11 +373,12 @@
                 .then(res => res.json())
                 .then(polls => {
                     const container = document.getElementById('pollsContainer');
-                    if (!polls || polls.length === 0) {
+                    const activePolls = polls.filter(p => !p.closed);
+                    if (!activePolls || activePolls.length === 0) {
                         container.innerHTML = '<div class="text-center text-slate-500 text-xs py-4"><i class="fas fa-poll mr-1"></i> Belum ada polling aktif</div>';
                         return;
                     }
-                    container.innerHTML = polls.map(p => {
+                    container.innerHTML = activePolls.map(p => {
                         const voted = p.hasVoted;
                         const pctYes = p.yesPercentage || 0;
                         const pctNo = p.noPercentage || 0;
@@ -484,11 +499,14 @@
                     <p class="text-slate-400 text-xs leading-relaxed mb-4 line-clamp-3">${c.isiPengaduan}</p>
                     <div class="flex items-center justify-between pt-3 border-t border-slate-700/50">
                         <div class="flex items-center gap-2">
-                            <button onclick="sendUpvote(${c.id})" class="bg-slate-700/40 hover:bg-indigo-500/20 text-slate-300 hover:text-indigo-400 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-700 hover:border-indigo-500/30 transition-all flex items-center gap-1.5">
-                                <i class="fas fa-arrow-up"></i> Dukung <span class="bg-slate-800/50 px-1.5 py-0.5 rounded text-[10px]" id="up-count-${c.id}">${c.upvotesCount || 0}</span>
+<button data-upvote-btn="${c.id}" onclick="sendUpvote(${c.id})" class="bg-slate-700/40 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-700 transition-all flex items-center gap-1.5 ${c.upvoted ? 'border-indigo-500/30 bg-indigo-500/20 text-indigo-400' : 'hover:bg-indigo-500/20 hover:text-indigo-400 hover:border-indigo-500/30'}">
+                                <i class="fas fa-arrow-up"></i> <span id="up-count-${c.id}">${c.upvotesCount}</span>
                             </button>
                             <button onclick="viewComments(${c.id})" class="bg-slate-700/40 hover:bg-blue-500/20 text-slate-300 hover:text-blue-400 px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-700 hover:border-blue-500/30 transition-all flex items-center gap-1.5">
                                 <i class="fas fa-comment"></i> ${commentCount > 0 ? `<span class="bg-slate-800/50 px-1.5 py-0.5 rounded text-[10px]" id="cmt-count-${c.id}">${commentCount}</span>` : 'Komentar'}
+                            </button>
+                            <button onclick="shareComplaint(${c.id})" class="bg-slate-700/40 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-400 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 hover:border-emerald-500/30 transition-all" title="Salin tautan">
+                                <i class="fas fa-share-alt"></i>
                             </button>
                         </div>
                         ${c.isAnonymous ? '<span class="text-[10px] text-slate-500 flex items-center gap-1"><i class="fas fa-user-secret text-indigo-400/60"></i> Anonim</span>' : ''}
@@ -570,14 +588,29 @@
                     if (data.error) { alert(data.error); return; }
                     const span = document.getElementById('up-count-' + id);
                     if (span) { span.innerText = data.count; span.classList.add('animate-upvote'); setTimeout(() => span.classList.remove('animate-upvote'), 400); }
-                    const btn = document.querySelector(`button[onclick="sendUpvote(${id})"]`);
+                    const btn = document.querySelector(`[data-upvote-btn="${id}"]`);
                     if (btn) {
-                        btn.classList.remove('border-slate-700');
-                        btn.classList.add('border-indigo-500/30', 'bg-indigo-500/20', 'text-indigo-400', 'animate-upvote');
-                        btn.disabled = true;
-                        setTimeout(() => btn.classList.remove('animate-upvote'), 400);
+                        if (data.upvoted) {
+                            btn.classList.add('border-indigo-500/30', 'bg-indigo-500/20', 'text-indigo-400');
+                            btn.classList.remove('border-slate-700', 'text-slate-300');
+                        } else {
+                            btn.classList.remove('border-indigo-500/30', 'bg-indigo-500/20', 'text-indigo-400');
+                            btn.classList.add('border-slate-700', 'text-slate-300');
+                        }
                     }
                 }).catch(() => {});
+        }
+
+        function shareComplaint(id) {
+            const url = window.location.origin + '/citizen/detail/' + id;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(url).then(() => {
+                    const btn = document.querySelector(`button[onclick="shareComplaint(${id})"]`);
+                    if (btn) { btn.innerHTML = '<i class="fas fa-check"></i>'; setTimeout(() => { btn.innerHTML = '<i class="fas fa-share-alt"></i>'; }, 2000); }
+                }).catch(() => { prompt('Salin tautan:', url); });
+            } else {
+                prompt('Salin tautan:', url);
+            }
         }
 
         function viewComments(id) {
@@ -591,7 +624,7 @@
 
         function loadCommentModal(id) {
             fetch('/api/complaints/' + id, { credentials: 'same-origin' })
-                .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+                .then(res => { if (!res.ok) { return res.json().then(e => { throw new Error(e.error || 'HTTP ' + res.status); }); } return res.json(); })
                 .then(complaint => {
                     if (complaint.error) { throw new Error(complaint.error); }
                     const comments = complaint.comments || [];
@@ -629,13 +662,18 @@
                             </div>
                         </div>`;
                     content.innerHTML = html;
-                }).catch(() => {
+                }).catch(err => {
+                    console.error('loadCommentModal error:', err);
                     document.getElementById('commentModalContent').innerHTML = `
                         <div class="px-6 py-4 border-b border-slate-700 flex justify-between items-center bg-slate-700/30 flex-shrink-0">
-                            <h3 class="font-bold text-slate-100 text-sm"><i class="fas fa-comments text-blue-400 mr-2"></i> Komentar</h3>
+                            <h3 class="font-bold text-slate-100 text-sm"><i class="fas fa-comments text-blue-400 mr-2"></i> Komentar <span class="text-xs text-red-400 ml-2">(Gagal)</span></h3>
                             <button onclick="closeCommentModal()" class="text-slate-400 hover:text-slate-200"><i class="fas fa-times"></i></button>
                         </div>
-                        <div class="p-6 text-center text-slate-500 flex-1"><i class="fas fa-exclamation-triangle text-2xl mb-2 block text-amber-400"></i><span class="text-xs">Gagal memuat komentar</span></div>`;
+                        <div class="p-6 text-center text-slate-500 flex-1">
+                            <i class="fas fa-exclamation-triangle text-2xl mb-2 block text-amber-400"></i>
+                            <span class="text-xs">Gagal memuat komentar</span>
+                            <span class="text-[9px] block mt-2 text-slate-600">${err.message || 'Unknown error'}</span>
+                        </div>`;
                 });
         }
 

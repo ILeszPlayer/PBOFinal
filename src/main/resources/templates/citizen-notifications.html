@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifikasi - KomunServis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-slate-100 min-h-screen font-sans">
+
+    <nav class="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-xl border-b border-slate-700/50 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="/citizen/home" class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm shadow-lg shadow-indigo-500/20"><i class="fas fa-users text-white"></i></a>
+                <div>
+                    <span class="font-black text-sm tracking-tight">Komunitas</span>
+                    <span class="text-indigo-400 font-black text-sm">Servis</span>
+                </div>
+                <div class="hidden md:flex items-center gap-1 ml-4">
+                    <a href="/citizen/home" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-home mr-1"></i> Beranda</a>
+                    <a href="/citizen/broadcasts" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-bullhorn mr-1"></i> Pengumuman</a>
+                    <a href="/citizen/leaderboard" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-trophy mr-1"></i> Peringkat</a>
+                    <a href="/citizen/polls" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-poll mr-1"></i> Polling</a>
+                    <a href="/citizen/upvoted" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-arrow-up mr-1"></i> Didukung</a>
+                    <a href="/citizen/notifications" class="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-lg border border-amber-500/20 transition-all"><i class="fas fa-bell mr-1"></i> Notifikasi</a>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="hidden md:inline-flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700">
+                    <i class="fas fa-star text-amber-400 text-[9px]"></i>
+                    <span th:text="${userPoints != null ? userPoints : 0}"></span> pts
+                </span>
+                <button onclick="markAllRead()" class="bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-400 text-[9px] font-bold px-3 py-1.5 rounded-lg border border-indigo-500/30 transition-all"><i class="fas fa-check-double mr-1"></i> Baca Semua</button>
+                <a href="/citizen/profile" class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold border-2 border-slate-700 hover:border-indigo-400 transition-all"><span th:text="${#strings.substring(userName != null ? userName : 'U', 0, 1).toUpperCase()}">U</span></a>
+                <a href="/logout" class="text-red-400 hover:text-red-300 text-xs p-2 rounded-lg hover:bg-red-500/10 transition-all" title="Keluar"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-6 max-w-3xl">
+        <div class="mb-6 text-center">
+            <h1 class="text-xl font-black tracking-tight text-slate-100"><i class="fas fa-bell text-indigo-400 mr-2"></i> Notifikasi</h1>
+            <p class="text-xs text-slate-400 mt-1">Aktivitas terbaru seputar pengaduan Anda</p>
+        </div>
+
+        <div th:if="${#lists.isEmpty(notifications)}" class="text-center py-16 text-slate-500">
+            <i class="fas fa-bell-slash text-4xl mb-3 block text-slate-600"></i>
+            <span class="text-sm">Belum ada notifikasi</span>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(notifications)}" class="space-y-2">
+            <div th:each="n : ${notifications}" class="bg-slate-800/60 border rounded-xl p-4 flex items-start gap-3 transition-all"
+                 th:classappend="${n.isRead} ? 'border-slate-700/50' : 'border-indigo-500/40 bg-indigo-500/5'">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-sm"
+                     th:classappend="${n.type.name() == 'STATUS_CHANGE'} ? 'bg-amber-500/20 text-amber-400' : (${n.type.name() == 'NEW_COMMENT'} ? 'bg-blue-500/20 text-blue-400' : 'bg-indigo-500/20 text-indigo-400')">
+                    <i th:classappend="${n.type.name() == 'STATUS_CHANGE'} ? 'fas fa-sync-alt' : (${n.type.name() == 'NEW_COMMENT'} ? 'fas fa-comment' : 'fas fa-info-circle')" class="text-xs"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-slate-200 leading-relaxed" th:text="${n.message}">Pesan</p>
+                    <p class="text-[9px] text-slate-500 mt-1" th:text="${n.createdAt != null ? #temporals.format(n.createdAt, 'dd MMM yyyy HH:mm') : '-'}">Tgl</p>
+                </div>
+                <button th:unless="${n.isRead}" th:onclick="'markRead(' + ${n.id} + ')'" class="text-[9px] text-indigo-400 hover:text-indigo-300 font-bold flex-shrink-0 bg-indigo-500/10 hover:bg-indigo-500/20 px-2 py-1 rounded-lg transition-all"><i class="fas fa-check"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function markRead(id) {
+            fetch('/api/notifications/' + id + '/read', { method: 'POST', credentials: 'same-origin' })
+                .then(() => location.reload())
+                .catch(() => {});
+        }
+
+        function markAllRead() {
+            fetch('/api/notifications/read-all', { method: 'POST', credentials: 'same-origin' })
+                .then(() => location.reload())
+                .catch(() => {});
+        }
+    </script>
+</body>
+</html>

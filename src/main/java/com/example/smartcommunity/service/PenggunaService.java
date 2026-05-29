@@ -11,6 +11,7 @@ public interface PenggunaService {
     Pengguna findByEmail(String email);
     Pengguna awardPoints(Long userId, int points);
     Pengguna recalculateReputation(Long userId);
+    void save(Pengguna user);
     List<Pengguna> getAllUsers();
     long countUsers();
     List<Pengguna> findAllCitizens();

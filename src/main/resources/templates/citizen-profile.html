@@ -9,21 +9,43 @@
 </head>
 <body class="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-slate-100 min-h-screen font-sans">
 
-        <div class="max-w-5xl mx-auto px-4 py-6">
-            <!-- Nav -->
-            <div class="flex items-center justify-between mb-6">
-                <a th:href="@{/citizen/home}" class="inline-flex items-center gap-2 text-indigo-400 hover:text-indigo-300 text-xs font-bold transition-all">
-                    <i class="fas fa-arrow-left"></i> Kembali ke Beranda
-                </a>
-                <a th:href="@{/logout}" class="text-xs text-red-400 hover:text-red-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10">
-                    <i class="fas fa-sign-out-alt mr-1"></i> Keluar
-                </a>
+    <nav class="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-xl border-b border-slate-700/50 shadow-lg">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="/citizen/home" class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm shadow-lg shadow-indigo-500/20"><i class="fas fa-users text-white"></i></a>
+                <div>
+                    <span class="font-black text-sm tracking-tight">Komunitas</span>
+                    <span class="text-indigo-400 font-black text-sm">Servis</span>
+                </div>
+                <div class="hidden md:flex items-center gap-1 ml-4">
+                    <a href="/citizen/home" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-home mr-1"></i> Beranda</a>
+                    <a href="/citizen/broadcasts" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-bullhorn mr-1"></i> Pengumuman</a>
+                    <a href="/citizen/leaderboard" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-trophy mr-1"></i> Peringkat</a>
+                    <a href="/citizen/polls" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-poll mr-1"></i> Polling</a>
+                    <a href="/citizen/upvoted" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-arrow-up mr-1"></i> Didukung</a>
+                    <a href="/citizen/notifications" class="text-[10px] font-bold text-slate-300 hover:text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/10 transition-all"><i class="fas fa-bell mr-1"></i> Notifikasi</a>
+                </div>
             </div>
+            <div class="flex items-center gap-2">
+                <span class="hidden md:inline-flex items-center gap-1.5 text-[10px] font-semibold text-slate-400 bg-slate-800/50 px-3 py-1.5 rounded-full border border-slate-700">
+                    <i class="fas fa-star text-amber-400 text-[9px]"></i>
+                    <span th:text="${userPoints != null ? userPoints : 0}"></span> pts
+                </span>
+                <a href="/citizen/profile" class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[10px] font-bold border-2 border-slate-700 hover:border-indigo-400 transition-all"><span th:text="${#strings.substring(userName != null ? userName : 'U', 0, 1).toUpperCase()}">U</span></a>
+                <a href="/logout" class="text-red-400 hover:text-red-300 text-xs p-2 rounded-lg hover:bg-red-500/10 transition-all" title="Keluar"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+    </nav>
 
-            <div th:if="${param.deleted}" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+        <div class="max-w-5xl mx-auto px-4 py-6">
+
+            <div th:if="${param.deleted}" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
                 <i class="fas fa-check-circle"></i> Pengaduan berhasil dihapus!
             </div>
-            <div th:if="${param.error}" class="bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold px-4 py-3 rounded-xl mb-6 flex items-center gap-2">
+            <div th:if="${param.updated}" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
+                <i class="fas fa-check-circle"></i> Profil berhasil diperbarui!
+            </div>
+            <div th:if="${param.error}" class="bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-bold px-4 py-3 rounded-xl mb-4 flex items-center gap-2">
                 <i class="fas fa-exclamation-circle"></i> <span th:text="${param.error}"></span>
             </div>
 
@@ -118,6 +140,9 @@
                                 <div class="flex items-center justify-center gap-1.5">
                                     <a th:href="@{/citizen/detail/{id}(id=${c.id})}" class="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300 text-[10px] font-bold transition-all">
                                         Detail <i class="fas fa-arrow-right text-[8px]"></i>
+                                    </a>
+                                    <a th:if="${c.status.name() == 'PENDING'}" th:href="@{/citizen/complaint/{id}/edit(id=${c.id})}" class="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 text-[10px] font-bold transition-all ml-2">
+                                        <i class="fas fa-pen text-[8px]"></i>
                                     </a>
                                     <form th:if="${c.status.name() != 'SELESAI'}" th:action="@{/citizen/complaint/{id}/delete(id=${c.id})}" method="post" onsubmit="return confirm('Hapus pengaduan ini? Tindakan ini tidak dapat dibatalkan.')">
                                         <button type="submit" class="inline-flex items-center gap-1 text-red-400 hover:text-red-300 text-[10px] font-bold transition-all ml-2">

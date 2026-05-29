@@ -34,15 +34,15 @@ public class PollApiController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Map<String, Object>>> getActivePolls(Authentication authentication) {
-        List<Poll> polls = pollRepository.findByIsActiveTrueOrderByCreatedAtDesc();
+    public ResponseEntity<List<Map<String, Object>>> getAllPolls(Authentication authentication) {
+        List<Poll> polls = pollRepository.findAllByOrderByCreatedAtDesc();
         Long userId = getUserId(authentication);
 
         List<Map<String, Object>> result = polls.stream().map(poll -> {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("id", poll.getId());
             m.put("question", poll.getQuestion());
-            m.put("isActive", poll.isIsActive());
+            m.put("closed", !poll.isIsActive());
             m.put("createdAt", poll.getCreatedAt() != null ?
                 List.of(poll.getCreatedAt().getYear(), poll.getCreatedAt().getMonthValue(),
                     poll.getCreatedAt().getDayOfMonth()) : null);
@@ -68,9 +68,6 @@ public class PollApiController {
             return ResponseEntity.status(401).body(Map.of("error", "Harus login"));
         }
         String voteStr = body.get("vote");
-        if (voteStr == null || (!voteStr.equals("YES") && !voteStr.equals("NO"))) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Pilih YES atau NO"));
-        }
 
         Poll poll = pollRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Polling tidak ditemukan"));
@@ -81,19 +78,39 @@ public class PollApiController {
         Pengguna user = penggunaRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
 
+        // Reset vote if empty string provided
+        if (voteStr == null || voteStr.isEmpty()) {
+            pollVoteRepository.findByPollIdAndUserId(id, user.getId())
+                .ifPresent(v -> pollVoteRepository.delete(v));
+            // Reload poll to get fresh counts
+            Poll refreshed = pollRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Polling tidak ditemukan"));
+            return ResponseEntity.ok(Map.of("success", true,
+                "yesCount", refreshed.getYesCount(),
+                "noCount", refreshed.getNoCount(),
+                "totalVotes", refreshed.getTotalVotes()));
+        }
+
+        if (!voteStr.equals("YES") && !voteStr.equals("NO")) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Pilih YES atau NO"));
+        }
+
         if (pollVoteRepository.findByPollIdAndUserId(id, user.getId()).isPresent()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Anda sudah memberikan suara"));
+            pollVoteRepository.deleteByPollIdAndUserId(id, user.getId());
         }
 
         PollVote.Vote vote = PollVote.Vote.valueOf(voteStr);
         PollVote pollVote = new PollVote(vote, poll, user);
         pollVoteRepository.save(pollVote);
 
+        // Reload poll to get fresh counts after vote
+        Poll refreshed = pollRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Polling tidak ditemukan"));
         return ResponseEntity.ok(Map.of(
             "success", true,
-            "yesCount", poll.getYesCount(),
-            "noCount", poll.getNoCount(),
-            "totalVotes", poll.getTotalVotes()
+            "yesCount", refreshed.getYesCount(),
+            "noCount", refreshed.getNoCount(),
+            "totalVotes", refreshed.getTotalVotes()
         ));
     }
 

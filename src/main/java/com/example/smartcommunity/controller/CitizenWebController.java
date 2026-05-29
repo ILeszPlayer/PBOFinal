@@ -1,17 +1,23 @@
 package com.example.smartcommunity.controller;
 
 import com.example.smartcommunity.dto.CreateComplaintRequest;
+import com.example.smartcommunity.model.Broadcast;
 import com.example.smartcommunity.model.Comment;
 import com.example.smartcommunity.model.Complaint;
+import com.example.smartcommunity.model.Notification;
 import com.example.smartcommunity.model.Pengguna;
+import com.example.smartcommunity.repository.BroadcastRepository;
 import com.example.smartcommunity.repository.CommentRepository;
 import com.example.smartcommunity.repository.ComplaintRepository;
+import com.example.smartcommunity.repository.NotificationRepository;
 import com.example.smartcommunity.service.BroadcastService;
 import com.example.smartcommunity.service.ComplaintService;
+import com.example.smartcommunity.service.NotificationService;
 import com.example.smartcommunity.service.PenggunaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -27,8 +33,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/citizen")
@@ -39,6 +47,10 @@ public class CitizenWebController {
     @Autowired private PenggunaService penggunaService;
     @Autowired private ComplaintRepository complaintRepository;
     @Autowired private CommentRepository commentRepository;
+    @Autowired private BroadcastRepository broadcastRepository;
+    @Autowired private NotificationService notificationService;
+    @Autowired private NotificationRepository notificationRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
 
     @GetMapping("/home")
     public String renderHomeSkeleton(Authentication authentication, Model model) {
@@ -116,6 +128,9 @@ public class CitizenWebController {
         if (tierProgressPercent > 100) tierProgressPercent = 100;
 
         model.addAttribute("user", user);
+        model.addAttribute("userName", user.getNama());
+        model.addAttribute("userPoints", user.getReputationPoints());
+        model.addAttribute("userTier", user.getReputationTier());
         model.addAttribute("myComplaints", myComplaints);
         model.addAttribute("totalUpvotes", totalUpvotes);
         model.addAttribute("reputationTier", currentTier);
@@ -126,9 +141,18 @@ public class CitizenWebController {
     }
 
     @GetMapping("/detail/{id}")
-    public String viewDetail(@PathVariable Long id, Model model) {
+    public String viewDetail(@PathVariable Long id, Authentication authentication, Model model) {
         Complaint complaint = complaintService.findById(id);
         model.addAttribute("complaint", complaint);
+
+        if (authentication != null) {
+            try {
+                Pengguna user = penggunaService.findByEmail(authentication.getName());
+                model.addAttribute("userName", user.getNama());
+                model.addAttribute("userPoints", user.getReputationPoints());
+                model.addAttribute("userTier", user.getReputationTier());
+            } catch (Exception ignored) {}
+        }
 
         // Load comments via native query to avoid lazy-loading issues
         List<Object[]> rows = commentRepository.findCommentRawDataByComplaintId(id);
@@ -190,6 +214,175 @@ public class CitizenWebController {
         }
         complaintService.deleteComplaint(id);
         return "redirect:/citizen/profile?deleted=true";
+    }
+
+    @GetMapping("/complaint/{id}/edit")
+    public String editComplaintPage(@PathVariable Long id, Authentication authentication, Model model) {
+        Complaint complaint = complaintService.findById(id);
+        Pengguna user = penggunaService.findByEmail(authentication.getName());
+        if (!complaint.getUser().getId().equals(user.getId())) {
+            return "redirect:/citizen/profile";
+        }
+        if (complaint.getStatus() != Complaint.Status.PENDING) {
+            return "redirect:/citizen/profile?error=Hanya pengaduan pending yang bisa diedit";
+        }
+        model.addAttribute("userName", user.getNama());
+        model.addAttribute("userPoints", user.getReputationPoints());
+        model.addAttribute("userTier", user.getReputationTier());
+        model.addAttribute("c", complaint);
+        model.addAttribute("kategoris", Complaint.Kategori.values());
+        return "citizen-complaint-edit";
+    }
+
+    @PostMapping("/complaint/{id}/edit")
+    public String updateComplaint(@PathVariable Long id,
+            @RequestParam("judul") String judul,
+            @RequestParam("isiPengaduan") String isiPengaduan,
+            @RequestParam(value = "kategori", required = false) String kategori,
+            @RequestParam(value = "foto", required = false) MultipartFile foto,
+            @RequestParam(value = "isAnonymous", defaultValue = "false") boolean isAnonymous,
+            Authentication authentication) {
+        Complaint complaint = complaintService.findById(id);
+        Pengguna user = penggunaService.findByEmail(authentication.getName());
+        if (!complaint.getUser().getId().equals(user.getId())) {
+            return "redirect:/citizen/profile";
+        }
+        if (complaint.getStatus() != Complaint.Status.PENDING) {
+            return "redirect:/citizen/profile?error=Hanya pengaduan pending yang bisa diedit";
+        }
+        try {
+            complaint.setJudul(judul);
+            complaint.setIsiPengaduan(isiPengaduan);
+            if (kategori != null && !kategori.isEmpty()) {
+                complaint.setKategori(Complaint.Kategori.valueOf(kategori));
+            }
+            complaint.setIsAnonymous(isAnonymous);
+            if (foto != null && !foto.isEmpty()) {
+                try {
+                    String uploadDir = "uploads/complaints/";
+                    java.io.File dir = new java.io.File(uploadDir);
+                    if (!dir.exists()) dir.mkdirs();
+                    String fileName = System.currentTimeMillis() + "_" + foto.getOriginalFilename();
+                    java.io.File dest = new java.io.File(dir, fileName);
+                    foto.transferTo(dest);
+                    complaint.setBuktiFoto("/uploads/complaints/" + fileName);
+                } catch (Exception e) {
+                    return "redirect:/citizen/complaint/" + id + "/edit?error=Gagal upload foto";
+                }
+            }
+            complaintRepository.save(complaint);
+            return "redirect:/citizen/complaint/" + id + "/edit?success=true";
+        } catch (Exception e) {
+            return "redirect:/citizen/complaint/" + id + "/edit?error=" + e.getMessage();
+        }
+    }
+
+    @GetMapping("/polls")
+    public String renderPollsPage(Authentication authentication, Model model) {
+        if (authentication != null) {
+            try {
+                Pengguna user = penggunaService.findByEmail(authentication.getName());
+                model.addAttribute("userName", user.getNama());
+                model.addAttribute("userPoints", user.getReputationPoints());
+                model.addAttribute("userTier", user.getReputationTier());
+            } catch (Exception ignored) {}
+        }
+        return "citizen-polls";
+    }
+
+    @GetMapping("/leaderboard")
+    public String leaderboardPage(Authentication authentication, Model model) {
+        if (authentication != null) {
+            try {
+                Pengguna user = penggunaService.findByEmail(authentication.getName());
+                model.addAttribute("userName", user.getNama());
+                model.addAttribute("userPoints", user.getReputationPoints());
+                model.addAttribute("userTier", user.getReputationTier());
+            } catch (Exception ignored) {}
+        }
+        List<Pengguna> allCitizens = penggunaService.findAllCitizens().stream()
+            .filter(u -> u.getRole().equals("CITIZEN"))
+            .sorted(Comparator.comparingInt(Pengguna::getReputationPoints).reversed())
+            .collect(Collectors.toList());
+        model.addAttribute("citizens", allCitizens);
+        return "citizen-leaderboard";
+    }
+
+    @GetMapping("/broadcasts")
+    public String broadcastsPage(Authentication authentication, Model model) {
+        if (authentication != null) {
+            try {
+                Pengguna user = penggunaService.findByEmail(authentication.getName());
+                model.addAttribute("userName", user.getNama());
+                model.addAttribute("userPoints", user.getReputationPoints());
+                model.addAttribute("userTier", user.getReputationTier());
+            } catch (Exception ignored) {}
+        }
+        List<Broadcast> allBroadcasts = broadcastRepository.findAllByOrderByTanggalDesc();
+        model.addAttribute("broadcasts", allBroadcasts);
+        return "citizen-broadcasts";
+    }
+
+    @GetMapping("/profile/edit")
+    public String editProfilePage(Authentication authentication, Model model) {
+        Pengguna user = penggunaService.findByEmail(authentication.getName());
+        model.addAttribute("user", user);
+        model.addAttribute("userName", user.getNama());
+        model.addAttribute("userPoints", user.getReputationPoints());
+        model.addAttribute("userTier", user.getReputationTier());
+        return "citizen-edit-profile";
+    }
+
+    @PostMapping("/profile/edit")
+    public String updateProfile(
+            @RequestParam("nama") String nama,
+            @RequestParam(value = "password", required = false) String password,
+            @RequestParam(value = "passwordConfirm", required = false) String passwordConfirm,
+            Authentication authentication) {
+        Pengguna user = penggunaService.findByEmail(authentication.getName());
+        try {
+            user.setNama(nama);
+            if (password != null && !password.isEmpty()) {
+                if (!password.equals(passwordConfirm)) {
+                    return "redirect:/citizen/profile/edit?error=Password tidak cocok";
+                }
+                user.setPassword(passwordEncoder.encode(password));
+            }
+            penggunaService.save(user);
+            return "redirect:/citizen/profile?updated=true";
+        } catch (Exception e) {
+            return "redirect:/citizen/profile/edit?error=" + e.getMessage();
+        }
+    }
+
+    @GetMapping("/upvoted")
+    public String upvotedPage(Authentication authentication, Model model) {
+        Pengguna user = penggunaService.findByEmail(authentication.getName());
+        model.addAttribute("userName", user.getNama());
+        model.addAttribute("userPoints", user.getReputationPoints());
+        model.addAttribute("userTier", user.getReputationTier());
+        // Get all complaints the user upvoted
+        List<Complaint> allComplaints = complaintRepository.findAllByOrderByTanggalDesc();
+        List<Complaint> upvoted = allComplaints.stream()
+            .filter(c -> c.getUpvotedUserIds().contains(user.getId()))
+            .collect(Collectors.toList());
+        model.addAttribute("upvotedComplaints", upvoted);
+        return "citizen-upvoted";
+    }
+
+    @GetMapping("/notifications")
+    public String notificationsPage(Authentication authentication, Model model) {
+        if (authentication != null) {
+            try {
+                Pengguna user = penggunaService.findByEmail(authentication.getName());
+                model.addAttribute("userName", user.getNama());
+                model.addAttribute("userPoints", user.getReputationPoints());
+                model.addAttribute("userTier", user.getReputationTier());
+                List<Notification> notifs = notificationService.getNotificationsByUser(user.getId());
+                model.addAttribute("notifications", notifs);
+            } catch (Exception ignored) {}
+        }
+        return "citizen-notifications";
     }
 
     @GetMapping("/api/my-complaints")

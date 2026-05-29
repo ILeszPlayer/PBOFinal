@@ -7,8 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-900 text-slate-100 flex min-h-screen font-sans">
-    <aside class="w-64 bg-slate-800 border-r border-slate-700 p-6 flex flex-col justify-between flex-shrink-0">
+<body class="bg-slate-900 text-slate-100 flex h-screen overflow-hidden font-sans">
+    <aside class="w-64 bg-slate-800 border-r border-slate-700 p-6 flex flex-col justify-between flex-shrink-0 sticky top-0 h-screen">
         <div class="space-y-6">
             <div class="flex items-center gap-2 px-2 text-indigo-400 font-black tracking-wider"><i class="fas fa-shield-halved text-xl"></i> CORE COMMAND</div>
             <nav class="space-y-2 text-xs font-bold">
@@ -61,6 +61,48 @@
                 </div>
             </div>
         </div>
+        <!-- Edit User -->
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-xl mt-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4"><i class="fas fa-edit text-amber-400 mr-1"></i> Edit Data Warga</h3>
+            <form th:action="@{/admin/warga/{id}/edit(id=${u.id})}" method="POST" class="space-y-3">
+                <div>
+                    <label class="text-[9px] font-bold uppercase tracking-wider text-slate-500 block mb-1">Nama</label>
+                    <input type="text" name="nama" th:value="${u.nama}" required
+                           class="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-all">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold uppercase tracking-wider text-slate-500 block mb-1">Email</label>
+                    <input type="email" name="email" th:value="${u.email}" required
+                           class="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-all">
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold uppercase tracking-wider text-slate-500 block mb-1">Role</label>
+                    <select name="role" class="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition-all">
+                        <option value="CITIZEN" th:selected="${u.role == 'CITIZEN'}">Warga</option>
+                        <option value="ADMIN" th:selected="${u.role == 'ADMIN'}">Admin</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-[9px] font-bold uppercase tracking-wider text-slate-500 block mb-1">Password Baru (biarkan kosong jika tidak diubah)</label>
+                    <input type="password" name="password" placeholder="Kosongkan jika tidak diubah"
+                           class="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all">
+                </div>
+                <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all"><i class="fas fa-save mr-1"></i> Simpan Perubahan</button>
+            </form>
+        </div>
+
+        <!-- Send Notification -->
+        <div class="bg-slate-800/60 border border-slate-700 rounded-2xl p-6 shadow-xl mt-4">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4"><i class="fas fa-bell text-indigo-400 mr-1"></i> Kirim Notifikasi ke Warga</h3>
+            <form th:action="@{/admin/warga/{id}/notify(id=${u.id})}" method="POST" class="space-y-3">
+                <input type="text" name="judul" placeholder="Judul notifikasi" required
+                       class="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-all">
+                <textarea name="pesan" rows="2" placeholder="Isi pesan notifikasi..." required
+                          class="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none transition-all"></textarea>
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition-all"><i class="fas fa-paper-plane mr-1"></i> Kirim Notifikasi</button>
+            </form>
+        </div>
+
         <div class="mt-4 text-right">
             <form th:action="@{/admin/warga/{id}/delete(id=${u.id})}" method="POST" onsubmit="return confirm('Hapus warga ini? Semua data terkait akan ikut terhapus.')">
                 <button type="submit" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold px-4 py-2 rounded-xl transition-all"><i class="fas fa-trash mr-1"></i> Hapus Warga</button>

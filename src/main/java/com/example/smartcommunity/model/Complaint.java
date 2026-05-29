@@ -122,10 +122,8 @@ public class Complaint {
     }
 
     public long getSlaHours() {
-        if (resolvedAt == null && processedAt == null) return 0;
-        LocalDateTime end = resolvedAt != null ? resolvedAt : LocalDateTime.now();
-        LocalDateTime start = processedAt != null ? processedAt : tanggal;
-        return java.time.Duration.between(start, end).toHours();
+        if (resolvedAt == null || processedAt == null) return 0;
+        return java.time.Duration.between(processedAt, resolvedAt).toHours();
     }
 
     public boolean isSlaCompliant() {
