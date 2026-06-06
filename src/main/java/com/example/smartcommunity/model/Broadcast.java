@@ -5,11 +5,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "broadcasts")
-public class Broadcast {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Broadcast extends BaseEntity {
 
     @Column(nullable = false)
     private String judul;
@@ -38,8 +34,11 @@ public class Broadcast {
         if (tanggal == null) tanggal = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    @Override
+    public String getSummary() {
+        return "Broadcast: " + getJudul();
+    }
+
     public String getJudul() { return judul; }
     public void setJudul(String judul) { this.judul = judul; }
     public String getIsiBroadcast() { return isiBroadcast; }

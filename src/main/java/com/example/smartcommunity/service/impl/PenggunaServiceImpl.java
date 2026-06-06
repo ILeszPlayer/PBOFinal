@@ -70,7 +70,7 @@ public class PenggunaServiceImpl implements PenggunaService {
     public Pengguna awardPoints(Long userId, int points) {
         Pengguna user = penggunaRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
-        user.setReputationPoints(user.getReputationPoints() + points);
+        user.addReputationPoints(points);
         return penggunaRepository.save(user);
     }
 

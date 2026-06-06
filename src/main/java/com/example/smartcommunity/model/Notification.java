@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notifications")
-public class Notification {
+public class Notification extends BaseEntity {
 
     public enum Type {
         STATUS_CHANGE,
@@ -14,10 +14,6 @@ public class Notification {
         NEW_COMPLAINT,
         SYSTEM
     }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -57,8 +53,12 @@ public class Notification {
         if (createdAt == null) createdAt = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    @Override
+    public String getSummary() {
+        String preview = message.length() > 50 ? message.substring(0, 50) + "..." : message;
+        return "[" + (getType() != null ? getType().name() : "?") + "] " + preview;
+    }
+
     public Type getType() { return type; }
     public void setType(Type type) { this.type = type; }
     public String getMessage() { return message; }
@@ -67,6 +67,11 @@ public class Notification {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public boolean isIsRead() { return isRead; }
     public void setIsRead(boolean isRead) { this.isRead = isRead; }
+
+    public void markAsRead() {
+        this.isRead = true;
+    }
+
     public Pengguna getUser() { return user; }
     public void setUser(Pengguna user) { this.user = user; }
     public Complaint getComplaint() { return complaint; }

@@ -53,11 +53,11 @@ body{min-height:100vh;display:flex;align-items:center;justify-content:center;bac
             <div th:if="${error != null}" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem;">
                 <p style="color:#fca5a5;font-size:0.85rem;"><i class="fas fa-circle-exclamation" style="margin-right:0.5rem;"></i><span th:text="${error}">Email sudah terdaftar</span></p>
             </div>
-<button type="submit" class="btn-primary"><i class="fas fa-user-plus" style="margin-right:0.5rem;"></i>Daftar Akun</button>
+<button type="submit" class="btn-primary"><i class="fas fa-user-plus" style="margin-right:0.5rem;"></i>Buat Akun</button>
 </form>
 <div style="margin-top:1.5rem;text-align:center;">
 <span style="color:rgba(255,255,255,0.4);font-size:0.9rem;">Sudah punya akun? </span>
-<a th:href="@{/login}" style="color:#818cf8;font-size:0.9rem;text-decoration:none;font-weight:500;">Masuk di sini</a>
+<a th:href="@{/login}" style="color:#818cf8;font-size:0.9rem;text-decoration:none;font-weight:500;">Masuk</a>
 </div>
 </div>
     <div th:if="${error != null}" class="toast error show" id="errorToast"><i class="fas fa-circle-exclamation" style="font-size:1.2rem;"></i><span th:text="${error}">Pendaftaran gagal</span></div>

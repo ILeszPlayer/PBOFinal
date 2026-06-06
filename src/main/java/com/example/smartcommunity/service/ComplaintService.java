@@ -8,7 +8,9 @@ import java.util.List;
 public interface ComplaintService {
     Complaint createComplaint(CreateComplaintRequest request);
     Complaint updateStatus(Long complaintId, Complaint.Status status);
+    Complaint updateStatus(Long complaintId, String statusName);
     Complaint upvote(Long complaintId);
+    Complaint upvote(Long complaintId, Long userId);
     void deleteComplaint(Long complaintId);
     List<Complaint> getAllComplaints();
     List<Complaint> searchComplaints(String keyword);

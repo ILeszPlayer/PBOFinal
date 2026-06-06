@@ -9,6 +9,7 @@ com\example\smartcommunity\model\Warga.class
 com\example\smartcommunity\service\NotificationService.class
 com\example\smartcommunity\config\CustomUserDetailsService.class
 com\example\smartcommunity\model\Notification.class
+com\example\smartcommunity\model\BaseEntity.class
 com\example\smartcommunity\dto\RegisterCitizenRequest.class
 com\example\smartcommunity\service\impl\PollServiceImpl.class
 com\example\smartcommunity\model\Pengguna.class

@@ -5,11 +5,7 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "user_profiles")
-public class UserProfile {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class UserProfile extends BaseEntity {
 
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -36,8 +32,11 @@ public class UserProfile {
         this.tanggalLahir = tanggalLahir;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    @Override
+    public String getSummary() {
+        return "Profil: " + (user != null ? user.getNama() : "?") + " - NIK: " + (nik != null ? nik : "-");
+    }
+
     public Pengguna getUser() { return user; }
     public void setUser(Pengguna user) { this.user = user; }
     public String getNik() { return nik; }

@@ -109,6 +109,12 @@ public class ComplaintServiceImpl implements ComplaintService {
     }
 
     @Override
+    public Complaint updateStatus(Long complaintId, String statusName) {
+        Complaint.Status status = Complaint.Status.valueOf(statusName.toUpperCase());
+        return updateStatus(complaintId, status);
+    }
+
+    @Override
     public Complaint updateStatus(Long complaintId, Complaint.Status status) {
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Pengaduan tidak ditemukan"));
@@ -153,6 +159,14 @@ public class ComplaintServiceImpl implements ComplaintService {
         Complaint complaint = complaintRepository.findById(complaintId)
                 .orElseThrow(() -> new RuntimeException("Pengaduan tidak ditemukan"));
         complaint.setUpvotesCount(complaint.getUpvotesCount() + 1);
+        return complaintRepository.save(complaint);
+    }
+
+    @Override
+    public Complaint upvote(Long complaintId, Long userId) {
+        Complaint complaint = complaintRepository.findById(complaintId)
+                .orElseThrow(() -> new RuntimeException("Pengaduan tidak ditemukan"));
+        complaint.addUpvote(userId);
         return complaintRepository.save(complaint);
     }
 

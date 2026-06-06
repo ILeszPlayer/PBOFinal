@@ -7,11 +7,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "polls")
-public class Poll {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Poll extends BaseEntity {
 
     @Column(nullable = false)
     private String question;
@@ -72,8 +68,29 @@ public class Poll {
         return votes.stream().anyMatch(v -> v.getUser().getId().equals(userId));
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    @Override
+    public String getSummary() {
+        String status = isActive ? "Aktif" : "Ditutup";
+        return "Polling: \"" + getQuestion() + "\" (" + status + ") - " + getTotalVotes() + " suara";
+    }
+
+    public void close() {
+        if (!this.isActive) {
+            throw new IllegalStateException("Polling sudah ditutup sebelumnya");
+        }
+        this.isActive = false;
+        this.closedAt = LocalDateTime.now();
+    }
+
+    public void toggleActive() {
+        this.isActive = !this.isActive;
+        if (!this.isActive) {
+            this.closedAt = LocalDateTime.now();
+        } else {
+            this.closedAt = null;
+        }
+    }
+
     public String getQuestion() { return question; }
     public void setQuestion(String question) { this.question = question; }
     public boolean isIsActive() { return isActive; }

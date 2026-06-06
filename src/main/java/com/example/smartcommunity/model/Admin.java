@@ -29,6 +29,16 @@ public class Admin extends Pengguna {
         return "/admin/dashboard";
     }
 
+    @Override
+    public String getRoleDisplayName() {
+        return "Admin";
+    }
+
+    @Override
+    public String getSummary() {
+        return getNama() + " (Admin - " + getLevelAkses() + ")";
+    }
+
     public String getLevelAkses() { return levelAkses; }
     public void setLevelAkses(String levelAkses) { this.levelAkses = levelAkses; }
     public List<Broadcast> getBroadcasts() { return broadcasts; }

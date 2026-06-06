@@ -146,10 +146,22 @@ public class DataFeedApiController {
         // Load comments (separate native query)
         try {
             List<Object[]> rows = commentRepository.findCommentRawDataByComplaintId(id);
+            // Load all likes for these comments
+            Map<Long, Set<Long>> likesMap = new HashMap<>();
+            try {
+                List<Object[]> likeRows = commentRepository.findCommentLikesByComplaintId(id);
+                for (Object[] lr : likeRows) {
+                    Long cid = ((Number) lr[0]).longValue();
+                    Long uid = ((Number) lr[1]).longValue();
+                    likesMap.computeIfAbsent(cid, k -> new HashSet<>()).add(uid);
+                }
+            } catch (Exception ignored) {}
+
             List<Map<String, Object>> commentsData = new ArrayList<>();
             for (Object[] cr : rows) {
                 Map<String, Object> cmMap = new LinkedHashMap<>();
-                cmMap.put("id", cr[0]);
+                Long commentId = ((Number) cr[0]).longValue();
+                cmMap.put("id", commentId);
                 cmMap.put("isiKomentar", cr[1]);
                 if (cr[2] instanceof java.sql.Timestamp ts) {
                     LocalDateTime ldt = ts.toLocalDateTime();
@@ -161,7 +173,10 @@ public class DataFeedApiController {
                 Map<String, Object> userMap = new LinkedHashMap<>();
                 userMap.put("nama", cr[3] != null ? cr[3].toString() : "Warga");
                 cmMap.put("user", userMap);
-                cmMap.put("userId", cr[4] != null ? ((Number) cr[4]).longValue() : null);
+                Long uid = cr[4] != null ? ((Number) cr[4]).longValue() : null;
+                cmMap.put("userId", uid);
+                cmMap.put("likeCount", cr[5] != null ? ((Number) cr[5]).intValue() : 0);
+                cmMap.put("liked", currentUserId != null && likesMap.containsKey(commentId) && likesMap.get(commentId).contains(currentUserId));
                 commentsData.add(cmMap);
             }
             result.put("comments", commentsData);
@@ -260,5 +275,31 @@ public class DataFeedApiController {
         commentRepository.delete(comment);
         int commentCount = commentRepository.findByComplaintIdOrderByTanggalAsc(complaintId).size();
         return ResponseEntity.ok(Map.of("success", true, "commentCount", commentCount));
+    }
+
+    @Transactional
+    @PostMapping("/complaints/{complaintId}/comment/{commentId}/like")
+    public ResponseEntity<Map<String, Object>> toggleCommentLike(
+            @PathVariable Long complaintId,
+            @PathVariable Long commentId,
+            Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).body(Map.of("error", "Harus login"));
+        }
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Komentar tidak ditemukan"));
+        Pengguna user = penggunaRepository.findByEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("User tidak ditemukan"));
+
+        boolean alreadyLiked = comment.getLikedUserIds().contains(user.getId());
+        if (alreadyLiked) {
+            comment.getLikedUserIds().remove(user.getId());
+            comment.setLikeCount(Math.max(0, comment.getLikeCount() - 1));
+        } else {
+            comment.getLikedUserIds().add(user.getId());
+            comment.setLikeCount(comment.getLikeCount() + 1);
+        }
+        commentRepository.save(comment);
+        return ResponseEntity.ok(Map.of("success", true, "liked", !alreadyLiked, "likeCount", comment.getLikeCount()));
     }
 }

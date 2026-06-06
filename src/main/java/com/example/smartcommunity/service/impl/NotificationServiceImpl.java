@@ -45,7 +45,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void markAsRead(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new RuntimeException("Notifikasi tidak ditemukan"));
-        notification.setIsRead(true);
+        notification.markAsRead();
         notificationRepository.save(notification);
     }
 
@@ -53,7 +53,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void markAllAsRead(Long userId) {
         List<Notification> unread = notificationRepository.findByUserIdAndIsReadFalseOrderByCreatedAtDesc(userId);
         for (Notification n : unread) {
-            n.setIsRead(true);
+            n.markAsRead();
         }
         notificationRepository.saveAll(unread);
     }

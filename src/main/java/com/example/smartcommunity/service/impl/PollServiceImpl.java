@@ -66,8 +66,7 @@ public class PollServiceImpl implements PollService {
     public Poll closePoll(Long pollId) {
         Poll poll = pollRepository.findById(pollId)
                 .orElseThrow(() -> new RuntimeException("Polling tidak ditemukan"));
-        poll.setIsActive(false);
-        poll.setClosedAt(LocalDateTime.now());
+        poll.close();
         return pollRepository.save(poll);
     }
 

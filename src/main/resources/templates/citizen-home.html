@@ -35,7 +35,7 @@
             <div class="flex items-center gap-2">
                 <!-- Not logged in: show login button -->
                 <div th:if="${!isAuthenticated}" class="flex items-center gap-2">
-                    <a href="/login" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-[10px] font-bold px-4 py-2 rounded-xl transition-all shadow-lg shadow-indigo-500/20"><i class="fas fa-sign-in-alt mr-1"></i> Login Warga</a>
+                    <a href="/login" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-[10px] font-bold px-4 py-2 rounded-xl transition-all shadow-lg shadow-indigo-500/20"><i class="fas fa-sign-in-alt mr-1"></i> Masuk</a>
                     <a href="/register" class="text-slate-300 hover:text-indigo-400 text-[10px] font-bold px-3 py-2 rounded-xl hover:bg-slate-800 transition-all">Daftar</a>
                 </div>
                 <!-- Logged in -->
@@ -45,7 +45,7 @@
                         <span th:text="${userPoints != null ? userPoints : 0}"></span> pts
                     </span>
                     <!-- Admin Page link for admins -->
-                    <a th:if="${isAdmin}" href="/admin/dashboard" class="text-amber-400 hover:text-amber-300 text-[10px] font-bold px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition-all"><i class="fas fa-shield-halved mr-1"></i> Admin Page</a>
+                    <a th:if="${isAdmin}" href="/admin/dashboard" class="text-amber-400 hover:text-amber-300 text-[10px] font-bold px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition-all"><i class="fas fa-shield-halved mr-1"></i> Panel Admin</a>
                     <!-- Notification Bell -->
                     <div class="relative">
                         <button onclick="toggleNotifDropdown()" class="flex items-center gap-1.5 text-[10px] font-semibold text-slate-300 bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700 hover:border-indigo-500/30 hover:text-indigo-400 transition-all relative">
@@ -105,7 +105,7 @@
                 <p class="text-slate-400 text-xs mt-1">Pantau dan laporkan perkembangan lingkungan sekitar Anda</p>
             </div>
             <a th:href="${isAuthenticated} ? '#' : '/login'" th:onclick="${isAuthenticated} ? 'document.getElementById(\'modalForm\').classList.remove(\'hidden\')' : ''" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/25 flex items-center gap-2 inline-flex">
-                <i class="fas fa-plus-circle"></i> Buat Pengaduan Baru
+                <i class="fas fa-plus-circle"></i> Buat Laporan
             </a>
         </div>
 
@@ -207,7 +207,7 @@
     <div id="modalForm" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-slate-800 rounded-2xl p-6 max-w-lg w-full border border-slate-700/60 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold"><i class="fas fa-plus-circle text-indigo-400 mr-2"></i>Buat Pengaduan Baru</h2>
+                <h2 class="text-lg font-bold"><i class="fas fa-plus-circle text-indigo-400 mr-2"></i>Laporan Baru</h2>
                 <button onclick="document.getElementById('modalForm').classList.add('hidden')" class="text-slate-400 hover:text-white text-xl">&times;</button>
             </div>
             <form th:action="@{/citizen/create-complaint}" method="post" enctype="multipart/form-data" class="space-y-3">
@@ -230,11 +230,11 @@
                     <input type="file" name="buktiFoto" accept="image/*" class="w-full text-sm text-slate-400 file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700">
                 </div>
                 <label class="flex items-center gap-2 text-sm text-slate-400 bg-slate-700/30 rounded-lg px-3 py-2.5 cursor-pointer hover:bg-slate-700/50 transition-all"><input type="checkbox" name="isAnonymous" value="true" class="accent-indigo-500"> <i class="fas fa-user-secret text-indigo-400"></i> Laporkan secara anonim</label>
-                <button type="button" onclick="getLocation()" class="w-full bg-slate-700/40 hover:bg-slate-600/40 text-slate-300 font-bold py-2 rounded-xl transition-all text-xs border border-slate-700 flex items-center justify-center gap-2 shadow-lg" id="locBtn"><i class="fas fa-map-marker-alt text-indigo-400"></i> <span id="locText">Tambahkan Lokasi Saya</span></button>
+                <button type="button" onclick="getLocation()" class="w-full bg-slate-700/40 hover:bg-slate-600/40 text-slate-300 font-bold py-2 rounded-xl transition-all text-xs border border-slate-700 flex items-center justify-center gap-2 shadow-lg" id="locBtn"><i class="fas fa-map-marker-alt text-indigo-400"></i> <span id="locText">Lokasi Saya</span></button>
                 <input type="hidden" name="latitude" id="latitude">
                 <input type="hidden" name="longitude" id="longitude">
                 <input type="hidden" name="lokasiNama" id="lokasiNama">
-                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl transition-all text-sm shadow-lg shadow-indigo-500/20">Kirim Pengaduan</button>
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl transition-all text-sm shadow-lg shadow-indigo-500/20">Kirim Laporan</button>
             </form>
         </div>
     </div>
@@ -249,6 +249,26 @@
     <div id="lightboxOverlay" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onclick="closeLightbox(event)">
         <button onclick="closeLightbox(event)" class="absolute top-4 right-4 text-white/70 hover:text-white text-3xl transition-all z-10"><i class="fas fa-times"></i></button>
         <img id="lightboxImg" class="max-w-full max-h-full object-contain rounded-2xl shadow-2xl">
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+        <div class="bg-slate-800 rounded-2xl max-w-sm w-full border border-slate-700/60 shadow-2xl p-6" onclick="event.stopPropagation()">
+            <div class="text-center mb-4">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/20">
+                    <i class="fas fa-lock text-white text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-100" id="loginModalTitle">🔒 Akses Terbatas</h3>
+                <p class="text-xs text-slate-400 mt-2 leading-relaxed" id="loginModalDesc">Anda harus login terlebih dahulu untuk melanjutkan.</p>
+            </div>
+            <form method="post" th:action="@{/login}" class="space-y-3">
+                <input type="email" name="email" required placeholder="Alamat Email" class="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                <input type="password" name="password" required placeholder="Kata Sandi" class="w-full bg-slate-700/50 border border-slate-600 rounded-xl px-4 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500">
+                <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-2.5 rounded-xl text-xs transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2"><i class="fas fa-sign-in-alt"></i> Masuk</button>
+                <p class="text-[10px] text-slate-500 text-center">Belum punya akun? <a th:href="@{/register}" class="text-indigo-400 hover:text-indigo-300 font-bold">Daftar Sekarang</a></p>
+            </form>
+            <button onclick="closeLoginModal()" class="w-full mt-2 text-slate-500 hover:text-slate-300 text-xs py-2 rounded-lg hover:bg-slate-700/30 transition-all">Tutup</button>
+        </div>
     </div>
 
     <script th:inline="javascript">
@@ -549,8 +569,14 @@
                             <button onclick="shareComplaint(${c.id})" class="bg-slate-700/40 hover:bg-emerald-500/20 text-slate-300 hover:text-emerald-400 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 hover:border-emerald-500/30 transition-all" title="Salin tautan">
                                 <i class="fas fa-share-alt"></i>
                             </button>
+                            <button onclick="shareWhatsApp(${c.id})" class="bg-slate-700/40 hover:bg-green-500/20 text-slate-300 hover:text-green-400 px-3 py-2 rounded-xl text-xs font-bold border border-slate-700 hover:border-green-500/30 transition-all" title="Bagikan ke WhatsApp">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
                         </div>
-                        ${c.isAnonymous ? '<span class="text-[10px] text-slate-500 flex items-center gap-1"><i class="fas fa-user-secret text-indigo-400/60"></i> Anonim</span>' : ''}
+                        <div class="flex items-center gap-2">
+                            ${c.status === 'PENDING' ? '<span class="text-[9px] text-slate-500 flex items-center gap-1"><i class="fas fa-hourglass-half text-amber-400/60"></i> Menunggu</span>' : (c.status === 'PROSES' ? '<span class="text-[9px] text-slate-500 flex items-center gap-1"><i class="fas fa-spinner text-blue-400/60"></i> Ditindaklanjuti</span>' : '')}
+                            ${c.isAnonymous ? '<span class="text-[10px] text-slate-500 flex items-center gap-1"><i class="fas fa-user-secret text-indigo-400/60"></i> Anonim</span>' : ''}
+                        </div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -682,13 +708,18 @@
         }
 
         function sendUpvote(id) {
+            if (!currentUserId) {
+                requireLogin('upvote');
+                return;
+            }
+            const btn = document.querySelector(`[data-upvote-btn="${id}"]`);
+            if (btn) btn.classList.add('animate-upvote-pulse');
             fetch('/api/complaints/' + id + '/upvote', { method: 'POST', credentials: 'same-origin' })
                 .then(res => res.json())
                 .then(data => {
-                    if (data.error) { alert(data.error); return; }
+                    if (data.error) { if (btn) btn.classList.remove('animate-upvote-pulse'); alert(data.error); return; }
                     const span = document.getElementById('up-count-' + id);
                     if (span) { span.innerText = data.count; span.classList.add('animate-upvote'); setTimeout(() => span.classList.remove('animate-upvote'), 400); }
-                    const btn = document.querySelector(`[data-upvote-btn="${id}"]`);
                     if (btn) {
                         if (data.upvoted) {
                             btn.classList.add('border-indigo-500/30', 'bg-indigo-500/20', 'text-indigo-400');
@@ -697,8 +728,9 @@
                             btn.classList.remove('border-indigo-500/30', 'bg-indigo-500/20', 'text-indigo-400');
                             btn.classList.add('border-slate-700', 'text-slate-300');
                         }
+                        setTimeout(() => btn.classList.remove('animate-upvote-pulse'), 400);
                     }
-                }).catch(() => {});
+                }).catch(() => { if (btn) btn.classList.remove('animate-upvote-pulse'); });
         }
 
         function shareComplaint(id) {
@@ -711,6 +743,14 @@
             } else {
                 prompt('Salin tautan:', url);
             }
+        }
+
+        function shareWhatsApp(id) {
+            const complaint = allComplaints.find(c => c.id === id);
+            if (!complaint) return;
+            const url = window.location.origin + '/citizen/detail/' + id;
+            const text = `*${complaint.judul}*\n${complaint.isiPengaduan ? complaint.isiPengaduan.substring(0, 100) + '...' : ''}\n\n${url}`;
+            window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
         }
 
         function viewComments(id) {
@@ -745,6 +785,8 @@
                             const cmDate = fmtDate(cm.tanggal, true);
                             const isOwn = apiUserId && cm.userId && apiUserId === cm.userId;
                             const deleteBtn = isOwn ? `<button onclick="deleteComment(${currentCommentId},${cm.id})" class="text-red-400 hover:text-red-300 text-[9px] ml-2 transition-all" title="Hapus komentar"><i class="fas fa-trash-alt"></i></button>` : '';
+                            const liked = cm.liked;
+                            const likeCount = cm.likeCount || 0;
                             html += `
                                 <div class="bg-slate-700/30 rounded-xl p-3 border border-slate-700/50" id="comment-${cm.id}">
                                     <div class="flex items-center gap-2 mb-1">
@@ -753,17 +795,28 @@
                                         <span class="text-[9px] text-slate-500 ml-auto">${cmDate}${deleteBtn}</span>
                                     </div>
                                     <p class="text-xs text-slate-300 leading-relaxed">${cm.isiKomentar}</p>
+                                    <div class="flex items-center gap-2 mt-2 pt-2 border-t border-slate-700/30">
+                                        <button onclick="toggleCommentLike(${currentCommentId},${cm.id})" class="flex items-center gap-1 text-[10px] font-semibold transition-all px-2 py-1 rounded-lg ${liked ? 'text-pink-400 bg-pink-500/10' : 'text-slate-500 hover:text-pink-400 hover:bg-pink-500/5'}" id="clike-${cm.id}">
+                                            <i class="fas ${liked ? 'fa-heart' : 'fa-heart'} text-[10px]"></i> <span id="clike-count-${cm.id}">${likeCount > 0 ? likeCount : ''}</span>
+                                        </button>
+                                    </div>
                                 </div>`;
                         });
                     }
                     html += `</div>
                         <div class="border-t border-slate-700 p-4 flex-shrink-0">
+                            ${apiUserId ? `
                             <div class="flex gap-2">
                                 <textarea id="commentInput" rows="2" placeholder="Tulis komentar Anda..." class="flex-1 bg-slate-700/50 border border-slate-600 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
                                 <button onclick="submitComment()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5 self-end">
                                     <i class="fas fa-paper-plane"></i> Kirim
                                 </button>
-                            </div>
+                            </div>` : `
+                            <div class="bg-slate-700/20 rounded-xl p-4 text-center border border-slate-700/50">
+                                <i class="fas fa-lock text-indigo-400 text-sm mb-2 block"></i>
+                                <p class="text-xs text-slate-400 mb-2">Anda harus login untuk berkomentar</p>
+                                <button onclick="closeCommentModal();requireLogin('comment')" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold px-5 py-2 rounded-xl text-xs transition-all inline-flex items-center gap-2 shadow-lg shadow-indigo-500/20"><i class="fas fa-sign-in-alt"></i> Masuk</button>
+                            </div>`}
                         </div>`;
                     modalContent.innerHTML = html;
                 }).catch(err => {
@@ -782,7 +835,9 @@
         }
 
         function submitComment() {
+            if (!currentUserId) { requireLogin('comment'); return; }
             const input = document.getElementById('commentInput');
+            if (!input) return;
             const text = input.value.trim();
             if (!text) return;
             input.disabled = true;
@@ -805,6 +860,28 @@
 
         function closeCommentModal() {
             document.getElementById('commentModal').classList.add('hidden');
+        }
+
+        function toggleCommentLike(complaintId, commentId) {
+            if (!currentUserId) { requireLogin('upvote'); return; }
+            fetch('/api/complaints/' + complaintId + '/comment/' + commentId + '/like', {
+                method: 'POST', credentials: 'same-origin'
+            }).then(res => res.json()).then(data => {
+                if (data.success) {
+                    const btn = document.getElementById('clike-' + commentId);
+                    const count = document.getElementById('clike-count-' + commentId);
+                    if (btn) {
+                        if (data.liked) {
+                            btn.classList.add('text-pink-400', 'bg-pink-500/10');
+                            btn.classList.remove('text-slate-500', 'hover:text-pink-400', 'hover:bg-pink-500/5');
+                        } else {
+                            btn.classList.remove('text-pink-400', 'bg-pink-500/10');
+                            btn.classList.add('text-slate-500', 'hover:text-pink-400', 'hover:bg-pink-500/5');
+                        }
+                    }
+                    if (count) count.textContent = data.likeCount > 0 ? data.likeCount : '';
+                }
+            }).catch(() => {});
         }
 
         function deleteComment(complaintId, commentId) {
@@ -848,7 +925,103 @@
                     lb.classList.add('hidden');
                     document.body.style.overflow = '';
                 }
+                const lm = document.getElementById('loginModal');
+                if (lm && !lm.classList.contains('hidden')) {
+                    closeLoginModal();
+                }
             }
+            // Shortcut 'N' for new complaint
+            if ((e.key === 'n' || e.key === 'N') && !e.ctrlKey && !e.metaKey && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'SELECT') {
+                if (currentUserId) {
+                    document.getElementById('modalForm').classList.remove('hidden');
+                    restoreDraft();
+                } else {
+                    requireLogin('create');
+                }
+            }
+            // Shortcut '/' for search focus
+            if (e.key === '/' && !e.ctrlKey && !e.metaKey && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+                const search = document.getElementById('searchInput');
+                if (search) search.focus();
+            }
+        });
+
+        // Login Modal functions
+        function requireLogin(action) {
+            const descs = {
+                'upvote': 'Anda harus login terlebih dahulu sebelum mendukung laporan warga.',
+                'comment': 'Anda harus login terlebih dahulu untuk berkomentar.',
+                'create': 'Anda harus login terlebih dahulu untuk membuat pengaduan.'
+            };
+            document.getElementById('loginModalDesc').textContent = descs[action] || 'Anda harus login terlebih dahulu untuk melanjutkan.';
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('loginModal').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.remove('flex');
+            document.getElementById('loginModal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        document.getElementById('loginModal')?.addEventListener('click', function(e) {
+            if (e.target === this) closeLoginModal();
+        });
+
+        // Auto-save complaint draft
+        function saveDraft() {
+            const form = document.querySelector('#modalForm form');
+            if (!form) return;
+            const data = {
+                judul: form.querySelector('[name="judul"]')?.value || '',
+                isiPengaduan: form.querySelector('[name="isiPengaduan"]')?.value || '',
+                kategori: form.querySelector('[name="kategori"]')?.value || '',
+                isAnonymous: form.querySelector('[name="isAnonymous"]')?.checked || false,
+                lokasiNama: document.getElementById('lokasiNama')?.value || ''
+            };
+            try { localStorage.setItem('complaintDraft', JSON.stringify(data)); } catch(e) {}
+        }
+
+        function restoreDraft() {
+            try {
+                const raw = localStorage.getItem('complaintDraft');
+                if (!raw) return;
+                const data = JSON.parse(raw);
+                const form = document.querySelector('#modalForm form');
+                if (!form) return;
+                const judul = form.querySelector('[name="judul"]');
+                const isi = form.querySelector('[name="isiPengaduan"]');
+                const kategori = form.querySelector('[name="kategori"]');
+                const anon = form.querySelector('[name="isAnonymous"]');
+                if (judul && data.judul) judul.value = data.judul;
+                if (isi && data.isiPengaduan) isi.value = data.isiPengaduan;
+                if (kategori && data.kategori) kategori.value = data.kategori;
+                if (anon) anon.checked = data.isAnonymous || false;
+                // Show restore toast
+                if (data.judul || data.isiPengaduan) {
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed bottom-4 left-4 z-50 bg-indigo-600/90 backdrop-blur-sm text-white text-[10px] font-bold px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 border border-indigo-400/30 animate-slide-in';
+                    toast.innerHTML = '<i class="fas fa-pen"></i> Draft ditemukan! <button onclick="this.parentElement.remove()" class="ml-2 text-white/70 hover:text-white">&times;</button>';
+                    document.body.appendChild(toast);
+                    setTimeout(() => { if (toast.parentNode) toast.remove(); }, 5000);
+                }
+            } catch(e) {}
+        }
+
+        function clearDraft() {
+            try { localStorage.removeItem('complaintDraft'); } catch(e) {}
+        }
+
+        // Auto-save on input
+        document.addEventListener('input', function(e) {
+            if (e.target.closest('#modalForm form')) saveDraft();
+        });
+
+        // Clear draft on form submit
+        document.querySelector('#modalForm form')?.addEventListener('submit', function() {
+            setTimeout(clearDraft, 100);
         });
 
         // Scroll-to-top button
@@ -877,6 +1050,8 @@
         .animate-slide-in { animation: slideIn 0.5s ease-out; }
         @keyframes upvotePop { 0% { transform: scale(1); } 50% { transform: scale(1.25); } 100% { transform: scale(1); } }
         .animate-upvote { animation: upvotePop 0.4s ease-in-out; }
+        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.4); } 50% { box-shadow: 0 0 0 8px rgba(99,102,241,0); } }
+        .animate-upvote-pulse { animation: pulseGlow 0.6s ease-in-out; }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in-up { animation: fadeInUp 0.4s ease-out forwards; }
         #scrollTopBtn { transition: all 0.3s ease; }

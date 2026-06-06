@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "complaints")
-public class Complaint {
+public class Complaint extends BaseEntity {
 
     public enum Kategori {
         INFRASTRUKTUR("Infrastruktur"),
@@ -46,10 +46,6 @@ public class Complaint {
         Urgency(String displayName) { this.displayName = displayName; }
         public String getDisplayName() { return displayName; }
     }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @Column(name = "judul", nullable = false)
     private String judul;
@@ -136,10 +132,20 @@ public class Complaint {
         return user != null ? user.getNama() : "Unknown";
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    @Override
+    public String getSummary() {
+        return getJudul() + " [" + (getStatus() != null ? getStatus().getDisplayName() : "PENDING") + "] - " + (getKategori() != null ? getKategori().getDisplayName() : "UMUM");
+    }
+
     public String getJudul() { return judul; }
-    public void setJudul(String judul) { this.judul = judul; }
+
+    public void setJudul(String judul) {
+        if (judul == null || judul.trim().isEmpty()) {
+            throw new IllegalArgumentException("Judul pengaduan tidak boleh kosong");
+        }
+        this.judul = judul.trim();
+    }
+
     public String getIsiPengaduan() { return isiPengaduan; }
     public void setIsiPengaduan(String isiPengaduan) { this.isiPengaduan = isiPengaduan; }
     public Kategori getKategori() { return kategori; }
@@ -153,13 +159,53 @@ public class Complaint {
     public LocalDateTime getResolvedAt() { return resolvedAt; }
     public void setResolvedAt(LocalDateTime resolvedAt) { this.resolvedAt = resolvedAt; }
     public Status getStatus() { return status; }
-    public void setStatus(Status status) { this.status = status; }
+
+    public void setStatus(Status status) {
+        if (status == null) throw new IllegalArgumentException("Status tidak boleh null");
+        if (this.status != null) {
+            String from = this.status.name();
+            String to = status.name();
+            boolean valid = switch (from) {
+                case "PENDING" -> to.equals("PROSES") || to.equals("SELESAI") || to.equals("DITOLAK");
+                case "PROSES" -> to.equals("SELESAI") || to.equals("DITOLAK");
+                case "SELESAI", "DITOLAK" -> false;
+                default -> true;
+            };
+            if (!valid) {
+                throw new IllegalStateException(
+                    "Tidak bisa mengubah status dari " + this.status.getDisplayName() + " ke " + status.getDisplayName()
+                );
+            }
+        }
+        this.status = status;
+    }
+
     public String getBuktiFoto() { return buktiFoto; }
     public void setBuktiFoto(String buktiFoto) { this.buktiFoto = buktiFoto; }
+
     public int getUpvotesCount() { return upvotesCount; }
-    public void setUpvotesCount(int upvotesCount) { this.upvotesCount = upvotesCount; }
     public Set<Long> getUpvotedUserIds() { return upvotedUserIds; }
-    public void setUpvotedUserIds(Set<Long> upvotedUserIds) { this.upvotedUserIds = upvotedUserIds; }
+
+    public void setUpvotesCount(int upvotesCount) { this.upvotesCount = upvotesCount; }
+
+    public void addUpvote(Long userId) {
+        if (userId == null) throw new IllegalArgumentException("User ID tidak boleh null");
+        if (upvotedUserIds.add(userId)) {
+            this.upvotesCount = upvotedUserIds.size();
+        }
+    }
+
+    public void removeUpvote(Long userId) {
+        if (userId == null) throw new IllegalArgumentException("User ID tidak boleh null");
+        if (upvotedUserIds.remove(userId)) {
+            this.upvotesCount = upvotedUserIds.size();
+        }
+    }
+
+    public boolean isUpvotedBy(Long userId) {
+        return userId != null && upvotedUserIds.contains(userId);
+    }
+
     public boolean isIsAnonymous() { return isAnonymous; }
     public void setIsAnonymous(boolean isAnonymous) { this.isAnonymous = isAnonymous; }
     public Double getLatitude() { return latitude; }

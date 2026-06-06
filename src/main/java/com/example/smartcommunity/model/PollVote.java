@@ -7,15 +7,11 @@ import java.time.LocalDateTime;
 @Table(name = "poll_votes", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"poll_id", "user_id"})
 })
-public class PollVote {
+public class PollVote extends BaseEntity {
 
     public enum Vote {
         YES, NO
     }
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -46,8 +42,11 @@ public class PollVote {
         if (createdAt == null) createdAt = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    @Override
+    public String getSummary() {
+        return "Vote " + getVote() + " oleh " + (user != null ? user.getNama() : "?");
+    }
+
     public Vote getVote() { return vote; }
     public void setVote(Vote vote) { this.vote = vote; }
     public LocalDateTime getCreatedAt() { return createdAt; }

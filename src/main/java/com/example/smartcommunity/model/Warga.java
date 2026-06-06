@@ -22,4 +22,14 @@ public class Warga extends Pengguna {
     public String getDashboardRoute() {
         return "/citizen/home";
     }
+
+    @Override
+    public String getRoleDisplayName() {
+        return "Warga";
+    }
+
+    @Override
+    public String getSummary() {
+        return getNama() + " - " + getReputationTier() + " (" + getReputationPoints() + " poin)";
+    }
 }
