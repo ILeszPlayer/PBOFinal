@@ -1,0 +1,12 @@
+{
+  "build": {
+    "builder": "maven",
+    "buildCommand": "./mvnw clean package -DskipTests"
+  },
+  "deploy": {
+    "startCommand": "java -jar target/*.jar",
+    "healthcheckPath": "/",
+    "healthcheckTimeout": 100,
+    "restartPolicyType": "on_failure"
+  }
+}
